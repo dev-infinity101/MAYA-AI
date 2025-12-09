@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-text-primary font-mono antialiased overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-surface backdrop-blur-xl border border-white/10;
+  }
+  
+  .glass-panel {
+    @apply bg-[rgba(20,20,20,0.6)] backdrop-blur-md border border-white/5;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(0, 255, 178, 0.5);
+  }
+  
+  .geist-mono-100 { font-family: "Geist Mono", monospace; font-weight: 100; }
+  .geist-mono-200 { font-family: "Geist Mono", monospace; font-weight: 200; }
+  .geist-mono-300 { font-family: "Geist Mono", monospace; font-weight: 300; }
+  .geist-mono-400 { font-family: "Geist Mono", monospace; font-weight: 400; }
+  .geist-mono-500 { font-family: "Geist Mono", monospace; font-weight: 500; }
+  .geist-mono-600 { font-family: "Geist Mono", monospace; font-weight: 600; }
+  .geist-mono-700 { font-family: "Geist Mono", monospace; font-weight: 700; }
+  .geist-mono-800 { font-family: "Geist Mono", monospace; font-weight: 800; }
+  .geist-mono-900 { font-family: "Geist Mono", monospace; font-weight: 900; }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #050505; 
+}
+::-webkit-scrollbar-thumb {
+  background: #222; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333; 
+}
