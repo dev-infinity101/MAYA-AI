@@ -22,12 +22,12 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
     - [x] Define `schemes` table (id, name, description, benefits, embedding, criteria)
     - [x] Define `users` table (basic auth)
     - [x] Define `chat_history` table
-- [ ] **Seed Data**
-    - [ ] Prepare JSON of 20-30 popular MSME schemes
-    - [ ] Write script to generate embeddings (Gemini API) and insert into DB
+- [x] **Seed Data**
+    - [x] Prepare JSON of 20-30 popular MSME schemes
+    - [x] Write script to generate embeddings (Jina AI) and insert into DB
 
 ### Day 3: Backend Core API 🔌
-- [ ] **FastAPI Basics**
+- [x] **FastAPI Basics**
     - [x] Setup `main.py` application entry point
     - [x] Configure CORS (allow frontend)
     - [x] Setup DB connection (SQLAlchemy Async)
@@ -45,13 +45,13 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
     - [x] Logic: User Query -> Embedding -> Vector Search -> LLM Rank -> Response (LLM Rank to be added)
 
 ### Day 5: Frontend Interface 🎨
-- [ ] **Layout**
-    - [ ] Implement "Glassmorphism" Dark UI (per UI-design.md)
-    - [ ] Sidebar (History) + Main Chat Area
-- [ ] **Components**
-    - [ ] `ChatInput` (with auto-resize)
-    - [ ] `MessageBubble` (User vs AI)
-    - [ ] `SchemeCard` (Display scheme details)
+- [x] **Layout**
+    - [x] Implement "Glassmorphism" Dark UI (per UI-design.md)
+    - [x] Sidebar (History) + Main Chat Area
+- [x] **Components**
+    - [x] `ChatInput` (with auto-resize)
+    - [x] `MessageBubble` (User vs AI)
+    - [x] `SchemeCard` (Display scheme details)
 
 ### Day 6: Integration & Basic Chat 🔗
 - [x] **Connect Frontend-Backend**
@@ -62,7 +62,7 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
 
 ### Day 7: Buffer & Refinement 🛠️
 - [ ] Fix CORS issues
-- [ ] Refine Prompt Engineering for Scheme Ranking
+- [x] Refine Prompt Engineering for Scheme Ranking
 - [ ] Ensure Mobile Responsiveness
 
 ---
@@ -77,21 +77,21 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
     - [x] Route user query to appropriate node
 
 ### Day 9: Specialized Agents 🧠
-- [ ] **Market Research Agent**
-    - [ ] Prompt: Analyze competitors, trends
-- [ ] **Brand Consultant Agent**
-    - [ ] Prompt: Generate names, taglines
-- [ ] **Financial Advisor Agent**
-    - [ ] Prompt: Basic pricing, loan eligibility advice
-- [ ] **Marketing Agent**
-    - [ ] Prompt: Low-cost marketing strategies
+- [x] **Market Research Agent**
+    - [x] Prompt: Analyze competitors, trends
+- [x] **Brand Consultant Agent**
+    - [x] Prompt: Generate names, taglines
+- [x] **Financial Advisor Agent**
+    - [x] Prompt: Basic pricing, loan eligibility advice
+- [x] **Marketing Agent**
+    - [x] Prompt: Low-cost marketing strategies
 
 ### Day 10: Web Search Integration 🌐
-- [ ] **Tavily Setup**
-    - [ ] Get API Key
-    - [ ] Implement `TavilyClient` wrapper
-- [ ] **Agent Enhancement**
-    - [ ] Equip Market Agent with web search capability for real-time data
+- [x] **Tavily Setup**
+    - [x] Get API Key
+    - [x] Implement `TavilyClient` wrapper
+- [x] **Agent Enhancement**
+    - [x] Equip Market Agent with web search capability for real-time data
 
 ### Day 11: Advanced UI Features ✨
 - [ ] **Rich Responses**
@@ -124,3 +124,13 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
     - [ ] Add animations (framer-motion)
     - [ ] Verify color contrast and accessibility
 - [ ] **MVP COMPLETE**
+
+## Change Log
+
+### [Date: 2025-12-23]
+- **Migration**: Switched text generation LLM from Google Gemini to Xiaomi Mimo V2 Flash (via OpenRouter).
+  - Created `MimoService` (`backend/services/mimo_service.py`).
+  - Updated `backend/agents/graph.py` to use `MimoService`.
+- **New Feature**: Implemented Web Search Integration.
+  - Created `TavilyService` (`backend/services/tavily_service.py`).
+  - Integrated Tavily search into `market_agent_node` for real-time data.

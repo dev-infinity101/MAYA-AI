@@ -1,5 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
-from services.gemini_service import gemini_service
+from services.mimo_service import mimo_service
 from agents.state import AgentState
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -24,7 +24,7 @@ async def route_request(state: AgentState) -> dict:
     # Simple logic for now, using LLM for classification
     prompt = f"{ROUTER_PROMPT}\n\nUser Query: {last_message.content}"
     
-    category = await gemini_service.generate_text(prompt)
+    category = await mimo_service.generate_text(prompt)
     category = category.strip().lower()
     
     # Normalize response

@@ -4,7 +4,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 from database import engine, Base, get_db
 import models
-from services.gemini_service import gemini_service
+from services.mimo_service import mimo_service
 from services.scheme_service import scheme_service
 from agents.graph import app_graph
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -57,8 +57,32 @@ class ChatRequest(BaseModel):
 
 @app.post("/api/test-ai")
 async def test_ai(request: ChatRequest):
-    response = await gemini_service.generate_text(request.message)
+    # Custom greeting logic to match graph.py
+    clean_message = request.message.strip().lower()
+    greetings = ["hey", "hi", "hello", "hi there", "hey there"]
+    
+    if clean_message in greetings:
+        return {"response": "Hey there! What's up? I'm MAYA, India's Business AI assistant. What can I help you with today?"}
+        
+    response = await mimo_service.generate_text(request.message)
     return {"response": response}
+
+@app.post("/api/chat/test")
+async def chat_test(request: ChatRequest):
+    """
+    Direct test for MimoService.
+    """
+    # Custom greeting logic to match graph.py
+    clean_message = request.message.strip().lower()
+    greetings = ["hey", "hi", "hello", "hi there", "hey there"]
+    
+    if clean_message in greetings:
+        return {"response": "Hey there! What's up? I'm MAYA, India's Business AI assistant. What can I help you with today?"}
+
+    response = await mimo_service.generate_text(request.message)
+    return {"response": response}
+
+# Removed duplicate chat_test endpoint
 
 # Scheme Navigator Endpoints
 

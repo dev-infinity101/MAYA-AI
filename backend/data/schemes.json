@@ -1,50 +1,242 @@
 [
   {
-    "name": "Pradhan Mantri Mudra Yojana (PMMY)",
-    "description": "MUDRA (Micro Units Development & Refinance Agency Ltd.) scheme provides loans up to 10 lakhs to non-corporate, non-farm small/micro enterprises.",
-    "benefits": "Loans up to Rs. 10 Lakhs under three categories: Shishu (up to 50k), Kishore (50k-5L), Tarun (5L-10L). No collateral required.",
+    "name": "Central MSME Schemes (Ministry of MSME)",
+    "description": "Official central government MSME schemes listed by the Ministry of MSME.",
+    "benefits": "Access to all central MSME schemes and guidelines.",
     "eligibility_criteria": {
-      "type": "Non-Corporate Small Business Segment (NCSBS)",
-      "sector": "Manufacturing, Trading and Service Sectors",
-      "loan_amount": "Up to 10 Lakhs"
+      "type": "MSMEs",
+      "sector": "All sectors",
+      "authority": "Government of India"
     },
-    "category": "Loan",
-    "link": "https://www.mudra.org.in/"
+    "category": "Information",
+    "link": "https://msme.gov.in/central-schemes"
   },
   {
-    "name": "Credit Guarantee Fund Trust for Micro and Small Enterprises (CGTMSE)",
-    "description": "Provides collateral-free credit to the Micro and Small Enterprise sector. Both existing and new enterprises are eligible.",
-    "benefits": "Collateral-free loans up to Rs. 2 Crores. Guarantee cover up to 85% for micro enterprises.",
+    "name": "Ministry of MSME",
+    "description": "Official website of the Ministry of Micro, Small and Medium Enterprises.",
+    "benefits": "Policy updates, schemes, notifications.",
     "eligibility_criteria": {
-      "type": "MSEs",
-      "loan_amount": "Up to 2 Crores",
-      "sector": "Manufacturing and Services"
+      "type": "MSMEs",
+      "sector": "All sectors",
+      "authority": "Government of India"
+    },
+    "category": "Government Portal",
+    "link": "https://msme.gov.in/"
+  },
+  {
+    "name": "MyMSME Portal",
+    "description": "Unified portal for MSME schemes and services.",
+    "benefits": "Single-window access to MSME schemes.",
+    "eligibility_criteria": {
+      "type": "MSMEs",
+      "sector": "All sectors",
+      "registration": "Udyam"
+    },
+    "category": "Portal",
+    "link": "https://my.msme.gov.in/"
+  },
+  {
+    "name": "Udyam Registration",
+    "description": "Official MSME registration portal of Government of India.",
+    "benefits": "MSME recognition and scheme eligibility.",
+    "eligibility_criteria": {
+      "type": "Micro, Small, Medium Enterprises",
+      "sector": "All sectors",
+      "registration": "Self-declaration"
+    },
+    "category": "Registration",
+    "link": "https://udyamregistration.gov.in/"
+  },
+  {
+    "name": "MSME Champions Portal",
+    "description": "Grievance redressal and support system for MSMEs.",
+    "benefits": "Handholding and problem resolution.",
+    "eligibility_criteria": {
+      "type": "Registered MSMEs",
+      "sector": "All sectors",
+      "registration": "Udyam"
+    },
+    "category": "Support",
+    "link": "https://champions.gov.in/"
+  },
+  {
+    "name": "Prime Minister Employment Generation Programme (PMEGP)",
+    "description": "Credit-linked subsidy scheme for new micro enterprises.",
+    "benefits": "Subsidy up to 35% of project cost.",
+    "eligibility_criteria": {
+      "type": "New Micro Enterprises",
+      "sector": "Manufacturing and Services",
+      "age": "Above 18 years"
+    },
+    "category": "Subsidy",
+    "link": "https://www.kviconline.gov.in/pmegpeportal/pmegphome/index.jsp"
+  },
+  {
+    "name": "Credit Guarantee Fund Trust for MSMEs (CGTMSE)",
+    "description": "Collateral-free credit guarantee scheme for MSMEs.",
+    "benefits": "Guarantee cover up to INR 2 Crore.",
+    "eligibility_criteria": {
+      "type": "Micro and Small Enterprises",
+      "sector": "Manufacturing and Services",
+      "loan_amount": "Up to INR 2 Crore"
     },
     "category": "Credit Guarantee",
     "link": "https://www.cgtmse.in/"
   },
   {
-    "name": "Prime Minister's Employment Generation Programme (PMEGP)",
-    "description": "Credit-linked subsidy programme for generation of employment opportunities through establishment of micro enterprises in rural as well as urban areas.",
-    "benefits": "Subsidy up to 35% of project cost in rural areas and 25% in urban areas. Project cost up to 50 lakhs for manufacturing and 20 lakhs for service sector.",
+    "name": "PM Vishwakarma Scheme",
+    "description": "Skill and financial support for traditional artisans.",
+    "benefits": "Training, toolkit incentive and credit support.",
     "eligibility_criteria": {
-      "age": "Above 18 years",
-      "qualification": "VIII Pass for projects above 10L (Mfg) / 5L (Service)",
-      "type": "New projects only"
+      "type": "Artisans and Craftsmen",
+      "sector": "Traditional trades",
+      "registration": "Vishwakarma certificate"
     },
-    "category": "Subsidy",
-    "link": "https://www.kvic.org.in/pmegp/"
+    "category": "Skill Development",
+    "link": "https://pmvishwakarma.gov.in/"
   },
   {
-    "name": "Stand-Up India Scheme",
-    "description": "Facilitates bank loans between 10 lakh and 1 Crore to at least one Scheduled Caste (SC) or Scheduled Tribe (ST) borrower and at least one woman borrower per bank branch for setting up a greenfield enterprise.",
-    "benefits": "Loan of Rs. 10 Lakh to 1 Crore. Repayable in 7 years.",
+    "name": "SFURTI Scheme",
+    "description": "Cluster-based development scheme for traditional industries.",
+    "benefits": "Financial assistance for cluster development.",
     "eligibility_criteria": {
-      "target_group": "SC/ST and/or Woman Entrepreneur",
-      "age": "Above 18 years",
-      "project_type": "Greenfield Enterprise"
+      "type": "Traditional Industry Clusters",
+      "sector": "Khadi, Village, Coir",
+      "project_type": "Cluster"
     },
-    "category": "Loan",
-    "link": "https://www.standupmitra.in/"
+    "category": "Cluster Development",
+    "link": "https://sfurti.msme.gov.in/SFURTI/Home.aspx"
+  },
+  {
+    "name": "ASPIRE Scheme",
+    "description": "Promotes entrepreneurship through incubation and innovation.",
+    "benefits": "Incubation and startup support.",
+    "eligibility_criteria": {
+      "type": "Startups and MSMEs",
+      "sector": "Agro-based and rural industries",
+      "support_type": "Incubation"
+    },
+    "category": "Innovation",
+    "link": "https://aspire.msme.gov.in/ASPIRE/AFHome.aspx"
+  },
+  {
+    "name": "ZED Certification Scheme",
+    "description": "Encourages Zero Defect Zero Effect manufacturing.",
+    "benefits": "Subsidy for certification and quality improvement.",
+    "eligibility_criteria": {
+      "type": "MSMEs",
+      "sector": "Manufacturing",
+      "certification": "ZED"
+    },
+    "category": "Quality",
+    "link": "https://zed.msme.gov.in/"
+  },
+  {
+    "name": "Lean Manufacturing Scheme",
+    "description": "Improves MSME competitiveness through lean tools.",
+    "benefits": "Productivity and cost improvement.",
+    "eligibility_criteria": {
+      "type": "MSMEs",
+      "sector": "Manufacturing",
+      "participation": "Group based"
+    },
+    "category": "Productivity",
+    "link": "https://lean.msme.gov.in/"
+  },
+  {
+    "name": "myScheme Platform",
+    "description": "National platform to discover government schemes.",
+    "benefits": "Personalized scheme discovery.",
+    "eligibility_criteria": {
+      "type": "Citizens and Businesses",
+      "sector": "All sectors",
+      "usage": "Discovery"
+    },
+    "category": "Portal",
+    "link": "https://www.myscheme.gov.in/"
+  },
+  {
+    "name": "MSME Schemes e-Book",
+    "description": "Official e-book containing MSME schemes.",
+    "benefits": "Authoritative scheme reference.",
+    "eligibility_criteria": {
+      "type": "MSMEs",
+      "sector": "All sectors",
+      "access": "Public"
+    },
+    "category": "Information",
+    "link": "https://msme.gov.in/e-book-schemes-msme"
+  },
+  {
+    "name": "MSME Cluster Development Programme (MSE-CDP)",
+    "description": "Infrastructure and soft support for MSME clusters.",
+    "benefits": "Funding for cluster infrastructure.",
+    "eligibility_criteria": {
+      "type": "MSME Clusters",
+      "sector": "All sectors",
+      "project_type": "Cluster"
+    },
+    "category": "Infrastructure",
+    "link": "https://cluster.dcmsme.gov.in/"
+  },
+  {
+    "name": "Innovative MSME Scheme",
+    "description": "Support for design, IPR and innovation.",
+    "benefits": "Funding for innovation and IP protection.",
+    "eligibility_criteria": {
+      "type": "MSMEs and Startups",
+      "sector": "All sectors",
+      "support_area": "IPR and Design"
+    },
+    "category": "Innovation",
+    "link": "https://innovative.msme.gov.in/"
+  },
+  {
+    "name": "MSME Scheme Document",
+    "description": "Official MSME scheme document.",
+    "benefits": "Detailed scheme guidelines.",
+    "eligibility_criteria": {
+      "type": "MSMEs",
+      "sector": "All sectors",
+      "format": "PDF"
+    },
+    "category": "Document",
+    "link": "https://msme.gov.in/sites/default/files/Sch-vol1-151214.pdf-sri.pdf"
+  },
+  {
+    "name": "NI-MSME Schemes",
+    "description": "Training and entrepreneurship schemes by NI-MSME.",
+    "benefits": "Skill development and capacity building.",
+    "eligibility_criteria": {
+      "type": "Entrepreneurs and MSMEs",
+      "sector": "All sectors",
+      "support_type": "Training"
+    },
+    "category": "Training",
+    "link": "https://www.nimsme.gov.in/msme-schemes"
+  },
+  {
+    "name": "DC MSME Scheme Compendium",
+    "description": "Compiled MSME schemes by DC MSME.",
+    "benefits": "Comprehensive scheme reference.",
+    "eligibility_criteria": {
+      "type": "MSMEs",
+      "sector": "All sectors",
+      "format": "PDF"
+    },
+    "category": "Document",
+    "link": "https://dcmsme.gov.in/SAMACHAR/eBook%20of%20Schemes%20for%20MSMEs.pdf"
+  },
+  {
+    "name": "MSME Scheme Booklet",
+    "description": "Official MSME scheme booklet.",
+    "benefits": "Overview of MSME schemes.",
+    "eligibility_criteria": {
+      "type": "MSMEs",
+      "sector": "All sectors",
+      "format": "PDF"
+    },
+    "category": "Document",
+    "link": "https://msme.gov.in/sites/default/files/Scheme-booklet-Eng.pdf"
   }
 ]
