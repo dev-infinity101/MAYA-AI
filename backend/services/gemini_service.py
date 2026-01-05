@@ -25,13 +25,13 @@ class GeminiService:
             return
         
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash",
+            model="gemini-flash-latest",
             google_api_key=api_key,
             temperature=0.7
         )
         
         self.embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001",
+            model="models/text-embedding-004",
             google_api_key=api_key
         )
 
