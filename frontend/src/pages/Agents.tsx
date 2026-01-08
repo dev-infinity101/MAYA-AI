@@ -7,7 +7,8 @@ import { Link } from 'react-router-dom';
 
 export function AgentsPage() {
   return (
-    <div className="min-h-screen bg-black overflow-hidden font-sans">
+    <div className="min-h-screen bg-black overflow-hidden font-sans relative">
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,201,255,0.05),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(0,255,178,0.05),transparent_40%)] pointer-events-none" />
       <Header />
 
       {/* 1. HERO SECTION */}
@@ -18,7 +19,10 @@ export function AgentsPage() {
         
         <div className="container mx-auto px-6 relative z-10 text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 leading-tight animate-in fade-in zoom-in duration-700">
-            Meet Your <br/> <span className="arcade-text-secondary block mt-2">Team of Agents </span>
+            <br />
+            <br />
+            <br />
+            Meet Your <span className="bg-gradient-to-r from-[#00C9FF] to-[#92FE9D] bg-clip-text text-transparent">Team of Agents</span>
           </h1>
           <p className="text-xl text-text-secondary max-w-2xl mx-auto mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
             4 specialized AI experts, available 24/7 to help you grow.
@@ -27,7 +31,7 @@ export function AgentsPage() {
       </section>
 
       {/* 2. AGENTS GRID */}
-      <section className="py-20 bg-white/5">
+      <section className="py-40 bg-white/5">
         <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <AgentOverviewCard 
@@ -160,11 +164,11 @@ function AgentSection({ id, title, desc, capabilities, icon, color, align }: Age
     const activeColor = colorClasses[color];
 
     return (
-        <section id={id} className="py-24 relative overflow-hidden">
+        <section id={id} className="py-40 relative overflow-hidden">
             <div className={`absolute ${isLeft ? 'left-0' : 'right-0'} top-1/2 -translate-y-1/2 w-1/3 h-full bg-gradient-to-r ${activeColor.split(' ')[0]} to-transparent blur-[100px] opacity-30 pointer-events-none`} />
             
             <div className="container mx-auto px-6 relative z-10">
-                <div className={`flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-16`}>
+                <div className={`flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-24`}>
                     <div className="flex-1">
                         <div className={`glass-panel p-10 rounded-3xl border ${activeColor.split(' ')[2]} relative group overflow-hidden`}>
                              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -184,12 +188,9 @@ function AgentSection({ id, title, desc, capabilities, icon, color, align }: Age
                         </div>
                     </div>
                     
-                    <div className="flex-1 space-y-6">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-wider ${activeColor.split(' ')[1]}`}>
-                            {title.split(' ')[0]} Agent
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-white">{title}</h2>
-                        <p className="text-lg text-text-secondary leading-relaxed">
+                    <div className="flex-1 space-y-8">
+                        <h2 className="text-4xl md:text-6xl font-bold text-white leading-tight">{title}</h2>
+                        <p className="text-xl text-text-secondary leading-relaxed max-w-xl">
                             {desc}
                         </p>
                         

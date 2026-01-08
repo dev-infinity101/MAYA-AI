@@ -6,16 +6,17 @@ import { Heart, Globe, Lightbulb } from 'lucide-react';
 
 export function AboutPage() {
   return (
-    <div className="min-h-screen bg-black overflow-hidden font-sans">
+    <div className="min-h-screen bg-black overflow-hidden font-sans relative">
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,178,0.05),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.03),transparent_40%)] pointer-events-none" />
       <Header />
 
       {/* 1. HERO SECTION */}
-      <section className="pt-32 pb-20 relative">
+      <section className="pt-48 pb-32 relative">
         <div className="container mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-center gap-16">
+            <div className="flex flex-col md:flex-row items-center gap-24">
                 <div className="flex-1 space-y-8">
                     <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        Empowering <br/> <span className="arcade-text block mt-2">Indian MSMEs</span>
+                        Empowering <span className="text-[#00FFB2]">Indian MSMEs</span>
                     </h1>
                     <p className="text-xl text-text-secondary max-w-xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
                         We believe that every business owner deserves access to the best advice and government support, regardless of their size or location.
@@ -34,7 +35,7 @@ export function AboutPage() {
       </section>
 
       {/* 2. STORY SECTION */}
-      <section className="py-24 bg-white/5">
+      <section className="py-40 bg-white/5">
         <div className="container mx-auto px-6 max-w-4xl text-center">
             <h2 className="text-3xl font-bold text-white mb-8">The Story of MAYA</h2>
             <div className="space-y-6 text-lg text-text-secondary leading-relaxed text-justify">
@@ -52,7 +53,7 @@ export function AboutPage() {
       </section>
 
       {/* 3. VALUES */}
-      <section className="py-24">
+      <section className="py-40">
         <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <ValueCard 

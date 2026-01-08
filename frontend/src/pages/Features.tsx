@@ -17,7 +17,7 @@ export function FeaturesPage() {
         
         <div className="container mx-auto px-6 relative z-10 text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
-            Discover. Match. <span className="arcade-text block mt-4">Apply.</span>
+            Discover. Match. Apply.
           </h1>
           <p className="text-xl text-text-secondary max-w-2xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
             The most advanced AI-powered government scheme discovery and business guidance platform for Indian MSMEs.

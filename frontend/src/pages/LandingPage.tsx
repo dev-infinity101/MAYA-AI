@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/Button';
@@ -6,25 +6,58 @@ import { ArrowRight, Shield, Brain, MessageSquare, TrendingUp, Users, CheckCircl
 import { Link } from 'react-router-dom';
 
 export function LandingPage() {
+  const [index, setIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const containerRef = useRef<HTMLSpanElement>(null);
+  
+  const rotatingTexts = ["AI Guidance", "Scheme Navigation", "Agentic workflow"];
+  const totalItems = rotatingTexts.length;
+
+  useEffect(() => {
+    if (isPaused) return;
+
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % totalItems);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [isPaused, totalItems]);
+
   return (
     <div className="min-h-screen bg-black overflow-hidden">
       <Header />
       
       {/* 1. HERO SECTION */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20">
+      <section className="relative min-h-screen flex items-center justify-center pt-40">
         {/* Background Effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/20 blur-[120px] rounded-full opacity-30 pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-secondary/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
         
         <div className="container mx-auto px-6 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm rounded-none text-text-secondary">MAYA AI 1.0 is now live</span>
-          </div>
           
           <h1 className="hero-title text-white mb-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            Smarter Business <br />
-            Decisions with <span className="arcade-text block mt-2">AI Guidance</span>
+            Smarter Business
+            Decisions with 
+            <span 
+              ref={containerRef}
+              className="scroll-container cursor-pointer"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              <span 
+                className="scroll-text"
+                style={{ transform: `translateY(-${index * 1.5}em)` }}
+              >
+                {rotatingTexts.map((text, i) => (
+                  <span 
+                    key={i} 
+                    className="scroll-item text-[#00FFB2]"
+                  >
+                    {text}
+                  </span>
+                ))}
+              </span>
+            </span>
           </h1>
           
           <p className="text-xl text-text-secondary max-w-2xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
@@ -58,7 +91,7 @@ export function LandingPage() {
       </section>
 
       {/* 2. VALUE PROP SECTION */}
-      <section className="py-32 relative">
+      <section className="py-48 relative">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <ValueCard 
@@ -81,10 +114,10 @@ export function LandingPage() {
       </section>
 
       {/* 3. FEATURE BLOCKS */}
-      <section id="features" className="py-32 bg-black relative">
+      <section id="features" className="py-48 bg-black relative">
         <div className="container mx-auto px-6">
           {/* Feature 1 */}
-          <div className="flex flex-col md:flex-row items-center gap-16 mb-32">
+          <div className="flex flex-col md:flex-row items-center gap-24 mb-48">
             <div className="flex-1">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full" />
@@ -130,7 +163,7 @@ export function LandingPage() {
           </div>
 
           {/* Feature 2 (Alternating) */}
-          <div className="flex flex-col md:flex-row-reverse items-center gap-16">
+          <div className="flex flex-col md:flex-row-reverse items-center gap-24">
             <div className="flex-1">
                <div className="relative">
                 <div className="absolute inset-0 bg-secondary/20 blur-[80px] rounded-full" />
@@ -175,7 +208,7 @@ export function LandingPage() {
       </section>
 
       {/* 5. CTA */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-48 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-black opacity-50" />
         <div className="container mx-auto px-6 relative z-10 text-center">
             <h2 className="text-5xl md:text-7xl font-bold mb-8 text-white">

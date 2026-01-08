@@ -5,7 +5,6 @@
 @layer base {
   :root {
     --glow-color-primary: rgba(4, 161, 109, 0.5);
-    --glow-color-secondary: rgba(0, 201, 255, 0.5);
     --glow-blur: 20px;
     --glow-spread: 0px;
   }
@@ -23,15 +22,7 @@
     @apply bg-[rgba(20,20,20,0.6)] backdrop-blur-md border border-white/5;
   }
 
-  .text-glow {
-    text-shadow: 0 0 var(--glow-blur) var(--glow-color-primary);
-    transition: text-shadow 0.3s ease;
-  }
 
-  .text-glow-secondary {
-    text-shadow: 0 0 var(--glow-blur) var(--glow-color-secondary);
-    transition: text-shadow 0.3s ease;
-  }
 
   .btn-glow {
     @apply transition-all duration-300;
@@ -84,49 +75,7 @@
      bottom: -8px;
    }
 
-  .arcade-text {
-    font-family: 'Tourney', sans-serif;
-    font-weight: 200;
-    font-style: italic;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    position: relative;
-    color: #fff;
-    /* Inner Stroke: 2px matching text color */
-    -webkit-text-stroke: 1px #fff;
-    /* Metallic Gradient Fill */
-    background: linear-gradient(to bottom, #fff 0%, #00FFB2 45%, #008f63 50%, #00FFB2 55%, #fff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    /* Outer Stroke (2px) + Glow (5px) using filters for better layering */
-    filter: 
-      drop-shadow(1px 1px 0px #000e01) 
-      drop-shadow(-1px -1px 0px #37f126) 
-      drop-shadow(1px -1px 0px #0a5815) 
-      drop-shadow(-1px 1px 0px #028518)
-      drop-shadow(0 0 5px var(--glow-color-primary));
-    paint-order: stroke fill;
-  }
 
-  .arcade-text-secondary {
-    font-family: 'Tourney', sans-serif;
-    font-weight: 200;
-    font-style: italic;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #fff;
-    -webkit-text-stroke: 1px #fff;
-    background: linear-gradient(to bottom, #fff 0%, #00C9FF 45%, #007694 50%, #00C9FF 55%, #fff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: 
-      drop-shadow(1px 1px 0px #010e27) 
-      drop-shadow(-1px -1px 0px #2aecf3) 
-      drop-shadow(1px -1px 0px #02608b) 
-      drop-shadow(-1px 1px 0px #0a045c)
-      drop-shadow(0 0 5px var(--glow-color-secondary));
-    paint-order: stroke fill;
-  }
 
   .hero-title {
     font-family: __esbuild_6b67ff, __esbuild_Fallback_6b67ff, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -142,6 +91,31 @@
     text-indent: 0px;
     word-spacing: 0px;
     vertical-align: baseline;
+  }
+
+  .scroll-container {
+    height: 1.5em;
+    overflow: hidden;
+    position: relative;
+    display: block;
+    margin-top: 0.5rem;
+  }
+
+  .scroll-text {
+    display: flex;
+    flex-direction: column;
+    transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    height: 100%;
+  }
+
+  .scroll-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5em;
+    flex-shrink: 0;
+    opacity: 1;
   }
 
   @screen md {

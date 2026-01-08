@@ -16,7 +16,7 @@ export function PricingPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/20 blur-[120px] rounded-full opacity-20 pointer-events-none" />
         <div className="container mx-auto px-6 relative z-10">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            Simple, transparent <span className="arcade-text block mt-2">pricing</span>
+            Simple, transparent pricing
           </h1>
           <p className="text-xl text-text-secondary max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
             Start for free, upgrade as you grow. No hidden fees.
