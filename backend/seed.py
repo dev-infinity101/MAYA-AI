@@ -5,69 +5,75 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import engine, Base, AsyncSessionLocal
 from models import Scheme
 from services.gemini_service import gemini_service
-from sqlalchemy import select, text
+from sqlalchemy import text, delete
+from dotenv import load_dotenv
+
+load_dotenv()
+
+async def get_embedding_with_retry(text_to_embed, max_attempts=3):
+    """Wait and retry logic for Gemini Free Tier with exit condition"""
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            emb = await gemini_service.get_embeddings(text_to_embed)
+            if emb:
+                return emb
+            
+            # Agar embedding empty/None aayi, matlab quota khatam ya block hai
+            attempt += 1
+            print(f"⚠️ Attempt {attempt} failed (Empty Embedding). Sleeping 70s to reset quota...")
+            await asyncio.sleep(70) # Full 1.1 minute sleep
+            
+        except Exception as e:
+            print(f"❌ Error on attempt {attempt+1}: {e}")
+            await asyncio.sleep(70)
+            attempt += 1
+            
+    print(f"🛑 Critical: Could not get embedding after {max_attempts} tries. Skipping this item.")
+    return None
 
 async def seed_schemes():
-    print("Starting database seeding...")
+    print("🚀 Starting Gemini-Only Seeding (Infinite Loop Fixed)...")
     
-    # Ensure pgvector extension exists and tables exist
     async with engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
 
     async with AsyncSessionLocal() as session:
-        # Check if schemes already exist
-        result = await session.execute(select(Scheme))
-        existing_schemes = result.scalars().all()
-        
-        if existing_schemes:
-            print(f"Database already has {len(existing_schemes)} schemes. Skipping seed.")
-            return
-
-        # Load schemes from JSON
-        try:
-            with open("data/schemes.json", "r") as f:
-                schemes_data = json.load(f)
-        except FileNotFoundError:
-            print("Error: data/schemes.json not found.")
-            return
-
-        print(f"Found {len(schemes_data)} schemes to insert.")
-
-        for scheme_data in schemes_data:
-            print(f"Processing: {scheme_data['name']}")
-            
-            # Generate embedding with retry logic
-            max_retries = 3
-            embedding = None
-            for attempt in range(max_retries):
-                embedding = await gemini_service.embed_text(
-                    f"{scheme_data['name']}. {scheme_data['description']}. {scheme_data['benefits']}. Category: {scheme_data['category']}."
-                )
-                if embedding:
-                    break
-                print(f"  Attempt {attempt + 1} failed. Retrying in 5s...")
-                await asyncio.sleep(5)
-            
-            if not embedding:
-                print(f"  Failed to generate embedding for {scheme_data['name']} after {max_retries} attempts. Skipping.")
-                continue
-
-            # Create Scheme object
-            new_scheme = Scheme(
-                name=scheme_data['name'],
-                description=scheme_data['description'],
-                benefits=scheme_data['benefits'],
-                eligibility_criteria=scheme_data['eligibility_criteria'],
-                category=scheme_data['category'],
-                link=scheme_data['link'],
-                embedding=embedding
-            )
-            
-            session.add(new_scheme)
-
+        print("🧹 Cleaning database...")
+        await session.execute(delete(Scheme))
         await session.commit()
-        print("Seeding completed successfully!")
+
+        with open("data/schemes.json", "r") as f:
+            schemes_data = json.load(f)
+
+        for i, data in enumerate(schemes_data):
+            name = data['name']
+            print(f"\n[{i+1}/{len(schemes_data)}] Processing: {name}")
+            
+            rich_text = f"{name}. {data['description']}. {data['benefits']}"
+            
+            # Safe embedding retrieval
+            embedding = await get_embedding_with_retry(rich_text)
+            
+            if embedding:
+                new_scheme = Scheme(
+                    name=name,
+                    description=data['description'],
+                    benefits=data['benefits'],
+                    eligibility_criteria=data['eligibility_criteria'],
+                    category=data['category'],
+                    link=data['link'],
+                    embedding=embedding
+                )
+                session.add(new_scheme)
+                await session.commit()
+                print(f"   ✅ Saved. Waiting 10s for next call...")
+                await asyncio.sleep(10) # 10s gap taaki 429 aaye hi na
+            else:
+                print(f"   ⏭️ Skipping {name} due to repeated API failures.")
+
+    print("\n🔥 SEEDING PROCESS COMPLETED!")
 
 if __name__ == "__main__":
     asyncio.run(seed_schemes())
