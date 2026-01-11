@@ -20,7 +20,7 @@ class GeminiService:
         
         # 1. Chat Model: Gemini 1.5 Flash (Perfect for your Agent)
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash", 
+            model="gemini-flash-latest", 
             google_api_key=api_key,
             temperature=0.7
         )
