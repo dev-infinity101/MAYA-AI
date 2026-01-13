@@ -1,12 +1,13 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models import Scheme
-from services.gemini_service import gemini_service
+from services.jina_service import jina_service
 
 class SchemeService:
     async def search_schemes(self, db: AsyncSession, query: str, limit: int = 3):
         # 1. Generate embedding for user query
-        query_embedding = await gemini_service.embed_text(query)
+        # Use Jina service for query embedding (task='retrieval.query')
+        query_embedding = await jina_service.embed_text(query, task="retrieval.query")
         if not query_embedding:
             return []
 

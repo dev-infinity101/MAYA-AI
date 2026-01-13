@@ -2,23 +2,23 @@ import React from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/Button';
-import { Users, Brain, TrendingUp, Target, ArrowRight, BarChart3, PenTool, Megaphone, Calculator } from 'lucide-react';
+import { ArrowRight, BarChart3, PenTool, Megaphone, Calculator } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function AgentsPage() {
   return (
-    <div className="min-h-screen bg-black overflow-hidden font-sans">
+    <div className="min-h-screen bg-black overflow-hidden font-sans relative">
       <Header />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-24 overflow-hidden">
+      <section className="relative pt-32 pb-24 overflow-hidden min-h-[60vh] flex items-center z-10 bg-gradient-to-br from-black via-[#020b1a] to-[#00C9FF]/20">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-white/10 rounded-full animate-[spin_20s_linear_infinite]" />
         
         <div className="container mx-auto px-6 relative z-10 text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 leading-tight animate-in fade-in zoom-in duration-700">
-            Meet Your <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-500 text-glow">Team of Agents </span>
+            Meet Your <span className="bg-gradient-to-r from-[#00C9FF] to-[#92FE9D] bg-clip-text text-transparent">Team of Agents</span>
           </h1>
           <p className="text-xl text-text-secondary max-w-2xl mx-auto mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
             4 specialized AI experts, available 24/7 to help you grow.
@@ -26,8 +26,10 @@ export function AgentsPage() {
         </div>
       </section>
 
+      <LightLeak color="cyan" />
+
       {/* 2. AGENTS GRID */}
-      <section className="py-20 bg-white/5">
+      <section className="py-40 bg-black relative z-10">
         <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <AgentOverviewCard 
@@ -62,6 +64,8 @@ export function AgentsPage() {
         </div>
       </section>
 
+      <LightLeak color="blue" />
+
       {/* 3. DETAILED AGENT SECTIONS */}
       
       {/* Market Agent */}
@@ -73,7 +77,10 @@ export function AgentsPage() {
         icon={<BarChart3 className="w-12 h-12 text-blue-400" />}
         color="blue"
         align="left"
+        useGradient="bl"
       />
+
+      <LightLeak color="purple" />
 
       {/* Brand Agent */}
       <AgentSection 
@@ -86,6 +93,8 @@ export function AgentsPage() {
         align="right"
       />
 
+      <LightLeak color="orange" />
+
       {/* Marketing Agent */}
       <AgentSection 
         id="marketing"
@@ -95,7 +104,10 @@ export function AgentsPage() {
         icon={<Megaphone className="w-12 h-12 text-orange-400" />}
         color="orange"
         align="left"
+        useGradient="br"
       />
+
+      <LightLeak color="green" />
 
       {/* Financial Agent */}
       <AgentSection 
@@ -108,9 +120,11 @@ export function AgentsPage() {
         align="right"
       />
 
-      <section className="py-24 text-center">
-        <div className="container mx-auto px-6">
-            <h2 className="text-4xl font-bold text-white mb-8">Ready to work with your new team?</h2>
+      <LightLeak color="cyan" />
+
+      <section className="py-32 text-center relative overflow-hidden bg-gradient-to-bl from-black via-[#020b1a] to-[#00C9FF]/20">
+        <div className="container mx-auto px-6 relative z-10">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">Ready to work with your new team?</h2>
             <Link to="/chat">
                 <Button variant="primary" size="lg" glow>
                     Start Free Consultation <ArrowRight className="ml-2" />
@@ -136,6 +150,29 @@ function AgentOverviewCard({ icon, title, desc, color, borderColor }: { icon: Re
     )
 }
 
+function LightLeak({ color = 'cyan' }: { color?: 'cyan' | 'blue' | 'purple' | 'orange' | 'green' }) {
+    const colors = {
+        cyan: 'rgba(11, 99, 91, 1)',
+        blue: 'rgba(6, 99, 136, 1)',
+        purple: 'rgba(95, 6, 136, 1)',
+        orange: 'rgba(136, 43, 6, 1)',
+        green: 'rgba(6, 136, 34, 1)',
+    };
+    const glows = {
+        cyan: 'bg-[#00C9FF]',
+        blue: 'bg-blue-500',
+        purple: 'bg-purple-500',
+        orange: 'bg-orange-500',
+        green: 'bg-green-500',
+    };
+    return (
+        <div className="relative z-20 h-px w-full overflow-visible">
+            <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1200px] h-[2px] bg-gradient-to-r from-transparent ${colors[color]}/40 to-transparent blur-[1px]`} />
+            <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] h-[20px] ${glows[color]}/10 blur-[30px] rounded-full`} />
+        </div>
+    );
+}
+
 interface AgentSectionProps {
     id: string;
     title: string;
@@ -144,9 +181,10 @@ interface AgentSectionProps {
     icon: React.ReactNode;
     color: 'blue' | 'purple' | 'orange' | 'green';
     align: 'left' | 'right';
+    useGradient?: 'br' | 'bl';
 }
 
-function AgentSection({ id, title, desc, capabilities, icon, color, align }: AgentSectionProps) {
+function AgentSection({ id, title, desc, capabilities, icon, color, align, useGradient }: AgentSectionProps) {
     const isLeft = align === 'left';
     
     // Map color names to Tailwind classes safely
@@ -159,12 +197,18 @@ function AgentSection({ id, title, desc, capabilities, icon, color, align }: Age
 
     const activeColor = colorClasses[color];
 
+    const gradientClass = useGradient === 'br' 
+        ? 'bg-gradient-to-br from-black via-[#020b1a] to-[#00C9FF]/20' 
+        : useGradient === 'bl' 
+            ? 'bg-gradient-to-bl from-black via-[#020b1a] to-[#00C9FF]/20' 
+            : 'bg-black';
+
     return (
-        <section id={id} className="py-24 relative overflow-hidden">
+        <section id={id} className={`py-40 relative overflow-hidden ${gradientClass}`}>
             <div className={`absolute ${isLeft ? 'left-0' : 'right-0'} top-1/2 -translate-y-1/2 w-1/3 h-full bg-gradient-to-r ${activeColor.split(' ')[0]} to-transparent blur-[100px] opacity-30 pointer-events-none`} />
             
             <div className="container mx-auto px-6 relative z-10">
-                <div className={`flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-16`}>
+                <div className={`flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-24`}>
                     <div className="flex-1">
                         <div className={`glass-panel p-10 rounded-3xl border ${activeColor.split(' ')[2]} relative group overflow-hidden`}>
                              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -184,12 +228,9 @@ function AgentSection({ id, title, desc, capabilities, icon, color, align }: Age
                         </div>
                     </div>
                     
-                    <div className="flex-1 space-y-6">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-wider ${activeColor.split(' ')[1]}`}>
-                            {title.split(' ')[0]} Agent
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-white">{title}</h2>
-                        <p className="text-lg text-text-secondary leading-relaxed">
+                    <div className="flex-1 space-y-8">
+                        <h2 className="text-4xl md:text-6xl font-bold text-white leading-tight">{title}</h2>
+                        <p className="text-xl text-text-secondary leading-relaxed max-w-xl">
                             {desc}
                         </p>
                         

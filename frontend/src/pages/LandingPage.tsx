@@ -1,30 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/Button';
 import { ArrowRight, Shield, Brain, MessageSquare, TrendingUp, Users, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import GreenMotion from '../Assets/GREEN_MOTION.mp4';
+import { PixelMaya } from '../components/PixelMaya';
 
 export function LandingPage() {
+  const [index, setIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const containerRef = useRef<HTMLSpanElement>(null);
+  
+  const rotatingTexts = ["AI Guidance", "Scheme Navigation", "Agentic workflow"];
+  const totalItems = rotatingTexts.length;
+
+  useEffect(() => {
+    if (isPaused) return;
+
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % totalItems);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [isPaused, totalItems]);
+
   return (
     <div className="min-h-screen bg-black overflow-hidden">
       <Header />
       
       {/* 1. HERO SECTION */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20">
+      <section className="relative min-h-screen flex items-center justify-center pt-40">
         {/* Background Effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/20 blur-[120px] rounded-full opacity-30 pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-secondary/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
         
         <div className="container mx-auto px-6 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm rounded-none text-text-secondary">MAYA AI 1.0 is now live</span>
-          </div>
           
           <h1 className="hero-title text-white mb-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            Smarter Business <br />
-            Decisions with <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary text-glow">AI Guidance</span>
+            Smarter Business
+            Decisions with 
+            <span 
+              ref={containerRef}
+              className="scroll-container cursor-pointer"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              <span 
+                className="scroll-text"
+                style={{ transform: `translateY(-${index * 1.5}em)` }}
+              >
+                {rotatingTexts.map((text, i) => (
+                  <span 
+                    key={i} 
+                    className="scroll-item text-[#00FFB2]"
+                  >
+                    {text}
+                  </span>
+                ))}
+              </span>
+            </span>
           </h1>
           
           <p className="text-xl text-text-secondary max-w-2xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
@@ -33,23 +68,28 @@ export function LandingPage() {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
             <Link to="/chat">
-                <Button variant="primary" size="lg" glow className="w-full sm:w-auto">
-                Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+                <button className="btn-modern-glow w-full sm:w-auto">
+                Start Free Trial <ArrowRight className="inline-block ml-2 w-6 h-5" />
+                </button>
             </Link>
-            <Button variant="ghost" size="lg" className="w-full sm:w-auto">
+            <Button variant="ghost" size="lg" className="w-full sm:w-auto btn-glow">
               View Demo
             </Button>
           </div>
 
           {/* Hero Visual */}
           <div className="mt-20 relative animate-in fade-in zoom-in duration-1000 delay-500">
-            <div className="glass-panel p-2 rounded-2xl max-w-5xl mx-auto shadow-2xl shadow-primary/10 border border-white/10">
-               <img 
-                 src="https://placehold.co/1200x675/111/444?text=Dashboard+Preview" 
-                 alt="App Interface" 
+            <div className="glass-panel p-2 rounded-2xl max-w-5xl mx-auto shadow-2xl shadow-primary/10 border border-white/10 overflow-hidden">
+               <video 
+                 autoPlay 
+                 loop 
+                 muted 
+                 playsInline
                  className="rounded-xl w-full h-auto opacity-80"
-               />
+               >
+                 <source src={GreenMotion} type="video/mp4" />
+                 Your browser does not support the video tag.
+               </video>
                {/* Overlay Gradients */}
                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent h-full w-full rounded-2xl pointer-events-none" />
             </div>
@@ -58,7 +98,7 @@ export function LandingPage() {
       </section>
 
       {/* 2. VALUE PROP SECTION */}
-      <section className="py-32 relative">
+      <section className="py-48 relative">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <ValueCard 
@@ -81,10 +121,10 @@ export function LandingPage() {
       </section>
 
       {/* 3. FEATURE BLOCKS */}
-      <section id="features" className="py-32 bg-black relative">
+      <section id="features" className="py-48 bg-black relative">
         <div className="container mx-auto px-6">
           {/* Feature 1 */}
-          <div className="flex flex-col md:flex-row items-center gap-16 mb-32">
+          <div className="flex flex-col md:flex-row items-center gap-24 mb-48">
             <div className="flex-1">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full" />
@@ -130,7 +170,7 @@ export function LandingPage() {
           </div>
 
           {/* Feature 2 (Alternating) */}
-          <div className="flex flex-col md:flex-row-reverse items-center gap-16">
+          <div className="flex flex-col md:flex-row-reverse items-center gap-24">
             <div className="flex-1">
                <div className="relative">
                 <div className="absolute inset-0 bg-secondary/20 blur-[80px] rounded-full" />
@@ -175,7 +215,7 @@ export function LandingPage() {
       </section>
 
       {/* 5. CTA */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-48 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-black opacity-50" />
         <div className="container mx-auto px-6 relative z-10 text-center">
             <h2 className="text-5xl md:text-7xl font-bold mb-8 text-white">
@@ -183,24 +223,39 @@ export function LandingPage() {
             </h2>
             <p className="text-xl text-text-secondary mb-12">No credit card required. Start growing today.</p>
             <Link to="/chat">
-                <Button variant="primary" size="lg" glow className="px-12">Start Free</Button>
+                <button className="btn-modern-glow px-12">Start Free</button>
             </Link>
         </div>
       </section>
 
       <Footer />
+      <PixelMaya />
     </div>
   );
 }
 
+// -----------------------------------------------------------------
+// Helper Components
+// -----------------------------------------------------------------
+
 function ValueCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
   return (
-    <div className="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-colors group">
-      <div className="mb-6 p-4 rounded-xl bg-white/5 w-fit group-hover:scale-110 transition-transform duration-300">
-        {icon}
+    <div className="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-all duration-500 group relative overflow-hidden border border-white/5 hover:border-primary/40 hover:-translate-y-1 shadow-2xl hover:shadow-primary/10">
+      {/* Abstract Glow Background - Always moving */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] opacity-20 group-hover:opacity-50 transition-opacity duration-700">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,rgba(0,255,178,0.15)_0%,transparent_70%)] animate-glow-slow" />
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,rgba(0,201,255,0.1)_0%,transparent_70%)] animate-glow-slow [animation-delay:-5s]" />
+        </div>
       </div>
-      <h3 className="text-xl font-bold mb-3 text-white">{title}</h3>
-      <p className="text-text-secondary leading-relaxed">{desc}</p>
+      
+      <div className="relative z-10">
+        <div className="mb-6 p-4 rounded-xl bg-white/5 w-fit group-hover:scale-110 transition-transform duration-300 border border-white/5 group-hover:border-primary/20 group-hover:bg-primary/10 group-hover:shadow-[0_0_20px_rgba(0,255,178,0.2)]">
+          {icon}
+        </div>
+        <h3 className="text-xl font-bold mb-3 text-white group-hover:text-primary transition-colors duration-300">{title}</h3>
+        <p className="text-text-secondary leading-relaxed group-hover:text-white/90 transition-colors duration-300">{desc}</p>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Bot, Github, Twitter, Linkedin } from 'lucide-react';
+import { Github, Twitter, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Brand } from './Brand';
 
 export function Footer() {
   return (
@@ -8,10 +8,9 @@ export function Footer() {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Bot className="w-6 h-6 text-primary" />
-              <span className="text-xl font-bold text-white">MAYA.AI</span>
-            </div>
+            <Link to="/">
+              <Brand />
+            </Link>
             <p className="text-text-secondary text-sm leading-relaxed">
               Empowering Indian MSMEs with AI-driven guidance on government schemes and business strategy.
             </p>

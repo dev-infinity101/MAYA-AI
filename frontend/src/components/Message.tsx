@@ -1,8 +1,7 @@
-import React from 'react';
-import { Bot, User } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Message as MessageType } from '../types';
 import { SchemeCard } from './SchemeCard';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageProps {
   message: MessageType;
@@ -14,37 +13,57 @@ export function Message({ message }: MessageProps) {
   return (
     <div 
       className={clsx(
-        "flex gap-4 animate-in slide-in-from-bottom-2 duration-500",
-        isUser ? "flex-row-reverse" : "flex-row"
+        "flex w-full animate-in slide-in-from-bottom-2 duration-500",
+        isUser ? "justify-end" : "justify-start"
       )}
     >
       <div className={clsx(
-          "w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-2",
-          isUser ? "bg-white/10" : "bg-primary/20"
-      )}>
-          {isUser ? <User size={16} /> : <Bot size={16} className="text-secondary" />}
-      </div>
-      
-      <div className={clsx(
-          "max-w-[85%] md:max-w-[75%]",
-          isUser ? "flex justify-end" : ""
+          "max-w-[85%] md:max-w-[80%]",
+          isUser ? "flex flex-col items-end" : "flex flex-col items-start"
       )}>
         {/* Text Content */}
         {message.content && (
-           <div className={clsx(
-            "rounded-2xl p-6 relative group mb-4",
-            isUser 
-                ? "bg-white/5 border border-primary/30 text-white rounded-tr-none backdrop-blur-sm shadow-[0_0_15px_rgba(0,255,178,0.05)]" 
-                : "glass-panel text-white rounded-tl-none"
-            )}>
-                <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+           <>
+               <div className={clsx(
+                "relative group",
+                isUser 
+                    ? "bg-[#006b33] text-white rounded-[24px] px-5 py-2.5 shadow-sm" 
+                    : "bg-transparent text-white rounded-none border-none px-0 py-3"
+                )}>
+                    <div className={clsx(
+                    "w-full text-white/90 leading-relaxed space-y-4",
+                    isUser ? "text-[15px]" : "text-[16px]"
+                )}>
+                    <ReactMarkdown
+                        components={{
+                            h1: ({node, ...props}) => <h1 className="text-2xl font-semibold text-white mt-8 mb-4 first:mt-0" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-white mt-8 mb-4 first:mt-0" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-white mt-6 mb-3 first:mt-0" {...props} />,
+                            p: ({node, ...props}) => <p className="mb-4 last:mb-0" {...props} />,
+                            ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
+                            li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                            hr: ({node, ...props}) => <hr className="border-white/10 my-8" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-semibold text-white" {...props} />,
+                            code: ({node, ...props}) => (
+                                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-[0.9em] font-mono" {...props} />
+                            ),
+                            blockquote: ({node, ...props}) => (
+                                <blockquote className="border-l-2 border-primary/30 pl-4 italic text-white/70 my-4" {...props} />
+                            ),
+                        }}
+                    >
+                        {message.content}
+                    </ReactMarkdown>
+                </div>
+                </div>
                 <div className={clsx(
-                    "absolute -bottom-6 text-xs text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity",
-                    isUser ? "right-0" : "left-0"
+                    "mt-1 text-[10px] text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity",
+                    isUser ? "text-right pr-2" : "text-left"
                 )}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
-            </div>
+           </>
         )}
 
         {/* Scheme List Content */}
