@@ -3,6 +3,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/Button';
 import { Heart, Globe, Lightbulb } from 'lucide-react';
+import aboutVideo from '../Assets/MAYA ABOUT MOTION.mp4';
 
 export function AboutPage() {
   return (
@@ -11,9 +12,9 @@ export function AboutPage() {
       <Header />
 
       {/* 1. HERO SECTION */}
-      <section className="pt-48 pb-32 relative">
+      <section className="pt-32 pb-16 relative">
         <div className="container mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-center gap-24">
+            <div className="flex flex-col md:flex-row items-center gap-16">
                 <div className="flex-1 space-y-8">
                     <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
                         Empowering <span className="text-[#00FFB2]">Indian MSMEs</span>
@@ -22,12 +23,15 @@ export function AboutPage() {
                         We believe that every business owner deserves access to the best advice and government support, regardless of their size or location.
                     </p>
                 </div>
-                <div className="flex-1 relative animate-in fade-in zoom-in duration-1000 delay-200">
+                <div className="flex-1 relative animate-in fade-in zoom-in duration-1000 delay-200 max-w-xl">
                     <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full" />
-                    <img 
-                        src="https://placehold.co/600x600/111/444?text=Our+Mission" 
-                        alt="Mission" 
-                        className="relative z-10 rounded-2xl border border-white/10 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500"
+                    <video 
+                        src={aboutVideo}
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline
+                        className="relative z-10 rounded-2xl border border-white/10 shadow-2xl rotate-3 w-full h-auto"
                     />
                 </div>
             </div>

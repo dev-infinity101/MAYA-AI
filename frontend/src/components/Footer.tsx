@@ -4,7 +4,7 @@ import { Brand } from './Brand';
 
 export function Footer() {
   return (
-    <footer className="bg-black border-t border-white/10 pt-20 pb-10">
+    <footer className="bg-black border-t border-white/10 pt-32 pb-10">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="space-y-4">
@@ -51,7 +51,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-text-secondary">
+        <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-text-secondary">
           <p>&copy; {new Date().getFullYear()} MAYA AI. All rights reserved.</p>
           <p>Made with ❤️ for Indian MSMEs</p>
         </div>

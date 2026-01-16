@@ -2,11 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/Button';
+import FancyOutlineLiftButton from '../components/FancyOutlineLiftButton';
+import { LoadingScreen } from '../components/LoadingScreen';
 import { ArrowRight, Shield, Brain, MessageSquare, TrendingUp, Users, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GreenMotion from '../Assets/GREEN_MOTION.mp4';
+import { PixelMaya } from '../components/PixelMaya';
 
 export function LandingPage() {
+  const [isLoading, setIsLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const containerRef = useRef<HTMLSpanElement>(null);
@@ -25,8 +29,10 @@ export function LandingPage() {
   }, [isPaused, totalItems]);
 
   return (
-    <div className="min-h-screen bg-black overflow-hidden">
-      <Header />
+    <>
+      {isLoading && <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />}
+      <div className={`min-h-screen bg-black overflow-hidden transition-opacity duration-1000 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+        <Header />
       
       {/* 1. HERO SECTION */}
       <section className="relative min-h-screen flex items-center justify-center pt-40">
@@ -164,7 +170,12 @@ export function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button>Try Scheme Finder</Button>
+              <br />
+              <Link to="/chat">
+                <FancyOutlineLiftButton>
+                  Try Scheme Finder
+                </FancyOutlineLiftButton>
+              </Link>
             </div>
           </div>
 
@@ -196,7 +207,12 @@ export function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button variant="secondary">Meet the Agents</Button>
+              <br />
+              <Link to="/agents">
+                <FancyOutlineLiftButton>
+                  Meet the Agents
+                </FancyOutlineLiftButton>
+              </Link>
             </div>
           </div>
         </div>
@@ -228,196 +244,15 @@ export function LandingPage() {
       </section>
 
       <Footer />
-      <GlitchFooter />
+      <PixelMaya />
     </div>
+    </>
   );
 }
 
-/**
- * GlitchFooter Component
- * 
- * Implements a refined, targeted glitch effect with localized cursor tracking.
- * - Effect Scope: 100x100px area (50px radius mask)
- * - Motion: 200ms delayed tracking with 10px offset and ease-out
- * - Animation: 0.5Hz frequency, max 5px displacement, 300ms transitions
- * - Visuals: Subtle RGB split, noise texture, brightness fluctuations
- */
-function GlitchFooter() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [cursorPos, setCursorPos] = useState({ x: -1000, y: -1000 });
-  const [targetPos, setTargetPos] = useState({ x: -1000, y: -1000 });
-  const [isHovering, setIsHovering] = useState(false);
-  const [scrollIntensity, setScrollIntensity] = useState(0);
-  const requestRef = useRef<number>();
-  const lastScrollY = useRef(0);
-
-  // Handle scroll-based intensity
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const delta = Math.abs(currentScrollY - lastScrollY.current);
-      setScrollIntensity(Math.min(delta / 50, 1)); // Scale intensity based on scroll speed
-      lastScrollY.current = currentScrollY;
-      
-      // Decay intensity
-      setTimeout(() => setScrollIntensity(0), 150);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Canvas-based pixel glitch effect
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationId: number;
-    const pixelSize = 4;
-    
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Always have a base intensity of 0.2, increase on hover or scroll
-      const intensity = Math.max(0.2, isHovering ? 0.8 : scrollIntensity);
-      const cols = Math.ceil(canvas.width / pixelSize);
-      const rows = Math.ceil(canvas.height / pixelSize);
-
-      for (let i = 0; i < 100 * intensity; i++) {
-        const x = Math.floor(Math.random() * cols) * pixelSize;
-        const y = Math.floor(Math.random() * rows) * pixelSize;
-        const w = pixelSize * (Math.random() > 0.8 ? 4 : 1);
-        const h = pixelSize;
-
-        ctx.fillStyle = Math.random() > 0.5 ? '#00FFB2' : '#00C9FF';
-        ctx.globalAlpha = Math.random() * 0.4 * intensity;
-        ctx.fillRect(x, y, w, h);
-      }
-
-      animationId = requestAnimationFrame(render);
-    };
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-
-    window.addEventListener('resize', resize);
-    resize();
-    render();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animationId);
-    };
-  }, [isHovering, scrollIntensity]);
-
-  // Smooth cursor tracking with delay and easing
-  useEffect(() => {
-    const updatePosition = (time: number) => {
-      if (!isHovering) return;
-
-      const easing = 0.15; // Ease-out factor
-      const offset = 10; // 10px offset
-
-      setCursorPos(prev => {
-        const dx = (targetPos.x + offset) - prev.x;
-        const dy = (targetPos.y + offset) - prev.y;
-        
-        return {
-          x: prev.x + dx * easing,
-          y: prev.y + dy * easing
-        };
-      });
-
-      requestRef.current = requestAnimationFrame(updatePosition);
-    };
-
-    if (isHovering) {
-      requestRef.current = requestAnimationFrame(updatePosition);
-    }
-
-    return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    };
-  }, [isHovering, targetPos]);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    setTargetPos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  };
-
-  return (
-    <div 
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => {
-        setIsHovering(false);
-        setCursorPos({ x: -1000, y: -1000 });
-        setTargetPos({ x: -1000, y: -1000 });
-      }}
-      className="w-full bg-emerald-500 py-0 flex items-center justify-center overflow-hidden group cursor-default border-t border-black/5 relative"
-      style={{
-        '--cursor-x': `${cursorPos.x}px`,
-        '--cursor-y': `${cursorPos.y}px`,
-        '--glitch-radius': '120px',
-        '--pixel-distort': isHovering ? '4px' : '0px',
-      } as React.CSSProperties}
-    >
-      {/* Background Pixel Canvas */}
-      <canvas 
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-40 z-0"
-      />
-
-      <div className="relative w-full h-[32vw] md:h-[28vw] flex items-center justify-center pointer-events-none">
-        {/* Glitch Layers - Behind the main text - Always Visible */}
-        <div className={`absolute inset-0 z-10 glitch-transition opacity-100`}>
-          {/* Enhanced RGB Split - Red */}
-          <h1 className="absolute inset-0 text-[32vw] font-[1000] text-white-500/40 leading-[0.7] tracking-[-0.08em] select-none w-full text-center animate-rgb-split-r animate-matrix-glitch-1">
-            MAYA
-          </h1>
-          {/* Enhanced RGB Split - Blue */}
-          <h1 className="absolute inset-0 text-[32vw] font-[1000] text-white-500/40 leading-[0.7] tracking-[-0.08em] select-none w-full text-center animate-rgb-split-b animate-matrix-glitch-2">
-            MAYA
-          </h1>
-          
-          {/* Additional Pixelated Distort Layer */}
-          <div className="absolute inset-0 flex items-center justify-center animate-pixel-move">
-            <h1 className="text-[32vw] font-[1000] text-primary/20 leading-[0.7] tracking-[-0.08em] select-none w-full text-center">
-              MAYA
-            </h1>
-          </div>
-        </div>
-
-        {/* Base Layer - Static Black MAYA - Always on Top for readability */}
-        <h1 className="text-[32vw] font-[1000] text-black leading-[0.7] tracking-[-0.08em] select-none relative z-20 w-full text-center">
-          MAYA
-        </h1>
-
-        {/* Overlays - Above everything - Always Visible */}
-        <div className={`absolute inset-0 z-30 pointer-events-none glitch-transition opacity-100`}>
-          {/* Enhanced Noise Texture Overlay */}
-          <div className="absolute inset-0 opacity-15 mix-blend-overlay animate-noise-jitter bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
-          
-          {/* Enhanced Scanline */}
-          <div className="absolute h-[20%] w-full bg-black/5 blur-sm animate-scanline-move" />
-        </div>
-
-        {/* CRT Mesh - Always Visible */}
-        <div className={`absolute inset-0 z-40 bg-[radial-gradient(rgba(0,0,0,0.15)_0.5px,transparent_0.5px)] bg-[length:4px_4px] glitch-transition opacity-100`} />
-      </div>
-    </div>
-  );
-}
+// -----------------------------------------------------------------
+// Helper Components
+// -----------------------------------------------------------------
 
 function ValueCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
   return (
