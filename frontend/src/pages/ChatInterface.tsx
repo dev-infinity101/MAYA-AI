@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Send, Sparkles, Menu, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef, memo } from 'react';
+import { Send, Sparkles, Menu, ChevronDown, PanelLeftOpen } from 'lucide-react';
 import { Message } from '../types';
 import { Message as MessageComponent } from '../components/Message';
 import { Sidebar } from '../components/Sidebar';
@@ -189,9 +189,11 @@ export function ChatInterface() {
                 {!isSidebarOpen && (
                     <button 
                         onClick={() => setSidebarOpen(true)} 
-                        className="p-2 text-text-secondary hover:text-white transition-colors"
+                        aria-label="Open sidebar"
+                        title="Open sidebar"
+                        className="p-2 text-text-secondary hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 group"
                     >
-                        <Menu size={20} />
+                        <PanelLeftOpen size={20} className="group-hover:scale-110 transition-transform" />
                     </button>
                 )}
                 <div className="flex items-center gap-1 cursor-pointer hover:bg-white/5 px-2 py-1 rounded-lg transition-colors group">
