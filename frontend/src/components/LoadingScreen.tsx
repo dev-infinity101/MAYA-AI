@@ -17,7 +17,7 @@ export function LoadingScreen({ onLoadingComplete }: { onLoadingComplete: () => 
     
     setPixels(pixelArray);
 
-    // Phase 1: Randomly fill pixels (0-2s)
+    // Phase 1: Randomly fill pixels (0-1s)
     const fillInterval = setInterval(() => {
       setPixels(prev => {
         const inactiveIndices = prev
@@ -29,9 +29,9 @@ export function LoadingScreen({ onLoadingComplete }: { onLoadingComplete: () => 
           return prev;
         }
 
-        // Activate 30-50 random pixels at once for smooth filling
+        // Activate 50-70 random pixels at once for faster filling
         const toActivate = Math.min(
-          Math.floor(Math.random() * 20) + 30,
+          Math.floor(Math.random() * 20) + 50,
           inactiveIndices.length
         );
         
@@ -44,18 +44,18 @@ export function LoadingScreen({ onLoadingComplete }: { onLoadingComplete: () => 
         
         return newPixels;
       });
-    }, 50);
+    }, 30);
 
-    // Phase 2: Start pulsing (after 2s)
+    // Phase 2: Start pulsing (after 1s)
     const pulseTimer = setTimeout(() => {
       clearInterval(fillInterval);
       setPhase('pulsing');
-    }, 2000);
+    }, 1000);
 
-    // Phase 3: Start clearing (after 4s)
+    // Phase 3: Start clearing (after 2s)
     const clearTimer = setTimeout(() => {
       setPhase('clearing');
-    }, 4000);
+    }, 2000);
 
     // Clear interval for clearing phase
     let clearingInterval: NodeJS.Timeout;
@@ -71,9 +71,9 @@ export function LoadingScreen({ onLoadingComplete }: { onLoadingComplete: () => 
             return prev;
           }
 
-          // Deactivate 30-50 random pixels at once
+          // Deactivate 50-70 random pixels at once for faster clearing
           const toDeactivate = Math.min(
-            Math.floor(Math.random() * 20) + 30,
+            Math.floor(Math.random() * 20) + 50,
             activeIndices.length
           );
           
@@ -86,13 +86,13 @@ export function LoadingScreen({ onLoadingComplete }: { onLoadingComplete: () => 
           
           return newPixels;
         });
-      }, 50);
+      }, 30);
     }
 
-    // Complete loading (after 6s)
+    // Complete loading (after 3s)
     const completeTimer = setTimeout(() => {
       onLoadingComplete();
-    }, 10);
+    }, 1000);
 
     return () => {
       clearInterval(fillInterval);

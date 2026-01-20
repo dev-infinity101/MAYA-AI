@@ -19,7 +19,6 @@ export function Header() {
 
   const navLinks = [
     { name: 'Features', path: '/features' },
-    { name: 'Agents', path: '/agents' },
     { name: 'Pricing', path: '/pricing' },
     { name: 'About', path: '/about' },
   ];

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, MessageSquare, X, Settings, HelpCircle, LogOut, Sparkles, Zap } from 'lucide-react';
+import { memo, useState } from 'react';
+import { Plus, MessageSquare, X, Settings, HelpCircle, LogOut, Sparkles, Zap, PanelLeftClose } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
 import { Button } from './Button';
@@ -14,14 +14,27 @@ interface SidebarProps {
   onNewChat?: () => void;
 }
 
+const SidebarCloseButton = memo(({ onClick }: { onClick: () => void }) => (
+  <button 
+    onClick={onClick}
+    aria-label="Close sidebar"
+    title="Close sidebar"
+    className="p-2 text-text-secondary hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 group"
+  >
+    <PanelLeftClose size={20} className="group-hover:scale-110 transition-transform" />
+  </button>
+));
+
+SidebarCloseButton.displayName = 'SidebarCloseButton';
+
 export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSelectSession, onNewChat }: SidebarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div 
       className={clsx(
-        "fixed md:relative z-20 h-full bg-black/50 backdrop-blur-xl border-r border-white/10 transition-all duration-300 ease-in-out",
-        isOpen ? "w-80 translate-x-0" : "w-0 -translate-x-full md:w-0 md:translate-x-0 opacity-0 md:opacity-100 overflow-hidden"
+        "fixed md:relative z-20 h-full bg-black/50 backdrop-blur-xl border-r border-white/10 transition-all duration-300 ease-in-out overflow-hidden",
+        isOpen ? "w-80 opacity-100" : "w-0 opacity-0 -translate-x-full md:translate-x-0"
       )}
     >
       <div className="flex flex-col h-full p-4 relative">
@@ -29,9 +42,7 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
           <Link to="/">
             <Brand showText={false} />
           </Link>
-          <button onClick={onClose} className="md:hidden text-text-secondary">
-              <X />
-          </button>
+          <SidebarCloseButton onClick={onClose} />
         </div>
 
         <Button 
