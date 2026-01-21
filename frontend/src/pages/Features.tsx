@@ -6,7 +6,7 @@ import { LightLeak } from '../components/LightLeak';
 import { AgentOverviewCard } from '../components/AgentOverviewCard';
 import { AgentSection } from '../components/AgentSection';
 import { FuturisticBeam } from '../components/FuturisticBeam';
-import { Search, Shield, Zap, MessageSquare, ArrowRight, CheckCircle2, BarChart3, PenTool, Megaphone, Calculator } from 'lucide-react';
+import { Search, Shield, Zap, MessageSquare, CheckCircle2, Megaphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function FeaturesPage() {
@@ -135,7 +135,48 @@ export function FeaturesPage() {
             
             <AgentOverviewCard 
                 index={0}
-                icon={<BarChart3 />} 
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
+                    <title>business-products-deal-handshake</title>
+                    <g>
+                      <path d="M30.48 7.62H32v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="m27.43 15.24 0 1.52 -3.04 0 0 1.53 3.04 0 0 9.14 -6.09 0 0 1.52 6.09 0 0 1.53 4.57 0 0 -15.24 -4.57 0z" strokeWidth="1"></path>
+                      <path d="M28.96 9.14h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+                      <path d="M27.43 7.62h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+                      <path d="M25.91 9.14h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+                      <path d="M25.91 1.53h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M24.39 7.62h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M22.86 15.24h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+                      <path d="M21.34 13.72h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="m21.34 22.86 -1.53 0 0 3.05 -3.04 0 0 3.04 1.52 0 0 -1.52 3.05 0 0 -4.57z" strokeWidth="1"></path>
+                      <path d="M18.29 21.34h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M18.29 3.05h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M16.77 19.81h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+                      <path d="M16.77 16.76h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+                      <path d="M15.24 12.19h6.1v1.53h-6.1Z" strokeWidth="1"></path>
+                      <path d="M16.77 4.57h1.52V6.1h-1.52Z" strokeWidth="1"></path>
+                      <path d="M16.77 1.53h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M15.24 24.38h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+                      <path d="M15.24 18.29h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+                      <path d="M15.24 3.05h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+                      <path d="m13.72 30.48 -4.57 0 0 1.52 6.09 0 0 -1.52 1.53 0 0 -1.53 -3.05 0 0 1.53z" strokeWidth="1"></path>
+                      <path d="M13.72 13.72h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M12.19 27.43h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+                      <path d="M12.19 19.81h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+                      <path d="M12.19 15.24h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+                      <path d="M10.67 12.19h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+                      <path d="M10.67 25.91h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M10.67 16.76h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+                      <path d="M10.67 6.1h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M9.15 13.72h1.52v1.52H9.15Z" strokeWidth="1"></path>
+                      <path d="M7.62 28.95h1.53v1.53H7.62Z" strokeWidth="1"></path>
+                      <path d="M7.62 15.24h1.53v1.52H7.62Z" strokeWidth="1"></path>
+                      <path d="m4.58 27.43 0 -9.14 3.04 0 0 -1.53 -3.04 0 0 -1.52 -4.58 0 0 15.24 4.58 0 0 -1.53 3.04 0 0 -1.52 -3.04 0z" strokeWidth="1"></path>
+                      <path d="M6.1 0h1.52v1.53H6.1Z" strokeWidth="1"></path>
+                      <path d="m4.58 12.19 0 -1.52 1.52 0 0 -1.53 -1.52 0 0 -1.52 -1.53 0 0 1.52 -1.52 0 0 1.53 1.52 0 0 1.52 1.53 0z" strokeWidth="1"></path>
+                    </g>
+                  </svg>
+                } 
                 title="Market Research" 
                 desc="Competitor analysis & trends"
                 color="text-cyan-400"
@@ -145,7 +186,46 @@ export function FeaturesPage() {
             />
             <AgentOverviewCard 
                 index={1}
-                icon={<PenTool />} 
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6" fill="currentColor">
+                    <title>interface-essential-link-broken-1</title>
+                    <g>
+                      <path d="M30.48 7.62H32v10.66h-1.52Z" strokeWidth="1"></path>
+                      <path d="M28.95 18.28h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+                      <path d="M28.95 6.09h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+                      <path d="M19.81 19.81h9.14v1.52h-9.14Z" strokeWidth="1"></path>
+                      <path d="M25.91 10.67h1.52v4.57h-1.52Z" strokeWidth="1"></path>
+                      <path d="M19.81 9.14h6.1v1.53h-6.1Z" strokeWidth="1"></path>
+                      <path d="M19.81 15.24h6.1v1.52h-6.1Z" strokeWidth="1"></path>
+                      <path d="M19.81 4.57h9.14v1.52h-9.14Z" strokeWidth="1"></path>
+                      <path d="M18.29 16.76h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+                      <path d="M18.29 6.09h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+                      <path d="M15.24 21.33h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+                      <path d="M13.72 24.38h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M12.19 19.81h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+                      <path d="M13.72 1.52h1.52v4.57h-1.52Z" strokeWidth="1"></path>
+                      <path d="M12.19 25.9h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+                      <path d="M10.67 27.43h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                      <path d="M10.67 21.33h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+                      <path d="M9.15 22.86h1.52v1.52H9.15Z" strokeWidth="1"></path>
+                      <path d="M9.15 15.24h1.52v3.04H9.15Z" strokeWidth="1"></path>
+                      <path d="M4.57 28.95h6.1v1.53h-6.1Z" strokeWidth="1"></path>
+                      <path d="M7.62 18.28h1.53v1.53H7.62Z" strokeWidth="1"></path>
+                      <path d="M6.1 13.71h3.05v1.53H6.1Z" strokeWidth="1"></path>
+                      <path d="M6.1 24.38h3.05v1.52H6.1Z" strokeWidth="1"></path>
+                      <path d="M6.1 19.81h1.52v1.52H6.1Z" strokeWidth="1"></path>
+                      <path d="M4.57 9.14h4.58v1.53H4.57Z" strokeWidth="1"></path>
+                      <path d="m4.57 3.05 3.05 0 0 3.04 3.05 0 0 3.05 1.52 0 0 -4.57 -3.04 0 0 -3.05 -4.58 0 0 1.53z" strokeWidth="1"></path>
+                      <path d="M4.57 21.33H6.1v3.05H4.57Z" strokeWidth="1"></path>
+                      <path d="M4.57 15.24H6.1v1.52H4.57Z" strokeWidth="1"></path>
+                      <path d="M3.05 27.43h1.52v1.52H3.05Z" strokeWidth="1"></path>
+                      <path d="M3.05 16.76h1.52v1.52H3.05Z" strokeWidth="1"></path>
+                      <path d="M1.53 25.9h1.52v1.53H1.53Z" strokeWidth="1"></path>
+                      <path d="M1.53 18.28h1.52v1.53H1.53Z" strokeWidth="1"></path>
+                      <path d="M0 19.81h1.53v6.09H0Z" strokeWidth="1"></path>
+                    </g>
+                  </svg>
+                } 
                 title="Brand Strategy" 
                 desc="Naming & positioning"
                 color="text-emerald-400"
@@ -165,11 +245,35 @@ export function FeaturesPage() {
             />
             <AgentOverviewCard 
                 index={3}
-                icon={<Calculator />} 
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
+                    <title>money-payments-bank</title>
+                    <g>
+                      <path d="M30.47 10.67h-1.52V9.14h-1.52v1.53h-3.05v1.52h1.52v12.19h-3.05v-4.57h-1.52v4.57h-1.52v-3.05h-1.53v3.05h-4.57v-3.05h-1.52v3.05h-1.53v-4.57H9.14v4.57H6.09V12.19h1.53v-1.52H4.57V9.14H3.04v1.53H1.52V7.62H0v4.57h1.52v15.24H0V32h32v-4.57h-1.53V12.19H32V7.62h-1.53Zm-3.04 1.52h1.52v12.19h-1.52Zm-24.39 0h1.53v12.19H3.04Zm0 13.72h25.91v1.52H3.04Zm27.43 4.57H1.52v-1.53h28.95Z" strokeWidth="1"></path>
+                      <path d="M27.43 6.1h3.04v1.52h-3.04Z" strokeWidth="1"></path>
+                      <path d="M24.38 7.62h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+                      <path d="M24.38 4.57h3.05V6.1h-3.05Z" strokeWidth="1"></path>
+                      <path d="M21.33 6.1h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+                      <path d="M21.33 3.05h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+                      <path d="M18.28 4.57h3.05V6.1h-3.05Z" strokeWidth="1"></path>
+                      <path d="M18.28 1.52h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+                      <path d="M13.71 6.1v1.52h-1.52v1.52h-1.53v1.53H9.14v4.57h1.52v1.52h1.53v1.53h1.52v1.52h4.57v-1.52h1.53v-1.53h1.52v-1.52h1.52v-4.57h-1.52V9.14h-1.52V7.62h-1.53V6.1Zm4.57 3.04v1.53h-4.57v1.52h4.57v1.52h1.53v1.53h-1.53v1.52h-1.52v1.53h-1.52v-1.53h-1.53v-1.52h4.57v-1.53h-4.57v-1.52h-1.52v-1.52h1.52V9.14h1.53V7.62h1.52v1.52Z" strokeWidth="1"></path>
+                      <path d="M13.71 3.05h4.57v1.52h-4.57Z" strokeWidth="1"></path>
+                      <path d="M13.71 0h4.57v1.52h-4.57Z" strokeWidth="1"></path>
+                      <path d="M10.66 4.57h3.05V6.1h-3.05Z" strokeWidth="1"></path>
+                      <path d="M10.66 1.52h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+                      <path d="M7.62 6.1h3.04v1.52H7.62Z" strokeWidth="1"></path>
+                      <path d="M7.62 3.05h3.04v1.52H7.62Z" strokeWidth="1"></path>
+                      <path d="M4.57 7.62h3.05v1.52H4.57Z" strokeWidth="1"></path>
+                      <path d="M4.57 4.57h3.05V6.1H4.57Z" strokeWidth="1"></path>
+                      <path d="M1.52 6.1h3.05v1.52H1.52Z" strokeWidth="1"></path>
+                    </g>
+                  </svg>
+                } 
                 title="Financial" 
                 desc="Pricing & planning"
-                color="text-green-400"
-                borderColor="border-green-500/30"
+                color="text-green-400" 
+                borderColor="border-green-500/30" 
                 bgGlow="from-green-500/5"
                 onHover={setHoveredCard}
             />
@@ -183,24 +287,104 @@ export function FeaturesPage() {
       <AgentSection 
         id="market"
         title="Market Research Agent"
-        desc="Deep dive into your industry landscape. Understand your competitors, identify gaps, and spot emerging trends."
-        capabilities={['Competitive Analysis', 'Local Demand Estimation', 'Industry Trends', 'SWOT Analysis']}
-        icon={<BarChart3 className="w-12 h-12 text-cyan-400" />}
-        color="blue"
+        desc="Stay ahead of the competition. Get deep insights into market trends, competitor strategies, and customer behavior."
+        capabilities={['Competitor Analysis', 'Web search with tavily api ', 'Customer Persona Building', 'SWOT Analysis']}
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-12 h-12 text-cyan-400" fill="currentColor">
+            <title>business-products-deal-handshake</title>
+            <g>
+              <path d="M30.48 7.62H32v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="m27.43 15.24 0 1.52 -3.04 0 0 1.53 3.04 0 0 9.14 -6.09 0 0 1.52 6.09 0 0 1.53 4.57 0 0 -15.24 -4.57 0z" strokeWidth="1"></path>
+              <path d="M28.96 9.14h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+              <path d="M27.43 7.62h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+              <path d="M25.91 9.14h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+              <path d="M25.91 1.53h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M24.39 7.62h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M22.86 15.24h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+              <path d="M21.34 13.72h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="m21.34 22.86 -1.53 0 0 3.05 -3.04 0 0 3.04 1.52 0 0 -1.52 3.05 0 0 -4.57z" strokeWidth="1"></path>
+              <path d="M18.29 21.34h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M18.29 3.05h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M16.77 19.81h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+              <path d="M16.77 16.76h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+              <path d="M15.24 12.19h6.1v1.53h-6.1Z" strokeWidth="1"></path>
+              <path d="M16.77 4.57h1.52V6.1h-1.52Z" strokeWidth="1"></path>
+              <path d="M16.77 1.53h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M15.24 24.38h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+              <path d="M15.24 18.29h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+              <path d="M15.24 3.05h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+              <path d="m13.72 30.48 -4.57 0 0 1.52 6.09 0 0 -1.52 1.53 0 0 -1.53 -3.05 0 0 1.53z" strokeWidth="1"></path>
+              <path d="M13.72 13.72h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M12.19 27.43h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+              <path d="M12.19 19.81h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+              <path d="M12.19 15.24h1.53v1.52h-1.53Z" strokeWidth="1"></path>
+              <path d="M10.67 12.19h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+              <path d="M10.67 25.91h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M10.67 16.76h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+              <path d="M10.67 6.1h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+              <path d="M9.15 13.72h1.52v1.52H9.15Z" strokeWidth="1"></path>
+              <path d="M7.62 28.95h1.53v1.53H7.62Z" strokeWidth="1"></path>
+              <path d="M7.62 15.24h1.53v1.52H7.62Z" strokeWidth="1"></path>
+              <path d="m4.58 27.43 0 -9.14 3.04 0 0 -1.53 -3.04 0 0 -1.52 -4.58 0 0 15.24 4.58 0 0 -1.53 3.04 0 0 -1.52 -3.04 0z" strokeWidth="1"></path>
+              <path d="M6.1 0h1.52v1.53H6.1Z" strokeWidth="1"></path>
+              <path d="m4.58 12.19 0 -1.52 1.52 0 0 -1.53 -1.52 0 0 -1.52 -1.53 0 0 1.52 -1.52 0 0 1.53 1.52 0 0 1.52 1.53 0z" strokeWidth="1"></path>
+            </g>
+          </svg>
+        }
+        color="green"
         align="left"
       />
       
       <LightLeak color="purple" />
       
       <AgentSection 
-        id="brand"
-        title="Brand Strategy Agent"
-        desc="Craft a memorable identity. From catchy business names to compelling taglines and mission statements."
-        capabilities={['Business Name Generation', 'Tagline Creation', 'Brand Voice Guidelines', 'Value Proposition Design']}
-        icon={<PenTool className="w-12 h-12 text-emerald-400" />}
-        color="purple"
-        align="right"
-      />
+          id="brand"
+          title="Brand Strategy Agent"
+          desc="Craft a memorable identity. From catchy business names to compelling taglines and mission statements."
+          capabilities={['Business Name Generation', 'Tagline Creation', 'Brand Voice Guidelines', 'Value Proposition Design']}
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-12 h-12 text-emerald-400" fill="currentColor">
+              <title>interface-essential-link-broken-1</title>
+              <g>
+                <path d="M30.48 7.62H32v10.66h-1.52Z" strokeWidth="1"></path>
+                <path d="M28.95 18.28h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+                <path d="M28.95 6.09h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+                <path d="M19.81 19.81h9.14v1.52h-9.14Z" strokeWidth="1"></path>
+                <path d="M25.91 10.67h1.52v4.57h-1.52Z" strokeWidth="1"></path>
+                <path d="M19.81 9.14h6.1v1.53h-6.1Z" strokeWidth="1"></path>
+                <path d="M19.81 15.24h6.1v1.52h-6.1Z" strokeWidth="1"></path>
+                <path d="M19.81 4.57h9.14v1.52h-9.14Z" strokeWidth="1"></path>
+                <path d="M18.29 16.76h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+                <path d="M18.29 6.09h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+                <path d="M15.24 21.33h1.52v3.05h-1.52Z" strokeWidth="1"></path>
+                <path d="M13.72 24.38h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                <path d="M12.19 19.81h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+                <path d="M13.72 1.52h1.52v4.57h-1.52Z" strokeWidth="1"></path>
+                <path d="M12.19 25.9h1.53v1.53h-1.53Z" strokeWidth="1"></path>
+                <path d="M10.67 27.43h1.52v1.52h-1.52Z" strokeWidth="1"></path>
+                <path d="M10.67 21.33h1.52v1.53h-1.52Z" strokeWidth="1"></path>
+                <path d="M9.15 22.86h1.52v1.52H9.15Z" strokeWidth="1"></path>
+                <path d="M9.15 15.24h1.52v3.04H9.15Z" strokeWidth="1"></path>
+                <path d="M4.57 28.95h6.1v1.53h-6.1Z" strokeWidth="1"></path>
+                <path d="M7.62 18.28h1.53v1.53H7.62Z" strokeWidth="1"></path>
+                <path d="M6.1 13.71h3.05v1.53H6.1Z" strokeWidth="1"></path>
+                <path d="M6.1 24.38h3.05v1.52H6.1Z" strokeWidth="1"></path>
+                <path d="M6.1 19.81h1.52v1.52H6.1Z" strokeWidth="1"></path>
+                <path d="M4.57 9.14h4.58v1.53H4.57Z" strokeWidth="1"></path>
+                <path d="m4.57 3.05 3.05 0 0 3.04 3.05 0 0 3.05 1.52 0 0 -4.57 -3.04 0 0 -3.05 -4.58 0 0 1.53z" strokeWidth="1"></path>
+                <path d="M4.57 21.33H6.1v3.05H4.57Z" strokeWidth="1"></path>
+                <path d="M4.57 15.24H6.1v1.52H4.57Z" strokeWidth="1"></path>
+                <path d="M3.05 27.43h1.52v1.52H3.05Z" strokeWidth="1"></path>
+                <path d="M3.05 16.76h1.52v1.52H3.05Z" strokeWidth="1"></path>
+                <path d="M1.53 25.9h1.52v1.53H1.53Z" strokeWidth="1"></path>
+                <path d="M1.53 18.28h1.52v1.53H1.53Z" strokeWidth="1"></path>
+                <path d="M0 19.81h1.53v6.09H0Z" strokeWidth="1"></path>
+              </g>
+            </svg>
+          }
+          color="purple"
+          align="right"
+        />
       
       <LightLeak color="orange" />
       
@@ -221,7 +405,31 @@ export function FeaturesPage() {
         title="Financial Agent"
         desc="Master your numbers. Get help with pricing strategies, profit margin calculations, and break-even analysis."
         capabilities={['Pricing Strategy', 'Profit Margin Calculation', 'Cost Breakdown', 'Break-even Analysis']}
-        icon={<Calculator className="w-12 h-12 text-green-400" />}
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-12 h-12 text-green-400" fill="currentColor">
+            <title>money-payments-bank</title>
+            <g>
+              <path d="M30.47 10.67h-1.52V9.14h-1.52v1.53h-3.05v1.52h1.52v12.19h-3.05v-4.57h-1.52v4.57h-1.52v-3.05h-1.53v3.05h-4.57v-3.05h-1.52v3.05h-1.53v-4.57H9.14v4.57H6.09V12.19h1.53v-1.52H4.57V9.14H3.04v1.53H1.52V7.62H0v4.57h1.52v15.24H0V32h32v-4.57h-1.53V12.19H32V7.62h-1.53Zm-3.04 1.52h1.52v12.19h-1.52Zm-24.39 0h1.53v12.19H3.04Zm0 13.72h25.91v1.52H3.04Zm27.43 4.57H1.52v-1.53h28.95Z" strokeWidth="1"></path>
+              <path d="M27.43 6.1h3.04v1.52h-3.04Z" strokeWidth="1"></path>
+              <path d="M24.38 7.62h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+              <path d="M24.38 4.57h3.05V6.1h-3.05Z" strokeWidth="1"></path>
+              <path d="M21.33 6.1h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+              <path d="M21.33 3.05h3.05v1.52h-3.05Z" strokeWidth="1"></path>
+              <path d="M18.28 4.57h3.05V6.1h-3.05Z" strokeWidth="1"></path>
+              <path d="M18.28 1.52h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+              <path d="M13.71 6.1v1.52h-1.52v1.52h-1.53v1.53H9.14v4.57h1.52v1.52h1.53v1.53h1.52v1.52h4.57v-1.52h1.53v-1.53h1.52v-1.52h1.52v-4.57h-1.52V9.14h-1.52V7.62h-1.53V6.1Zm4.57 3.04v1.53h-4.57v1.52h4.57v1.52h1.53v1.53h-1.53v1.52h-1.52v1.53h-1.52v-1.53h-1.53v-1.52h4.57v-1.53h-4.57v-1.52h-1.52v-1.52h1.52V9.14h1.53V7.62h1.52v1.52Z" strokeWidth="1"></path>
+              <path d="M13.71 3.05h4.57v1.52h-4.57Z" strokeWidth="1"></path>
+              <path d="M13.71 0h4.57v1.52h-4.57Z" strokeWidth="1"></path>
+              <path d="M10.66 4.57h3.05V6.1h-3.05Z" strokeWidth="1"></path>
+              <path d="M10.66 1.52h3.05v1.53h-3.05Z" strokeWidth="1"></path>
+              <path d="M7.62 6.1h3.04v1.52H7.62Z" strokeWidth="1"></path>
+              <path d="M7.62 3.05h3.04v1.52H7.62Z" strokeWidth="1"></path>
+              <path d="M4.57 7.62h3.05v1.52H4.57Z" strokeWidth="1"></path>
+              <path d="M4.57 4.57h3.05V6.1H4.57Z" strokeWidth="1"></path>
+              <path d="M1.52 6.1h3.05v1.52H1.52Z" strokeWidth="1"></path>
+            </g>
+          </svg>
+        }
         color="green"
         align="right"
       />

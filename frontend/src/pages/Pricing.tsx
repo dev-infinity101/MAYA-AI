@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/Button';
@@ -160,7 +160,7 @@ export function PricingPage() {
   );
 }
 
-function PricingCard({ title, price, period, desc, features, cta, variant, popular }: any) {
+function PricingCard({ title, price, period, desc, features, cta, variant }: any) {
     const isFeatured = variant === 'featured';
     
     return (

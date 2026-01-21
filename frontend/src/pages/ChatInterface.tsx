@@ -1,3 +1,5 @@
+import { useState, useEffect, useRef } from 'react';
+import { Send, Sparkles, Menu, ChevronDown, PanelLeftOpen } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Sparkles, Menu, ChevronDown, PlusCircle, Square } from 'lucide-react';
 import { Message } from '../types';

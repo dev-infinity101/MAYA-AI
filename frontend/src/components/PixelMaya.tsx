@@ -77,7 +77,7 @@ const generateM = (): PixelMatrix => {
 
 const generateA = (): PixelMatrix => {
   const m = createEmptyMatrix(MATRIX_WIDTH, MATRIX_HEIGHT);
-  const topX = MATRIX_WIDTH / 2, topY = STROKE_WIDTH / 2, bottomY = MATRIX_HEIGHT, spread = 0;
+  const topX = MATRIX_WIDTH / 2, bottomY = MATRIX_HEIGHT, spread = 0;
   drawLine(m, topX, 0, spread, bottomY, STROKE_WIDTH + 1);
   drawLine(m, topX, 0, MATRIX_WIDTH - spread, bottomY, STROKE_WIDTH + 1);
   drawRect(m, topX - 4, 0, 8, STROKE_WIDTH);

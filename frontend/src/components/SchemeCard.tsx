@@ -3,6 +3,22 @@ import { ExternalLink, CheckCircle, Info, ArrowRight, Tag } from 'lucide-react';
 import { Scheme } from '../types'; // Ensure types are imported from your central file
 import { SchemeDetailsModal } from './SchemeDetailsModal'; // Import the Modal we created
 
+import { Button } from './Button';
+
+export interface Scheme {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  benefits: string;
+  eligibility?: any;
+  application_link?: string;
+  relevance_score?: number;
+  explanation?: string;
+  key_benefit?: string;
+}
+
+
 interface SchemeCardProps {
   scheme: Scheme;
 }

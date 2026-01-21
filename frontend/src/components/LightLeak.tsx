@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function LightLeak({ color = 'cyan' }: { color?: 'cyan' | 'blue' | 'purple' | 'orange' | 'green' }) {
     const colors = {
         cyan: 'bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent',

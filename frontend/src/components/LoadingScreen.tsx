@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export function LoadingScreen({ onLoadingComplete }: { onLoadingComplete: () => void }) {
   const [pixels, setPixels] = useState<Array<{ id: number; active: boolean }>>([]);

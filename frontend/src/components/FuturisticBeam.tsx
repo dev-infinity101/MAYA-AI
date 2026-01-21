@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 export function FuturisticBeam({ className = '' }: { className?: string }) {
   // Generate random properties for the light streaks to ensure they feel organic
   const streaks = useMemo(() => {
-    return Array.from({ length: 8 }).map((_, i) => ({
+    return Array.from({ length: 8 }).map((_) => ({
       left: `${15 + Math.random() * 70}%`, // Keep within central 70% width
       width: Math.random() > 0.7 ? '2px' : '1px', // Varied thickness
       height: `${40 + Math.random() * 40}%`, // Varied length
