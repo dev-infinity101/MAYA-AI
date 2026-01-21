@@ -18,10 +18,14 @@ class MimoService:
         if not api_key:
             print("Warning: OPENROUTER_API_KEY not found in environment variables.")
         
+        # OpenRouter requires these extra headers to avoid 401 errors
         self.client = AsyncOpenAI(
             api_key=api_key,
             base_url="https://openrouter.ai/api/v1",
-            
+            default_headers={
+                "HTTP-Referer": "http://localhost:3000", # Aapka site URL
+                "X-Title": "MAYA-AI-Local"               # Aapke app ka naam
+            }
         )
         self.model = "xiaomi/mimo-v2-flash:free"
 

@@ -1,50 +1,136 @@
+import json
+import re
+from typing import Annotated, Sequence, TypedDict, List, Dict, Any
+from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
 from langgraph.graph import StateGraph, END
+from langgraph.graph.message import add_messages
+
+# Internal Imports
 from agents.state import AgentState
 from agents.router import route_request
 from services.scheme_service import scheme_service
 from services.mimo_service import mimo_service
 from services.tavily_service import tavily_service
 from database import AsyncSessionLocal
-from langchain_core.messages import AIMessage
 
 # --- Node Implementations ---
 
 async def router_node(state: AgentState):
+    """Determines which agent should handle the query."""
     return await route_request(state)
 
 async def scheme_agent_node(state: AgentState):
+    """
+    MAYA Final Node: Syncs with corrected SchemeService dictionaries.
+    Logic: Processes clean data for AI ranking and Frontend display.
+    """
     messages = state["messages"]
     last_message = messages[-1].content
     
-    # 1. Search schemes
-    async with AsyncSessionLocal() as db:
-        schemes = await scheme_service.search_schemes(db, last_message)
+    # 1. Number extraction (e.g., "top 3")
+    match = re.search(r'\b\d+\b', last_message)
+    requested_count = int(match.group()) if match else None
     
-    # 2. Format response using LLM
+    async with AsyncSessionLocal() as db:
+        # IMPORTANT: Service ab List[dict] return kar raha hai
+        schemes = await scheme_service.search_schemes(db, last_message, limit=3)
+    
     if schemes:
-        schemes_text = "\n\n".join([f"Name: {s.name}\nCategory: {s.category}\nBenefits: {s.benefits}\nDescription: {s.description}" for s in schemes])
+        schemes_data = []
+        for s in schemes:
+            # Helper for JSON parsing (just in case they come as strings)
+            def safe_parse(val):
+                if val is None: return None
+                if isinstance(val, (dict, list)): return val
+                try: return json.loads(val)
+                except: return val
+
+            # --- STEP 2: DATA MAPPING (Synced with Service Keys) ---
+            sd = {
+                "id": str(s.get('id')).strip(),
+                "name": s.get('name'),
+                "category": s.get('category') or "Business",
+                "description": s.get('description'),
+                "benefits": safe_parse(s.get('benefits')) or [],
+                # Keys are now identical to models.py
+                "eligibility_criteria": safe_parse(s.get('eligibility_criteria')), 
+                "required_documents": safe_parse(s.get('required_documents')) or [],
+                "application_mode": str(s.get('application_mode') or "Online/Offline"),
+                "link": s.get('link'),
+                "tags": safe_parse(s.get('tags')) or []
+            }
+            schemes_data.append(sd)
+
+        # --- STEP 3: AI ANALYSIS (REASONING) ---
+        analysis_input = [{"id": x["id"], "name": x["name"], "desc": x["description"]} for x in schemes_data]
         prompt = f"""
-        You are the 'Scheme Navigator' for the MAYA AI Assistant.
+        Analyze these government schemes for the query: "{last_message}"
+        Data: {json.dumps(analysis_input)}
         
-        User Query: {last_message}
-        
-        I have found the following relevant government schemes:
-        {schemes_text}
-        
-        Task:
-        1. Present the top 1-2 most relevant schemes to the user.
-        2. Briefly explain WHY each scheme is a good fit for their query.
-        3. Mention key benefits.
-        4. End with an encouraging closing, inviting them to ask about eligibility or application steps.
-        
-        Style: Professional, helpful, and concise. Use bullet points for readability.
-        CRITICAL: Do NOT start with a greeting or self-introduction. Jump straight into the results.
+        Return ONLY a JSON object:
+        {{
+            "chat_summary": "Friendly 1-2 sentence overview",
+            "schemes_metadata": [
+                {{"id": "...", "relevance_score": 0-100, "explanation": "Why this fits?"}}
+            ]
+        }}
         """
-        response_text = await mimo_service.generate_text(prompt)
-    else:
-        response_text = "I searched our database but couldn't find any specific government schemes that match your exact query. \n\nCould you try rephrasing? For example, tell me your industry (e.g., 'textiles'), your goal (e.g., 'loan for machinery'), or your business size."
         
-    return {"messages": [AIMessage(content=response_text)]}
+        ai_response = await mimo_service.generate_text(prompt)
+        
+        try:
+            # AI JSON Parse karna
+            cleaned_json = ai_response.replace('```json', '').replace('```', '').strip()
+            parsed = json.loads(cleaned_json)
+            chat_text = parsed.get("chat_summary", "I found these relevant schemes for you:")
+            
+            # Metadata mapping
+            metadata_map = {str(item.get('id')).strip(): item for item in parsed.get("schemes_metadata", [])}
+            
+            # --- STEP 4: FINAL MERGE & SORT ---
+            final_schemes = []
+            for sd in schemes_data:
+                sid = sd['id']
+                if sid in metadata_map:
+                    sd.update({
+                        "relevance_score": metadata_map[sid].get("relevance_score", 75),
+                        "explanation": metadata_map[sid].get("explanation", "")
+                    })
+                else:
+                    sd.update({"relevance_score": 50, "explanation": "Matching record found in database."})
+                final_schemes.append(sd)
+
+            # Highest score first
+            final_schemes.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+            display_schemes = final_schemes[:requested_count] if requested_count else final_schemes
+
+            return {
+                "messages": [AIMessage(content=chat_text)],
+                "schemes": display_schemes,
+                "current_agent": "scheme"
+            }
+
+        except Exception as e:
+            print(f"❌ Analysis Error: {e}")
+            fallback = schemes_data[:requested_count] if requested_count else schemes_data
+            return {
+                "messages": [AIMessage(content="I found these schemes in our database:")], 
+                "schemes": fallback,
+                "current_agent": "scheme"
+            }
+
+    return {
+        "messages": [AIMessage(content="I'm sorry, I couldn't find any specific schemes matching your query.")], 
+        "schemes": [],
+        "current_agent": "scheme"
+    }
+
+    # If no results in DB
+    return {
+        "messages": [AIMessage(content="I'm sorry, I couldn't find any specific schemes for that in my database.")], 
+        "schemes": [],
+        "current_agent": "scheme"
+    }
 
 async def general_agent_node(state: AgentState):
     messages = state["messages"]
@@ -69,6 +155,7 @@ async def general_agent_node(state: AgentState):
         response = await mimo_service.generate_text(prompt)
         
     return {"messages": [AIMessage(content=response)]}
+
 
 # Placeholder nodes for other agents (to be implemented)
 async def market_agent_node(state: AgentState):
@@ -154,7 +241,7 @@ async def marketing_agent_node(state: AgentState):
 def create_graph():
     workflow = StateGraph(AgentState)
 
-    # Add nodes
+    # Nodes registration
     workflow.add_node("router", router_node)
     workflow.add_node("scheme", scheme_agent_node)
     workflow.add_node("market", market_agent_node)
@@ -163,7 +250,7 @@ def create_graph():
     workflow.add_node("marketing", marketing_agent_node)
     workflow.add_node("general", general_agent_node)
 
-    # Set entry point
+     # Set entry point
     workflow.set_entry_point("router")
 
     # Add conditional edges based on router output

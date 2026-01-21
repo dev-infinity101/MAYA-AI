@@ -1,33 +1,34 @@
-# Core Framework
-fastapi==0.109.2
-uvicorn[standard]==0.27.1
-pydantic==2.6.1
-pydantic-settings==2.1.0
+# --- Core Framework (Stable) ---
+fastapi>=0.109.2
+uvicorn[standard]>=0.27.1
+pydantic>=2.6.1
+pydantic-settings>=2.1.0
 
-# Google Gemini Integration (CRITICAL)
+# --- Google Gemini AI (Future Proof) ---
+# Version 2.0.0+ is essential for Gemini 1.5 Pro/Flash integration
 langchain-google-genai>=2.0.0
 google-generativeai>=0.8.0
 
-# Agent Orchestration
-langgraph==0.0.39
-langchain-core==0.1.23
+# --- Agent Orchestration (Conflict Resolved) ---
+# Langgraph 0.0.39 requires langchain-core >= 0.1.46
+langchain-core>=0.1.46
+langgraph>=0.0.39
 
-# Database
-sqlalchemy==2.0.28
-asyncpg==0.29.0
-# psycopg2-binary==2.9.9 # Removing problematic binary build for now, asyncpg is main driver
-pgvector==0.2.5
-alembic==1.13.1
+# --- Database & Persistence ---
+sqlalchemy>=2.0.28
+asyncpg>=0.29.0
+pgvector>=0.2.5
+alembic>=1.13.1
 
-# Web Search
-tavily-python==0.3.3
+# --- Web Search & Tools ---
+tavily-python>=0.3.3
 
-# Authentication & Security
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
+# --- Security & Auth ---
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.9
 
-# Utilities
-python-dotenv==1.0.0
-httpx==0.26.0
-tenacity==8.2.3
+# --- Utilities ---
+python-dotenv>=1.0.0
+httpx>=0.26.0
+tenacity>=8.2.3
