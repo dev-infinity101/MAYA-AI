@@ -46,6 +46,18 @@ export function Message({ message }: MessageProps) {
                             li: ({node, ...props}) => <li className="pl-1" {...props} />,
                             hr: ({node, ...props}) => <hr className="border-white/10 my-8" {...props} />,
                             strong: ({node, ...props}) => <strong className="font-semibold text-white" {...props} />,
+                            table: ({node, ...props}) => (
+                                <div className="my-6 w-full overflow-hidden rounded-lg border border-white/10">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-sm" {...props} />
+                                    </div>
+                                </div>
+                            ),
+                            thead: ({node, ...props}) => <thead className="bg-white/5 text-white/90" {...props} />,
+                            tbody: ({node, ...props}) => <tbody className="divide-y divide-white/5" {...props} />,
+                            tr: ({node, ...props}) => <tr className="transition-colors hover:bg-white/5" {...props} />,
+                            th: ({node, ...props}) => <th className="px-4 py-3 font-semibold" {...props} />,
+                            td: ({node, ...props}) => <td className="px-4 py-3 align-top text-white/70" {...props} />,
                             code: ({node, ...props}) => (
                                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-[0.9em] font-mono" {...props} />
                             ),

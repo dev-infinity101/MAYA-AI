@@ -8,6 +8,7 @@ import { AgentSection } from '../components/AgentSection';
 import { FuturisticBeam } from '../components/FuturisticBeam';
 import { Search, Shield, Zap, MessageSquare, CheckCircle2, Megaphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import chatInterface from '../Assets/chat-interface.png';
 
 export function FeaturesPage() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -442,7 +443,7 @@ export function FeaturesPage() {
             <div className="group p-8 md:p-12 rounded-3xl border border-emerald-500/20 backdrop-blur-md bg-black/40 flex flex-col md:flex-row items-center gap-12 hover:border-emerald-400/60 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-500">
                 <div className="flex-1 order-2 md:order-1 relative z-10">
                     <div className="relative rounded-xl overflow-hidden border border-emerald-500/20 group-hover:border-emerald-500/40 transition-colors duration-500">
-                        <img src="https://placehold.co/800x600/000000/10b981?text=Chat+Interface" alt="Chat Interface" className="rounded-xl shadow-2xl w-full group-hover:scale-105 transition-transform duration-700" />
+                        <img src={chatInterface} alt="Chat Interface" className="rounded-xl shadow-2xl w-full group-hover:scale-105 transition-transform duration-700" />
                         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none" />
                     </div>
                 </div>

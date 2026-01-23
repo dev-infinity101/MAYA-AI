@@ -172,6 +172,19 @@ async def general_agent_node(state: AgentState):
         
     return {"messages": [AIMessage(content=response)]}
 
+async def off_topic_agent_node(state: AgentState):
+    """Handles queries that are outside the scope of MAYA."""
+    messages = state["messages"]
+    last_message = messages[-1].content
+    
+    response = (
+        "I specialize in helping Indian businesses and MSMEs with growth strategies, "
+        "government schemes, market research, and financial planning.\n\n"
+        "I cannot assist with topics outside this scope. How can I help your business today?"
+    )
+    
+    return {"messages": [AIMessage(content=response)]}
+
 async def market_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
@@ -264,6 +277,7 @@ def create_graph():
     workflow.add_node("finance", finance_agent_node)
     workflow.add_node("marketing", marketing_agent_node)
     workflow.add_node("general", general_agent_node)
+    workflow.add_node("off_topic", off_topic_agent_node)
 
      # Set entry point
     workflow.set_entry_point("router")
@@ -278,7 +292,8 @@ def create_graph():
             "brand": "brand",
             "finance": "finance",
             "marketing": "marketing",
-            "general": "general"
+            "general": "general",
+            "off_topic": "off_topic"
         }
     )
 
@@ -289,6 +304,7 @@ def create_graph():
     workflow.add_edge("finance", END)
     workflow.add_edge("marketing", END)
     workflow.add_edge("general", END)
+    workflow.add_edge("off_topic", END)
 
     return workflow.compile()
 

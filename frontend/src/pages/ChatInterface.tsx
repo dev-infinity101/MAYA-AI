@@ -31,7 +31,7 @@ const ChatInputBox = ({
     return (
         <div className={`w-full max-w-2xl relative group animate-in fade-in duration-500 ${isCentered ? 'slide-in-from-bottom-6' : ''}`}>
             {/* Neon Gradient Animation */}
-            <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-secondary/50 rounded-[26px] blur transition duration-500 ${isCentered ? 'opacity-20 group-hover:opacity-40' : 'opacity-0 group-hover:opacity-100'}`} />
+            <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-primary/70 rounded-[26px] blur transition duration-500 ${isCentered ? 'opacity-20 group-hover:opacity-40' : 'opacity-0 group-hover:opacity-100'}`} />
             
             <div className="relative bg-[#212121] rounded-[26px] border border-white/5 shadow-xl overflow-hidden flex items-center min-h-[52px] transition-colors hover:bg-[#2f2f2f]">
                     

@@ -88,6 +88,22 @@ async def chat_agent(request: schemas.ChatRequest, db: AsyncSession = Depends(ge
         
         # 4. Extract Output
         last_message_content = result["messages"][-1].content
+        
+        # The new Pydantic validator in ChatResponse will handle the list->string conversion
+        # but we need to do it here first to save to DB correctly as well.
+        
+        # FIX: Ensure content is string (Gemini/LangChain sometimes returns list of dicts)
+        if isinstance(last_message_content, list):
+            # Extract text from list of blocks e.g. [{'type': 'text', 'text': '...'}]
+            text_parts = []
+            for block in last_message_content:
+                if isinstance(block, dict):
+                    if 'text' in block:
+                        text_parts.append(block['text'])
+                elif isinstance(block, str):
+                    text_parts.append(block)
+            last_message_content = "\n".join(text_parts)
+            
         agent_name = result.get("current_agent", "MAYA")
         found_schemes = result.get("schemes", [])
         
@@ -97,6 +113,7 @@ async def chat_agent(request: schemas.ChatRequest, db: AsyncSession = Depends(ge
         except Exception as e:
             logger.warning(f"Failed to save assistant message to history: {e}")
         
+        # Return strict Pydantic model
         return schemas.ChatResponse(
             response=last_message_content,
             agent=agent_name,
@@ -107,6 +124,14 @@ async def chat_agent(request: schemas.ChatRequest, db: AsyncSession = Depends(ge
     except Exception as e:
         logger.error(f"🔥 Critical Graph Error: {e}", exc_info=True)
         error_str = str(e).lower()
+        
+        # Handle Pydantic Validation Errors specifically
+        if "validation error" in error_str:
+             raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Response validation failed: {str(e)}"
+            )
+
         if "connection" in error_str or "refused" in error_str or "getaddrinfo" in error_str:
              raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
