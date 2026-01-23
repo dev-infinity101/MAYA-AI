@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { Download } from 'lucide-react';
 import { Message as MessageType } from '../types';
 import { SchemeCard } from './SchemeCard';
 import ReactMarkdown from 'react-markdown';
@@ -31,8 +32,8 @@ export function Message({ message }: MessageProps) {
                     : "bg-transparent text-white rounded-none border-none px-0 py-3"
                 )}>
                     <div className={clsx(
-                    "w-full text-white/90 leading-relaxed space-y-4",
-                    isUser ? "text-[15px]" : "text-[16px]"
+                    "w-full text-white/90 leading-relaxed space-y-4 text-[14px]", // Main chat text 14px
+                    isUser ? "text-right" : "text-left"
                 )}>
                     <ReactMarkdown
                         components={{
@@ -51,6 +52,27 @@ export function Message({ message }: MessageProps) {
                             blockquote: ({node, ...props}) => (
                                 <blockquote className="border-l-2 border-primary/30 pl-4 italic text-white/70 my-4" {...props} />
                             ),
+                            img: ({node, ...props}) => (
+                                <div className="relative group my-4 rounded-lg overflow-hidden border border-white/10 bg-black/20 max-w-md">
+                                    <img 
+                                        className="w-full h-auto object-cover" 
+                                        {...props} 
+                                        alt={props.alt || "Generated Image"}
+                                    />
+                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a 
+                                            href={props.src} 
+                                            download={`maya-generated-${Date.now()}.png`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-sm flex items-center justify-center transition-colors"
+                                            title="Download Image"
+                                        >
+                                            <Download size={18} />
+                                        </a>
+                                    </div>
+                                </div>
+                            ),
                         }}
                     >
                         {message.content}
@@ -58,7 +80,7 @@ export function Message({ message }: MessageProps) {
                 </div>
                 </div>
                 <div className={clsx(
-                    "mt-1 text-[10px] text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity",
+                    "mt-1 text-[11px] text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity", // Timestamp 11px
                     isUser ? "text-right pr-2" : "text-left"
                 )}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

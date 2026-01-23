@@ -6,16 +6,20 @@ from datetime import datetime
 
 class ChatHistoryService:
     async def save_message(self, db: AsyncSession, session_id: str, role: str, content: str, user_id: int = None):
-        message = ChatHistory(
-            session_id=session_id,
-            role=role,
-            content=content,
-            user_id=user_id
-        )
-        db.add(message)
-        await db.commit()
-        await db.refresh(message)
-        return message
+        try:
+            message = ChatHistory(
+                session_id=session_id,
+                role=role,
+                content=content,
+                user_id=user_id
+            )
+            db.add(message)
+            await db.commit()
+            await db.refresh(message)
+            return message
+        except Exception as e:
+            await db.rollback()
+            raise e
 
     async def get_session_history(self, db: AsyncSession, session_id: str):
         stmt = select(ChatHistory).where(ChatHistory.session_id == session_id).order_by(ChatHistory.timestamp.asc())

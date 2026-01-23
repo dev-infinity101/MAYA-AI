@@ -7,7 +7,7 @@ ROUTER_PROMPT = """
 You are an intelligent intent classifier for the MAYA AI Assistant.
 Classify the user's query into one of the following categories:
 
-1. 'scheme': The user is asking about government schemes, loans, subsidies, or eligibility.
+1. 'scheme': The user is asking about government schemes, loans, subsidies, eligibility and  saying and asking for more details for specific schemes or asking for more information about specific schemes.
 2. 'market': The user is asking about market research, competitors, or industry trends.
 3. 'brand': The user is asking about branding, business names, or taglines.
 4. 'finance': The user is asking about financial advice, pricing, or calculations (not specific schemes).

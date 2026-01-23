@@ -1,8 +1,7 @@
 import { memo, useState } from 'react';
-import { Plus, MessageSquare, X, Settings, HelpCircle, LogOut, Sparkles, Zap, PanelLeftClose } from 'lucide-react';
+import { MessageSquare, X, Settings, HelpCircle, LogOut, Sparkles, Zap, PanelLeftClose, SquarePen } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
-import { Button } from './Button';
 import { Brand } from './Brand';
 
 interface SidebarProps {
@@ -38,21 +37,25 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
       )}
     >
       <div className="flex flex-col h-full p-4 relative">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <Link to="/">
             <Brand showText={false} />
           </Link>
-          <SidebarCloseButton onClick={onClose} />
+          <div className="flex items-center gap-2">
+            <SidebarCloseButton onClick={onClose} />
+          </div>
         </div>
 
-        <Button 
-            variant="outline" 
-            className="w-full justify-start gap-2 mb-6" 
-            size="sm"
+        <button 
             onClick={onNewChat}
+            className="w-full flex items-center justify-between px-3 py-2.5 mb-6 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg transition-all duration-200 group"
         >
-          <Plus size={16} /> New Chat
-        </Button>
+            <div className="flex items-center gap-2.5 text-white">
+                <SquarePen size={18} className="text-text-secondary group-hover:text-primary transition-colors" />
+                <span className="text-sm font-medium">New chat</span>
+            </div>
+            <span className="text-xs text-text-secondary opacity-50 hidden md:block group-hover:opacity-80 transition-opacity">Ctrl + Shift + O</span>
+        </button>
 
         <div className="flex-1 overflow-y-auto space-y-2 pr-2">
           <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">History</div>

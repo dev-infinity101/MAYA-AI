@@ -22,11 +22,6 @@ alembic==1.13.1
 # Web Search
 tavily-python==0.3.3
 
-# Authentication & Security
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
-
 # Utilities
 python-dotenv==1.0.0
 httpx==0.26.0

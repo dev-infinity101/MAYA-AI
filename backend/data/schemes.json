@@ -1,242 +1,828 @@
 [
   {
-    "name": "Central MSME Schemes (Ministry of MSME)",
-    "description": "Official central government MSME schemes listed by the Ministry of MSME.",
-    "benefits": "Access to all central MSME schemes and guidelines.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "All sectors",
-      "authority": "Government of India"
-    },
-    "category": "Information",
-    "link": "https://msme.gov.in/central-schemes"
+    "name": "Stand-Up India",
+    "description": "Financing SC/ST and Women Entrepreneurs for setting up greenfield enterprises in manufacturing, services, or trading.",
+    "benefits": ["Loans from ₹10 Lakh to ₹1 Crore.", "Composite loan covers 75% of project cost."],
+    "eligibility_criteria": {"type": "SC/ST/Women", "sector": "Manufacturing/Services/Trading", "authority": "Ministry of Finance", "min_age": 18, "social_category": ["SC", "ST", "Women"], "geography": "India-wide", "ownership_stake": "51% Minimum"},
+    "required_documents": ["Caste Certificate", "Project Report", "Aadhaar", "Bank Statement"],
+    "application_mode": "Online/Bank", "tags": ["loan", "greenfield", "women"], "category": "Finance", "link": "https://www.standupmitra.in/"
   },
   {
-    "name": "Ministry of MSME",
-    "description": "Official website of the Ministry of Micro, Small and Medium Enterprises.",
-    "benefits": "Policy updates, schemes, notifications.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "All sectors",
-      "authority": "Government of India"
-    },
-    "category": "Government Portal",
-    "link": "https://msme.gov.in/"
+    "name": "PM Kaushal Vikas Yojana (PMKVY) - STT",
+    "description": "Skill development for school/college dropouts or unemployed youth.",
+    "benefits": ["Industry-relevant skill training.", "Certification and placement assistance."],
+    "eligibility_criteria": {"type": "Unemployed Youth", "sector": "Multi-sector", "authority": "MSDE", "min_age": 15, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Educational Certificate", "Aadhaar", "Bank Passbook"],
+    "application_mode": "PMKVY Training Centres", "tags": ["skill", "training", "placement"], "category": "Skill Development", "link": "https://www.pmkvyofficial.org/"
   },
   {
-    "name": "MyMSME Portal",
-    "description": "Unified portal for MSME schemes and services.",
-    "benefits": "Single-window access to MSME schemes.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "All sectors",
-      "registration": "Udyam"
-    },
-    "category": "Portal",
-    "link": "https://my.msme.gov.in/"
+    "name": "Biotechnology Ignition Grant (BIG)",
+    "description": "Invests in innovative biotech ideas from ideation to Proof of Concept.",
+    "benefits": ["Grant-in-aid up to ₹50 Lakhs.", "Mentorship and incubator access."],
+    "eligibility_criteria": {"type": "Individuals/Startups", "sector": "Biotech/Health", "authority": "BIRAC", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Startup < 5 years old"},
+    "required_documents": ["POC Document", "Registration Proof", "Identity Proof"],
+    "application_mode": "Online", "tags": ["grant", "biotech", "innovation"], "category": "Innovation", "link": "https://birac.nic.in/"
   },
   {
-    "name": "Udyam Registration",
-    "description": "Official MSME registration portal of Government of India.",
-    "benefits": "MSME recognition and scheme eligibility.",
-    "eligibility_criteria": {
-      "type": "Micro, Small, Medium Enterprises",
-      "sector": "All sectors",
-      "registration": "Self-declaration"
-    },
-    "category": "Registration",
-    "link": "https://udyamregistration.gov.in/"
+    "name": "Marketing Incentive - Handloom",
+    "description": "Promotes marketing channels for handloom products to ensure better remuneration for weavers.",
+    "benefits": ["Financial incentive for marketing.", "Greater visibility for handloom products."],
+    "eligibility_criteria": {"type": "Handloom Agencies/Weavers", "sector": "Textiles", "authority": "Ministry of Textiles", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Handloom Mark/Identity", "Bank Account", "Production Proof"],
+    "application_mode": "Nodal Agencies", "tags": ["handloom", "marketing", "textile"], "category": "Incentive", "link": "https://texmin.nic.in/"
   },
   {
-    "name": "MSME Champions Portal",
-    "description": "Grievance redressal and support system for MSMEs.",
-    "benefits": "Handholding and problem resolution.",
-    "eligibility_criteria": {
-      "type": "Registered MSMEs",
-      "sector": "All sectors",
-      "registration": "Udyam"
-    },
-    "category": "Support",
-    "link": "https://champions.gov.in/"
+    "name": "PM Virasat ka Samvardhan (PM VIKAS)",
+    "description": "Socio-economic empowerment of minorities through skilling, training, and education.",
+    "benefits": ["Women leadership training.", "Education for school dropouts."],
+    "eligibility_criteria": {"type": "Notified Minorities", "sector": "Skill/Education", "authority": "Ministry of Minority Affairs", "min_age": 14, "social_category": ["Minority"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Minority Certificate", "Aadhaar", "School Leaving Certificate"],
+    "application_mode": "Online Portal", "tags": ["minority", "skill", "empowerment"], "category": "Social Welfare", "link": "https://www.minorityaffairs.gov.in/"
   },
   {
-    "name": "Prime Minister Employment Generation Programme (PMEGP)",
-    "description": "Credit-linked subsidy scheme for new micro enterprises.",
-    "benefits": "Subsidy up to 35% of project cost.",
-    "eligibility_criteria": {
-      "type": "New Micro Enterprises",
-      "sector": "Manufacturing and Services",
-      "age": "Above 18 years"
-    },
-    "category": "Subsidy",
-    "link": "https://www.kviconline.gov.in/pmegpeportal/pmegphome/index.jsp"
+    "name": "Venture Capital Fund for SC",
+    "description": "Concessional finance for SC individuals to promote entrepreneurship.",
+    "benefits": ["Investment from ₹10 Lakh to ₹15 Crore.", "Support as Debt or Equity."],
+    "eligibility_criteria": {"type": "SC Entrepreneurs", "sector": "High Growth Sectors", "authority": "IFCI Venture", "min_age": 18, "social_category": ["SC"], "geography": "India-wide", "ownership_stake": "51% SC Holding"},
+    "required_documents": ["Caste Certificate", "Business Plan", "Incorporation Cert"],
+    "application_mode": "Online", "tags": ["venture-capital", "sc-support", "equity"], "category": "Finance", "link": "https://vcfsc.in/"
   },
   {
-    "name": "Credit Guarantee Fund Trust for MSMEs (CGTMSE)",
-    "description": "Collateral-free credit guarantee scheme for MSMEs.",
-    "benefits": "Guarantee cover up to INR 2 Crore.",
-    "eligibility_criteria": {
-      "type": "Micro and Small Enterprises",
-      "sector": "Manufacturing and Services",
-      "loan_amount": "Up to INR 2 Crore"
-    },
-    "category": "Credit Guarantee",
-    "link": "https://www.cgtmse.in/"
+    "name": "Coir Udyami Yojana",
+    "description": "Modernization of the coir industry and generation of rural employment.",
+    "benefits": ["Credit-linked subsidy for coir units.", "Working capital assistance."],
+    "eligibility_criteria": {"type": "Coir Entrepreneurs", "sector": "Coir Industry", "authority": "Coir Board", "min_age": 18, "social_category": ["All"], "geography": "Rural/Coir areas", "ownership_stake": "N/A"},
+    "required_documents": ["Aadhaar", "Coir Board Registration", "Bank Consent"],
+    "application_mode": "Coir Board/Online", "tags": ["coir", "rural-employment", "msme"], "category": "MSME", "link": "http://coirboard.gov.in/"
   },
   {
-    "name": "PM Vishwakarma Scheme",
-    "description": "Skill and financial support for traditional artisans.",
-    "benefits": "Training, toolkit incentive and credit support.",
-    "eligibility_criteria": {
-      "type": "Artisans and Craftsmen",
-      "sector": "Traditional trades",
-      "registration": "Vishwakarma certificate"
-    },
+    "name": "PM Vishwakarma",
+    "description": "Holistic support to traditional artisans and craftspeople in scaling up products.",
+    "benefits": ["Skill upgradation and toolkit incentive.", "Collateral-free credit support."],
+    "eligibility_criteria": {"type": "Artisans/Craftspeople", "sector": "Handicrafts/Traditional", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Individual/Artisan"},
+    "required_documents": ["Aadhaar", "Artisan Card", "Ration Card"],
+    "application_mode": "CSC Centers", "tags": ["artisan", "traditional", "credit"], "category": "MSME", "link": "https://pmvishwakarma.gov.in/"
+  },
+  {
+    "name": "Samriddhi (SC/ST Startup Scheme)",
+    "description": "Assistance for SC/ST students to launch their own business after/during education.",
+    "benefits": ["One-time financial assistance of ₹20 Lakhs.", "Mentorship for student startups."],
+    "eligibility_criteria": {"type": "SC/ST Students", "sector": "Any Tech/Business", "authority": "Ministry of Education", "min_age": 18, "social_category": ["SC", "ST"], "geography": "India-wide", "ownership_stake": "Student-led"},
+    "required_documents": ["Caste Certificate", "Student ID", "Startup Proposal"],
+    "application_mode": "University/Online", "tags": ["student", "startup", "funding"], "category": "Education/Startup", "link": "https://education.gov.in/"
+  },
+  {
+    "name": "Agri-Clinics And Agri-Business Centres (AC&ABC)",
+    "description": "Supplements public extension by providing services to farmers through business models.",
+    "benefits": ["Training for agri-entrepreneurs.", "Bank loan and subsidy for agri-units."],
+    "eligibility_criteria": {"type": "Agriculture Graduates", "sector": "Agriculture", "authority": "Ministry of Agriculture", "min_age": 18, "social_category": ["All"], "geography": "Rural", "ownership_stake": "Proprietorship"},
+    "required_documents": ["Agri-Degree/Diploma", "Aadhaar", "Detailed Project Report"],
+    "application_mode": "MANAGE Portal/Online", "tags": ["agriculture", "business", "training"], "category": "Agriculture", "link": "https://www.manage.gov.in/"
+  },
+  {
+    "name": "Mahila Samriddhi Yojana",
+    "description": "Micro-financing for empowerment of women from economically backward areas.",
+    "benefits": ["Loans at nominal interest rates.", "Support for small goals and independence."],
+    "eligibility_criteria": {"type": "Women/SHG", "sector": "Micro-finance", "authority": "Ministry of Social Justice", "min_age": 18, "social_category": ["Women", "EWS"], "geography": "India-wide", "ownership_stake": "Women-owned"},
+    "required_documents": ["Income Certificate", "Aadhaar", "SHG Proof"],
+    "application_mode": "Banks/SCA", "tags": ["women-empowerment", "micro-loan", "finance"], "category": "Finance", "link": "https://socialjustice.gov.in/"
+  },
+  {
+    "name": "ESDP - Entrepreneurship & Skill Development",
+    "description": "Organized to nurture the talent of youth by enlightening them on industrial activities.",
+    "benefits": ["Industrial activity training.", "Assistance for setting up MSMEs."],
+    "eligibility_criteria": {"type": "Unemployed Youth", "sector": "MSME/Industry", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Aadhaar", "Education Certificate", "Identity Proof"],
+    "application_mode": "MSME-DI Offices", "tags": ["entrepreneurship", "skill", "msme"], "category": "Skill Development", "link": "https://msme.gov.in/"
+  },
+  {
+    "name": "PM-MKSSY (Fisheries Sector)",
+    "description": "Formalization of fisheries microenterprises and facilitating access to working capital.",
+    "benefits": ["Institutional working capital finance.", "Small grants for stakeholders."],
+    "eligibility_criteria": {"type": "Fisheries Microenterprises", "sector": "Aquaculture/Fisheries", "authority": "Ministry of Fisheries", "min_age": 18, "social_category": ["All"], "geography": "Coastal/Fisheries areas", "ownership_stake": "Nodal Stakeholder"},
+    "required_documents": ["NFDP Registration", "Bank Account", "Fishing License"],
+    "application_mode": "Online Portal", "tags": ["fisheries", "formalization", "finance"], "category": "Fisheries", "link": "https://dof.gov.in/"
+  },
+  {
+    "name": "Assistance to State SC Corporations",
+    "description": "Economic development assistance to SCs below poverty line through credit facilitation.",
+    "benefits": ["Share capital and margin money loans.", "Subsidies for employment schemes."],
+    "eligibility_criteria": {"type": "SC Families (BPL)", "sector": "Multi-sector", "authority": "Ministry of Social Justice", "min_age": 18, "social_category": ["SC"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["BPL Ration Card", "Caste Certificate", "Income Certificate"],
+    "application_mode": "State SC Corp Offices", "tags": ["subsidy", "sc-support", "finance"], "category": "Social Justice", "link": "https://socialjustice.gov.in/"
+  },
+  {
+    "name": "PRISM (Innovation Scheme)",
+    "description": "Promotes innovations in individuals, start-ups, and MSMEs for model fabrication.",
+    "benefits": ["Support up to ₹20,00,000/- for fabrication.", "Assistance for patenting and tech transfer."],
+    "eligibility_criteria": {"type": "Individuals/Startups/MSME", "sector": "Innovation/Tech", "authority": "Ministry of Science", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Innovative Entity"},
+    "required_documents": ["Innovation Draft", "Model Blueprint", "ID Proof"],
+    "application_mode": "Online/DSIR", "tags": ["innovation", "patent", "technology"], "category": "Innovation", "link": "https://www.dsir.gov.in/"
+  },
+  {
+    "name": "ASIIM - Ambedkar Social Innovation",
+    "description": "Boosts entrepreneurship among SC students and differently-abled youth for tech ideas.",
+    "benefits": ["Equity funding support.", "Hand-holding and incubation support."],
+    "eligibility_criteria": {"type": "SC Students/Disabled Youth", "sector": "Technology", "authority": "Ministry of Social Justice", "min_age": 18, "social_category": ["SC"], "geography": "India-wide", "ownership_stake": "SC Youth Promoted"},
+    "required_documents": ["Caste Certificate", "Project Idea", "Disability Proof"],
+    "application_mode": "Online Portal", "tags": ["incubation", "sc-student", "equity"], "category": "Startup Support", "link": "http://vcfsc.in/asiim.html"
+  },
+  {
+    "name": "New Swarnima Scheme for Women",
+    "description": "Term loan scheme for women entrepreneurs from backward classes.",
+    "benefits": ["Loan up to ₹2,00,000/- at 5% interest.", "Social and financial security for BC women."],
+    "eligibility_criteria": {"type": "Women (Backward Classes)", "sector": "Micro-business", "authority": "Ministry of Social Justice", "min_age": 18, "social_category": ["Backward Class"], "geography": "India-wide", "ownership_stake": "Women-led"},
+    "required_documents": ["BC Certificate", "Aadhaar", "Income Certificate"],
+    "application_mode": "SCA/Online", "tags": ["women", "backward-class", "loan"], "category": "Finance", "link": "https://socialjustice.gov.in/"
+  },
+  {
+    "name": "National Apprenticeship Promotion Scheme-2",
+    "description": "Promotes apprenticeship training by providing stipend support to apprentices.",
+    "benefits": ["Partial stipend support from Government.", "Capacity building of apprenticeship ecosystem."],
+    "eligibility_criteria": {"type": "Apprentices/Stakeholders", "sector": "All Industry", "authority": "MSDE", "min_age": 14, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Education Qualification", "Aadhaar", "Bank Account"],
+    "application_mode": "NAPS Portal", "tags": ["apprenticeship", "stipend", "skill"], "category": "Skill Development", "link": "https://www.apprenticeshipindia.gov.in/"
+  },
+  {
+    "name": "PM SVANidhi",
+    "description": "Micro-credit scheme for street vendors to provide collateral-free working capital loans.",
+    "benefits": ["Loan up to ₹50,000 incrementally.", "7% interest subsidy on timely payment."],
+    "eligibility_criteria": {"type": "Street Vendors", "sector": "Vending/Trading", "authority": "MoHUA", "min_age": 18, "social_category": ["All"], "geography": "Statutory Towns", "ownership_stake": "Proprietorship"},
+    "required_documents": ["Vending ID Card", "Aadhaar", "Bank Account"],
+    "application_mode": "Online/App/CSC", "tags": ["street-vendor", "loan", "collateral-free"], "category": "Micro-Finance", "link": "https://pmsvanidhi.mohua.gov.in/"
+  },
+  {
+    "name": "SITARE-GYTI Award Grant",
+    "description": "Funding for innovative student projects with commercial potential in biotech.",
+    "benefits": ["Funding up to ₹15 Lakhs per project.", "Support for creating biotech startups."],
+    "eligibility_criteria": {"type": "Postgraduate/Doctoral Students", "sector": "Biotech", "authority": "Ministry of Science", "min_age": 21, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Student Innovation"},
+    "required_documents": ["Research Project", "Student ID", "Guide Approval"],
+    "application_mode": "Online (BIRAC)", "tags": ["biotech", "student-research", "grant"], "category": "Innovation", "link": "https://birac.nic.in/"
+  },
+  {
+    "name": "Sub-mission on Breed Development of Livestock and Poultry",
+    "description": "Focussed on enhancing per-animal productivity and genetic improvement in livestock and poultry through financial aid for breeding.",
+    "benefits": ["Financial assistance for setting up parent farms and hatcheries.", "Support for breed improvement and quality control."],
+    "eligibility_criteria": {"type": "Livestock Farmers / Entrepreneurs", "sector": "Animal Husbandry", "authority": "DAHD / Ministry of Fisheries", "min_age": 18, "social_category": ["All"], "geography": "Rural Areas", "ownership_stake": "Proprietorship / SHG"},
+    "required_documents": ["Land Ownership Proof", "Project Report", "Identity Proof", "Bank Details"],
+    "application_mode": "Online (NLM Portal)", "tags": ["livestock", "poultry", "farming", "rural-business"], "category": "Agriculture", "link": "https://nlm.udyamimitra.in/"
+  },
+  {
+    "name": "Marketing Development Assistance (MDA) - Tourism",
+    "description": "Supports travel agents and tour operators for the promotion of Indian tourism in international markets.",
+    "benefits": ["Financial aid for overseas marketing and publicity.", "Assistance for participating in international tourism fairs."],
+    "eligibility_criteria": {"type": "Approved Travel Agents / Tour Operators", "sector": "Tourism", "authority": "Ministry of Tourism", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Ministry Approved Entity"},
+    "required_documents": ["DOT Approval Certificate", "Overseas Visit Details", "Marketing Strategy", "Audit Reports"],
+    "application_mode": "Online (Tourism Portal)", "tags": ["tourism", "marketing", "international", "travel-trade"], "category": "Service", "link": "https://tourism.gov.in/"
+  },
+  {
+    "name": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana",
+    "description": "Provides generic medicines at affordable prices through dedicated outlets (Janaushadhi Kendras).",
+    "benefits": ["Incentives up to ₹5 Lakhs for opening a store.", "Additional ₹2 Lakhs for Women/SC/ST/Northeast entrepreneurs."],
+    "eligibility_criteria": {"type": "Pharmacists / Entrepreneurs", "sector": "Pharmaceutical", "authority": "Dept of Pharmaceuticals", "min_age": 21, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Licensed Pharmacist Required"},
+    "required_documents": ["Drug License", "B.Pharma/D.Pharma Registration", "Shop Lease Agreement", "Identity Proof"],
+    "application_mode": "Online (PMBI)", "tags": ["healthcare", "pharmacy", "medicine", "retail"], "category": "Retail", "link": "https://janaushadhi.gov.in/"
+  },
+  {
+    "name": "Export Oriented Production: Large Cardamom Nursery",
+    "description": "Focuses on quality improvement and export promotion of spices by helping farmers set up certified nurseries.",
+    "benefits": ["Financial subsidy for nursery units.", "Technical training for cardamom quality control."],
+    "eligibility_criteria": {"type": "Spice Farmers / Nursery Owners", "sector": "Spices / Agri", "authority": "Spices Board", "min_age": 18, "social_category": ["All"], "geography": "Spice Regions", "ownership_stake": "Individual/Landowner"},
+    "required_documents": ["Spices Board Registration", "Land Documents", "Nursery Plan", "Bank Passbook"],
+    "application_mode": "Offline/Online (Spices Board)", "tags": ["agriculture", "export", "spices", "nursery"], "category": "Agriculture", "link": "http://www.indianspices.com/"
+  },
+  {
+    "name": "Micro Credit Finance (NSFDC)",
+    "description": "Direct micro-loans to SC entrepreneurs for income-generating units costing up to ₹1,40,000.",
+    "benefits": ["Loans at very low interest rates.", "Collateral-free micro-credit for self-employment."],
+    "eligibility_criteria": {"type": "SC Individuals", "sector": "Small Scale Business", "authority": "NSFDC", "min_age": 18, "social_category": ["SC"], "geography": "India-wide", "ownership_stake": "Proprietorship"},
+    "required_documents": ["Caste Certificate", "Income Certificate", "Identity Proof", "Project Idea"],
+    "application_mode": "State Channelizing Agencies (SCAs)", "tags": ["micro-credit", "sc-support", "loan", "self-employment"], "category": "Finance", "link": "https://nsfdc.nic.in/"
+  },
+  {
+    "name": "PLI Scheme for White Goods (AC and LED)",
+    "description": "Incentivizes manufacturers of AC and LED components to boost domestic manufacturing and reduce imports.",
+    "benefits": ["4% to 6% cash incentive on incremental sales.", "5-year support for component manufacturing."],
+    "eligibility_criteria": {"type": "Manufacturing Companies", "sector": "Electronics", "authority": "DPIIT", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Registered Entity"},
+    "required_documents": ["Investment Commitment", "GST Details", "PAN Card", "Audited Balance Sheets"],
+    "application_mode": "Online (PLI Portal)", "tags": ["manufacturing", "pli", "electronics", "industrial-growth"], "category": "Industry", "link": "https://dpiit.gov.in/"
+  },
+  {
+    "name": "UNNATI - Industrial Transformation Scheme",
+    "description": "Special industrialization scheme for the Northeast region to boost manufacturing and services.",
+    "benefits": ["Capital investment incentive.", "Insurance reimbursement and interest subsidy."],
+    "eligibility_criteria": {"type": "New/Expanding Industrial Units", "sector": "Manufacturing/Service", "authority": "DPIIT", "min_age": 18, "social_category": ["All"], "geography": "Northeast India", "ownership_stake": "Located in NER"},
+    "required_documents": ["DPR", "Land Documents", "Registration Proof", "Aadhaar"],
+    "application_mode": "Online (UNNATI Portal)", "tags": ["northeast", "industrialization", "unnati", "development"], "category": "Industry", "link": "https://unnati.gov.in/"
+  },
+  {
+    "name": "General Term Loan (GTL) for Safai Karamcharis",
+    "description": "Financial assistance for any income-generating activity for Safai Karamcharis and their families.",
+    "benefits": ["Loan support up to 90% of the project cost.", "Highly concessional interest rates for the marginalized."],
+    "eligibility_criteria": {"type": "Safai Karamcharis / Manual Scavengers", "sector": "All Sectors", "authority": "NSKFDC", "min_age": 18, "social_category": ["Manual Scavengers"], "geography": "India-wide", "ownership_stake": "Proprietorship"},
+    "required_documents": ["Occupation Certificate", "Aadhaar", "Income Certificate", "Bank Details"],
+    "application_mode": "SCA Offices", "tags": ["loan", "social-welfare", "credit", "inclusion"], "category": "Finance", "link": "https://nskfdc.nic.in/"
+  },
+  {
+    "name": "Relief for PoK/Chhamb Displaced Families",
+    "description": "Central assistance provided as a one-time settlement for families displaced from PoK and Chhamb.",
+    "benefits": ["Financial grant of ₹5,49,692 per family.", "Direct Benefit Transfer (DBT) to the head of the family."],
+    "eligibility_criteria": {"type": "Displaced Families", "sector": "Rehabilitation", "authority": "Ministry of Home Affairs", "min_age": 18, "social_category": ["All"], "geography": "Jammu & Kashmir", "ownership_stake": "Registered Displaced Head"},
+    "required_documents": ["Displaced Family ID Card", "Aadhaar", "Domicile Certificate", "Bank Passbook"],
+    "application_mode": "District Administration Offices", "tags": ["rehabilitation", "kashmir", "relief", "dbt"], "category": "Social Welfare", "link": "https://mha.gov.in/"
+  },
+  {
+    "name": "PMKVY - Special Projects",
+    "description": "Targeted skill development for groups and projects that require customized training modules.",
+    "benefits": ["Skill training in non-conventional roles.", "Career counseling and placement support for the marginalized."],
+    "eligibility_criteria": {"type": "Vulnerable Groups / PwD / Transgender", "sector": "Multi-skill", "authority": "MSDE", "min_age": 15, "social_category": ["Vulnerable Groups"], "geography": "India-wide", "ownership_stake": "Individual/Project-based"},
+    "required_documents": ["Identity Proof", "Educational Documents", "Category Certificate (if any)"],
+    "application_mode": "PMKVY Centers", "tags": ["skill-training", "employment", "marginalized", "vocational"], "category": "Skill Development", "link": "https://www.pmkvyofficial.org/"
+  },
+  {
+    "name": "National Handicrafts Development Programme: EMPORIA",
+    "description": "Financial aid for setting up permanent emporia in urban areas for marketing handicraft products.",
+    "benefits": ["Marketing platform in prime urban locations.", "Assistance for interior work and rent for emporia."],
+    "eligibility_criteria": {"type": "Corporations / Agencies", "sector": "Handicrafts", "authority": "Ministry of Textiles", "min_age": 18, "social_category": ["All"], "geography": "India-wide (Urban focus)", "ownership_stake": "N/A"},
+    "required_documents": ["Implementing Agency Registration", "Financial Audit", "Emporia Plan"],
+    "application_mode": "Offline (DC Handicrafts)", "tags": ["handicrafts", "marketing", "urban-haat", "artisan"], "category": "Marketing Infrastructure", "link": "http://www.handicrafts.nic.in/"
+  },
+  {
+    "name": "Mahila Coir Yojana",
+    "description": "Focuses on providing training and subsidised coir processing machinery to rural women.",
+    "benefits": ["Stipend during training.", "75% subsidy on spinning and processing machinery."],
+    "eligibility_criteria": {"type": "Rural Women Entrepreneurs", "sector": "Coir Industry", "authority": "Coir Board", "min_age": 18, "social_category": ["Women"], "geography": "Coir Production Districts", "ownership_stake": "Proprietorship"},
+    "required_documents": ["Identity Proof", "Training Completion Cert", "Aadhaar Card", "Bank Details"],
+    "application_mode": "Coir Board Offices", "tags": ["women-empowerment", "coir", "rural-industry", "subsidy"], "category": "MSME", "link": "http://coirboard.gov.in/"
+  },
+  {
+    "name": "Coir Industry Technology Upgradation (CITUS)",
+    "description": "Aims to modernize the coir industry through technical upgradation and machinery support.",
+    "benefits": ["Capital subsidy for machinery.", "Assistance for setting up quality control labs."],
+    "eligibility_criteria": {"type": "Coir Enterprises", "sector": "Coir / MSME", "authority": "Coir Board", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Registered MSME"},
+    "required_documents": ["Udyam Registration", "Machinery Quotations", "Aadhaar", "Pan Card"],
+    "application_mode": "Online (Coir Board)", "tags": ["coir", "technology-modernization", "msme-support", "industrial-upgrade"], "category": "MSME", "link": "http://coirboard.gov.in/"
+  },
+  {
+    "name": "MSME Sustainable (ZED) Certification",
+    "description": "Encourages MSMEs to adopt Zero Defect Zero Effect practices through certification and rewards.",
+    "benefits": ["Certification fee subsidy (Micro: 80%, Small: 60%, Medium: 50%).", "Incentives from Banks and Government for high ratings."],
+    "eligibility_criteria": {"type": "Registered MSMEs", "sector": "Manufacturing", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Udyam Registered"},
+    "required_documents": ["Udyam Registration Certificate", "Plant Details", "Product Details", "PAN"],
+    "application_mode": "Online (ZED Portal)", "tags": ["quality", "zed", "msme-certification", "sustainability"], "category": "MSME", "link": "https://zed.msme.gov.in/"
+  },
+  {
+    "name": "Startup India Seed Fund Scheme (SISFS) - For Startups",
+    "description": "Direct financial aid for early-stage startups for product development and market trials.",
+    "benefits": ["Grant up to ₹20 Lakhs for POC/Prototype.", "Loan/Equity up to ₹50 Lakhs for commercialization."],
+    "eligibility_criteria": {"type": "DPIIT Recognized Startup", "sector": "Innovative Tech", "authority": "DPIIT", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "51% Indian Promoter"},
+    "required_documents": ["DPIIT Certificate", "Startup Pitch Deck", "Financial Forecast", "Identity Proof"],
+    "application_mode": "Online (Startup India Portal)", "tags": ["startup", "seed-funding", "innovation", "grant"], "category": "Startup Finance", "link": "https://seedfund.startupindia.gov.in/"
+  },
+  {
+    "name": "Membership Fee Reimbursement in E-Commerce Portals",
+    "description": "Reimburses the entry/membership fee for SC/ST MSMEs to join digital marketplaces.",
+    "benefits": ["100% reimbursement of portal fees.", "Helps marginalized entrepreneurs access online trade."],
+    "eligibility_criteria": {"type": "SC/ST MSMEs", "sector": "Digital Trade", "authority": "NSSH", "min_age": 18, "social_category": ["SC", "ST"], "geography": "India-wide", "ownership_stake": "SC/ST Led"},
+    "required_documents": ["Udyam Registration", "Caste Certificate", "Fee Payment Invoice", "Identity Proof"],
+    "application_mode": "Online (NSSH Portal)", "tags": ["e-commerce", "reimbursement", "sc-st-welfare", "digital-india"], "category": "Finance", "link": "https://www.scsthub.in/"
+  },
+  {
+    "name": "Technology Development Fund (TDF) - Defence R&D",
+    "description": "Aims to promote self-reliance in the Defence sector by supporting R&D in MSMEs and startups.",
+    "benefits": ["Project funding for innovative defence tech.", "Collaboration opportunities with DRDO and military."],
+    "eligibility_criteria": {"type": "Indian MSMEs / Startups", "sector": "Defence Technology", "authority": "Ministry of Defence", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Indian Registered Entity"},
+    "required_documents": ["Technical Proposal", "Company Registration", "PAN", "Audited Reports"],
+    "application_mode": "Online (TDF Portal)", "tags": ["defence", "make-in-india", "r&d", "technology-grant"], "category": "Innovation", "link": "https://tdf.drdo.gov.in/"
+  },
+  {
+    "name": "Telecom Technology Development Fund (TTDF)",
+    "description": "Grant-based support for designing and commercializing telecom products like 5G and Chipsets.",
+    "benefits": ["Financial grants for chipset and hardware design.", "Support for field trials in rural and remote areas."],
+    "eligibility_criteria": {"type": "Domestic Companies / Institutions", "sector": "Telecom", "authority": "Ministry of Communication", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Indian Promoter Holding"},
+    "required_documents": ["R&D Blueprint", "Registration Cert", "IPR Details", "Aadhaar"],
+    "application_mode": "Online (DoT Portal)", "tags": ["telecom", "5g", "hardware-design", "technology-fund"], "category": "Innovation", "link": "https://dot.gov.in/"
+  },
+  {
+    "name": "Export Promotion Capital Goods (EPCG) Scheme",
+    "description": "Facilitates import of capital goods at zero duty for enhancing manufacturing competitiveness for exports.",
+    "benefits": ["Zero customs duty on imported machinery.", "Supports the export of quality goods and services."],
+    "eligibility_criteria": {"type": "Manufacturer/Merchant Exporters", "sector": "Manufacturing / Export", "authority": "DGFT", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Export-Oriented"},
+    "required_documents": ["IEC Code", "PAN Card", "Machinery Invoice", "Digital Signature"],
+    "application_mode": "Online (DGFT Portal)", "tags": ["export", "import", "capital-goods", "international-trade"], "category": "Trade", "link": "https://www.dgft.gov.in/"
+  },
+  {
+    "name": "Fund of Funds for Startups (FFS)",
+    "description": "Indirect funding mechanism where the government invests in startups through Venture Capital funds.",
+    "benefits": ["Access to government-backed equity funding.", "Helps startups scale through professional AIFs."],
+    "eligibility_criteria": {"type": "DPIIT Recognized Startups", "sector": "Innovation / Tech", "authority": "SIDBI", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Indian Entity"},
+    "required_documents": ["Startup India Certificate", "Company Pitch Deck", "Financial Audit", "Aadhaar"],
+    "application_mode": "Via Registered AIFs/SIDBI", "tags": ["equity-funding", "venture-capital", "startup-growth", "sidbi"], "category": "Startup Finance", "link": "https://www.startupindia.gov.in/"
+  },
+  {
+    "name": "Swachhta Udyami Yojana",
+    "description": "Financial assistance for Safai Karamcharis and Manual Scavengers to procure sanitation-related vehicles for waste management.",
+    "benefits": ["Loans for vacuum loader trucks and garbage collection vehicles.", "Concessional interest rates and financial training."],
+    "eligibility_criteria": {"type": "Manual Scavengers / Dependents", "sector": "Sanitation", "authority": "NSKFDC", "min_age": 18, "social_category": ["Safai Karamchari"], "geography": "India-wide", "ownership_stake": "Proprietorship / SHG"},
+    "required_documents": ["Occupation Proof", "Aadhaar Card", "Vehicle Quotation", "Bank Details"],
+    "application_mode": "SCA Offices / Online", "tags": ["sanitation", "waste-management", "loan", "social-upliftment"], "category": "Social Welfare", "link": "https://nskfdc.nic.in/"
+  },
+  {
+    "name": "Sanitary Marts Scheme",
+    "description": "Assistance for setting up a one-stop-shop (Sanitary Mart) for all sanitation-related products and services.",
+    "benefits": ["Contributory loan for setting up shops.", "Help in creating income-generating avenues in sanitation."],
+    "eligibility_criteria": {"type": "Liberated Manual Scavengers", "sector": "Retail / Sanitation", "authority": "NSKFDC", "min_age": 18, "social_category": ["SC", "Safai Karamchari"], "geography": "India-wide", "ownership_stake": "Proprietorship"},
+    "required_documents": ["Skill Training Certificate", "Identity Proof", "Shop Space Proof", "Project Brief"],
+    "application_mode": "SCA Offices", "tags": ["retail", "sanitation", "small-business", "loan"], "category": "Retail", "link": "https://nskfdc.nic.in/"
+  },
+  {
+    "name": "Rubber Plantation Development (MTFP)",
+    "description": "Aims to increase natural rubber production through accelerated new planting and replanting on scientific lines.",
+    "benefits": ["Financial assistance for new planting/replanting.", "Technical guidance for rubber growers."],
+    "eligibility_criteria": {"type": "Rubber Growers / Farmers", "sector": "Agriculture", "authority": "Rubber Board", "min_age": 18, "social_category": ["All"], "geography": "Traditional (Kerala/TN) & NE Region", "ownership_stake": "Land Owner"},
+    "required_documents": ["Land Possession Certificate", "Aadhaar Card", "Rubber Board Registration", "Bank Details"],
+    "application_mode": "Online (Rubber Board)", "tags": ["agriculture", "rubber", "plantation", "subsidy"], "category": "Agriculture", "link": "https://www.rubberboard.gov.in/"
+  },
+  {
+    "name": "Coir Vikas Yojana - Export Market Promotion",
+    "description": "Aims to improve the export performance of the Indian Coir Sector through marketing activities and global promotion.",
+    "benefits": ["Support for international exhibitions and fairs.", "Financial assistance for exporting coir products."],
+    "eligibility_criteria": {"type": "Coir Exporters / Entrepreneurs", "sector": "Coir Industry", "authority": "Coir Board", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Registered Exporter"},
+    "required_documents": ["IEC Code", "Coir Board Registration", "Export Shipment Details", "PAN"],
+    "application_mode": "Online (Coir Board)", "tags": ["export", "coir", "international-trade", "msme"], "category": "Trade", "link": "http://coirboard.gov.in/"
+  },
+  {
+    "name": "PRISM (Category-1): Proof of Concept",
+    "description": "Supports individual innovators to achieve inclusive development through prototypes and proof of concept models.",
+    "benefits": ["Financial support for green technology and clean energy prototypes.", "Grant up to ₹2 Lakhs to ₹20 Lakhs."],
+    "eligibility_criteria": {"type": "Individual Innovators / Students", "sector": "Innovation / Tech", "authority": "DSIR", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Innovation Draft", "Prototype Plan", "Identity Proof", "Technical Background"],
+    "application_mode": "Online (DSIR Portal)", "tags": ["innovation", "prototype", "grant", "clean-energy"], "category": "Innovation", "link": "https://www.dsir.gov.in/"
+  },
+  {
+    "name": "Innovations for Defence Excellence (iDEX)",
+    "description": "Engages startups and MSMEs to foster innovation and technology development in the Defence and Aerospace sector.",
+    "benefits": ["Grants for R&D and technology development.", "Mentorship and adoption of innovation in Armed Forces."],
+    "eligibility_criteria": {"type": "MSMEs / Startups / Innovators", "sector": "Defence", "authority": "DIO (Ministry of Defence)", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Indian Majority Holding"},
+    "required_documents": ["Innovation Proposal", "Registration Certificate", "IPR Details", "Audited Reports"],
+    "application_mode": "Online (iDEX Portal)", "tags": ["defence", "aerospace", "innovation", "r&d"], "category": "Defence Innovation", "link": "https://idex.gov.in/"
+  },
+  {
+    "name": "MSE Exporters Capacity Building (IC Scheme)",
+    "description": "Reimburses various costs incurred by first-time MSE exporters on export shipments to build global capacity.",
+    "benefits": ["Reimbursement of shipment costs.", "Assistance for market entry for small exporters."],
+    "eligibility_criteria": {"type": "First-time MSE Exporters", "sector": "Export", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Udyam Registered"},
+    "required_documents": ["Udyam Registration", "IEC Code", "Export Invoice", "Bill of Lading"],
+    "application_mode": "Online (MSME IC Portal)", "tags": ["export", "capacity-building", "mse", "reimbursement"], "category": "Trade", "link": "https://ic.msme.gov.in/"
+  },
+  {
+    "name": "IC Scheme - Market Development Assistance",
+    "description": "Facilitates participation of MSMEs in international exhibitions, fairs, and buyer-seller meets abroad.",
+    "benefits": ["Reimbursement of stall rent and airfare.", "Exposure to international markets and seminars."],
+    "eligibility_criteria": {"type": "Micro, Small & Medium Enterprises", "sector": "Multi-sector", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Registered MSME"},
+    "required_documents": ["Event Participation Proof", "Travel Invoices", "Udyam Certificate", "Post-event Report"],
+    "application_mode": "Online (MSME IC Portal)", "tags": ["international-fairs", "marketing", "msme-growth", "trade-show"], "category": "Marketing", "link": "https://ic.msme.gov.in/"
+  },
+  {
+    "name": "Testing Fee Reimbursement Scheme (SC/ST)",
+    "description": "A sub-scheme under NSSH that reimburses testing fees for SC/ST MSMEs to ensure product quality.",
+    "benefits": ["100% reimbursement of laboratory testing fees.", "Supports quality compliance for small businesses."],
+    "eligibility_criteria": {"type": "SC/ST MSMEs", "sector": "All Sectors", "authority": "NSSH", "min_age": 18, "social_category": ["SC", "ST"], "geography": "India-wide", "ownership_stake": "100% SC/ST Owned"},
+    "required_documents": ["Test Report", "Fee Payment Receipt", "Caste Certificate", "Udyam Registration"],
+    "application_mode": "Online (NSSH Portal)", "tags": ["testing", "quality-control", "sc-st-support", "reimbursement"], "category": "Finance", "link": "https://www.scsthub.in/"
+  },
+  {
+    "name": "Incubation Scheme (MSME)",
+    "description": "Supports untapped creativity and promotes the adoption of latest technologies at the proof-of-concept level.",
+    "benefits": ["Capital and financial support for validation of ideas.", "Plant and machinery support for innovative startups."],
+    "eligibility_criteria": {"type": "Startups / MSMEs / Students", "sector": "Technology", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Proprietorship / Partnership"},
+    "required_documents": ["POC Document", "Business Idea Pitch", "Udyam Certificate", "Bank Details"],
+    "application_mode": "Online (MSME Innovative Portal)", "tags": ["incubation", "startup", "technology", "idea-validation"], "category": "MSME", "link": "https://innovative.msme.gov.in/"
+  },
+  {
+    "name": "Export Promotion Council Membership Reimbursement",
+    "description": "Provides reimbursement of annual membership fees paid by SC/ST MSEs to various Export Promotion Councils (EPC).",
+    "benefits": ["100% reimbursement of entry and subscription fees.", "Facilitates access to export-related network and data."],
+    "eligibility_criteria": {"type": "SC/ST Micro & Small Enterprises", "sector": "Export", "authority": "NSSH", "min_age": 18, "social_category": ["SC", "ST"], "geography": "India-wide", "ownership_stake": "SC/ST Led"},
+    "required_documents": ["EPC Membership Certificate", "Payment Receipt", "Caste Certificate", "Udyam Registration"],
+    "application_mode": "Online (NSSH Portal)", "tags": ["export", "membership", "sc-st-welfare", "trade-assistance"], "category": "Finance", "link": "https://www.scsthub.in/"
+  },
+  {
+    "name": "Special Credit Linked Capital Subsidy (SCLCSS)",
+    "description": "Provides 25% capital subsidy to SC/ST MSEs for procurement of plant & machinery through institutional finance.",
+    "benefits": ["Direct capital subsidy for technology upgradation.", "Facilitates modernization of SC/ST-owned units."],
+    "eligibility_criteria": {"type": "SC/ST Micro & Small Enterprises", "sector": "Manufacturing", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["SC", "ST"], "geography": "India-wide", "ownership_stake": "100% SC/ST Owned"},
+    "required_documents": ["Loan Sanction Letter", "Caste Certificate", "Machinery Quotation", "Udyam Registration"],
+    "application_mode": "Via Banks / PLIs", "tags": ["capital-subsidy", "machinery", "sc-st-entrepreneur", "modernization"], "category": "MSME", "link": "https://www.scsthub.in/"
+  },
+  {
+    "name": "Breed Development for Rural Poultry (Entrepreneurship)",
+    "description": "Supports rural poultry farming through 50% capital subsidy for establishing Parent Farms and Hatcheries.",
+    "benefits": ["Capital subsidy for brooder cum mother units.", "Incentivizes commercial poultry farming in rural areas."],
+    "eligibility_criteria": {"type": "Rural Entrepreneurs / SHGs", "sector": "Poultry", "authority": "DAHD", "min_age": 18, "social_category": ["All"], "geography": "Rural Areas", "ownership_stake": "Proprietorship / Entity"},
+    "required_documents": ["Project Report", "Land Proof", "Aadhaar Card", "Bank Account"],
+    "application_mode": "Online (NLM Portal)", "tags": ["poultry", "farming", "rural-employment", "subsidy"], "category": "Agriculture", "link": "https://nlm.udyamimitra.in/"
+  },
+  {
+    "name": "PLI Scheme for Automobile and Auto Component Industry",
+    "description": "Aims to enhance India’s manufacturing capabilities for Advanced Automotive Products through performance-linked incentives.",
+    "benefits": ["Incentives on sales of electric and hydrogen-fuel vehicles.", "Encourages global supply chain integration."],
+    "eligibility_criteria": {"type": "Automotive Companies / Manufacturers", "sector": "Automobile", "authority": "Ministry of Heavy Industries", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Indian Registered Company"},
+    "required_documents": ["Investment Data", "GST Registration", "Company Audit", "Product Specifications"],
+    "application_mode": "Online (MHI Portal)", "tags": ["automobile", "pli", "electric-vehicle", "manufacturing-incentive"], "category": "Industry", "link": "https://heavyindustries.gov.in/"
+  },
+  {
+    "name": "Recognition of In-House R&D Units",
+    "description": "Grants formal recognition and registration to in-house R&D units established by the corporate industry.",
+    "benefits": ["Customs duty waiver for R&D equipment.", "Income tax benefits for innovative research activities."],
+    "eligibility_criteria": {"type": "Corporate Industry / Companies", "sector": "Research & Development", "authority": "DSIR", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["R&D Infrastructure Proof", "Researcher Qualifications", "Audit Reports", "PAN"],
+    "application_mode": "Online (DSIR Portal)", "tags": ["research", "r&d", "corporate-growth", "tax-benefit"], "category": "Innovation", "link": "https://www.dsir.gov.in/"
+  },
+  {
+    "name": "Scheme of Fund for Regeneration of Traditional Industries (SFURTI)",
+    "description": "Makes traditional industries more productive and competitive through cluster development and interventions.",
+    "benefits": ["Financial aid for setting up Common Facility Centres (CFC).", "Soft and hard interventions for artisans."],
+    "eligibility_criteria": {"type": "Traditional Artisans / SHGs / NGOs", "sector": "Traditional Industries", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "Rural / Clusters", "ownership_stake": "N/A"},
+    "required_documents": ["Cluster Proposal", "Artisan Data", "NGO Registration", "Land Proof"],
+    "application_mode": "Online (SFURTI Portal)", "tags": ["cluster-development", "artisan", "traditional-industry", "sfurti"], "category": "MSME", "link": "https://sfurti.msme.gov.in/"
+  },
+  {
+    "name": "Design Scheme Under MSME Innovative",
+    "description": "Enables MSMEs to avail expert advice on product design and development for enhancing their product portfolio.",
+    "benefits": ["Grant for product design projects.", "Direct mentorship from experienced designers."],
+    "eligibility_criteria": {"type": "Micro, Small & Medium Enterprises", "sector": "Design / Product Development", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Udyam Registered"},
+    "required_documents": ["Design Project Proposal", "Udyam Certificate", "Identity Proof", "Company PAN"],
+    "application_mode": "Online (MSME Innovative Portal)", "tags": ["design", "product-development", "msme-innovative", "expert-advice"], "category": "Innovation", "link": "https://innovative.msme.gov.in/"
+  },
+  {
+    "name": "Bank Loan Processing Fee Reimbursement (SC/ST)",
+    "description": "Reimburses the processing fee charged by banks for sanctioning business loans to SC/ST entrepreneurs.",
+    "benefits": ["100% reimbursement of processing fees or ₹1 Lakh limit.", "Financial relief for marginalized entrepreneurs."],
+    "eligibility_criteria": {"type": "SC/ST MSMEs", "sector": "All Sectors", "authority": "NSSH", "min_age": 18, "social_category": ["SC", "ST"], "geography": "India-wide", "ownership_stake": "Proprietorship / Majority SC/ST"},
+    "required_documents": ["Caste Certificate", "Udyam Certificate", "Fee Receipt", "Loan Sanction Letter"],
+    "application_mode": "Online (NSSH Portal)", "tags": ["reimbursement", "banking-fee", "sc-st-support", "finance"], "category": "Finance", "link": "https://www.scsthub.in/"
+  },
+  {
+    "name": "Bank Guarantee Charges Reimbursement Scheme (SC/ST)",
+    "description": "Reimburses the bank guarantee charges for SC/ST MSMEs to enhance their participation in tenders.",
+    "benefits": ["Reimbursement of performance bank guarantee charges.", "Helps SC/ST entrepreneurs meet tender requirements."],
+    "eligibility_criteria": {"type": "SC/ST MSMEs", "sector": "Trade / Tenders", "authority": "NSSH", "min_age": 18, "social_category": ["SC", "ST"], "geography": "India-wide", "ownership_stake": "SC/ST Led"},
+    "required_documents": ["Bank Guarantee Fee Receipt", "Udyam Registration", "Caste Certificate", "Aadhaar"],
+    "application_mode": "Online (NSSH Portal)", "tags": ["bank-guarantee", "reimbursement", "tender-support", "sc-st-welfare"], "category": "Finance", "link": "https://www.scsthub.in/"
+  },
+  {
+    "name": "PRISM (Category-2): Fabrication & Trial",
+    "description": "Supports innovation projects requiring fabrication of working models, patenting, and technology transfer.",
+    "benefits": ["Funding for working models and process know-how.", "Financial assistance for trial runs and patenting."],
+    "eligibility_criteria": {"type": "Individual Innovators / MSMEs", "sector": "Innovation / Tech", "authority": "DSIR", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Project Report", "Fabrication Blueprint", "Identity Proof", "Patent Application (if any)"],
+    "application_mode": "Online (DSIR Portal)", "tags": ["fabrication", "technology-transfer", "patent", "innovation-trial"], "category": "Innovation", "link": "https://www.dsir.gov.in/"
+  },
+  {
+    "name": "PM Formalisation of Micro Food Processing Enterprises (PMFME)",
+    "description": "Supports the upgradation and formalization of micro food processing enterprises through credit-linked subsidies and technical support.",
+    "benefits": ["Credit-linked capital subsidy at 35% of the project cost.", "Support for common infrastructure, branding, and marketing."],
+    "eligibility_criteria": {"type": "Micro Enterprises / SHGs / Cooperatives", "sector": "Food Processing", "authority": "MoFPI", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Individual/Group ownership"},
+    "required_documents": ["Project Report", "Aadhaar Card", "FSSAI License", "Bank Loan Sanction"],
+    "application_mode": "Online (PMFME Portal)", "tags": ["food-processing", "subsidy", "formalization", "agri-business"], "category": "Agriculture", "link": "https://pmfme.mofpi.gov.in/"
+  },
+  {
+    "name": "Intellectual Property Right (IPR) Scheme - MSME Innovative",
+    "description": "Provides financial and legal support to MSMEs for filing patents, trademarks, and copyrights to protect their innovation.",
+    "benefits": ["Reimbursement of patent/trademark filing fees.", "Assistance for setting up Intellectual Property Facilitation Centres."],
+    "eligibility_criteria": {"type": "Registered MSMEs", "sector": "Innovation Driven", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Udyam Registered"},
+    "required_documents": ["Udyam Certificate", "IP Filing Receipt", "Patent Application Copy", "Bank Details"],
+    "application_mode": "Online (Innovative MSME Portal)", "tags": ["patent", "trademark", "copyright", "legal-support"], "category": "Innovation", "link": "https://innovative.msme.gov.in/"
+  },
+  {
+    "name": "Credit Enhancement Guarantee Scheme for SC",
+    "description": "Provides credit guarantee to Scheduled Caste entrepreneurs to help them access loans for setting up business enterprises.",
+    "benefits": ["Financial guarantee for loans taken by SC-led companies.", "Enables easier access to capital for high-growth sectors."],
+    "eligibility_criteria": {"type": "SC Entrepreneurs / Companies", "sector": "Multi-sector", "authority": "IFCI / Ministry of Social Justice", "min_age": 18, "social_category": ["SC"], "geography": "India-wide", "ownership_stake": "Majority SC Shareholding"},
+    "required_documents": ["Caste Certificate", "Company Registration", "Project Profile", "PAN Card"],
+    "application_mode": "Online (CEGSSC Portal)", "tags": ["credit-guarantee", "sc-support", "loan-assistance", "entrepreneurship"], "category": "Finance", "link": "https://www.ifci.com/"
+  },
+  {
+    "name": "Startup India Seed Fund - For Incubators",
+    "description": "Provides grants to incubators to offer seed funding to startups for prototype development and market entry.",
+    "benefits": ["Grants up to ₹5 Crores to eligible incubators.", "Supports startups at very early stages through professional incubators."],
+    "eligibility_criteria": {"type": "Incubators (Central/State/Academic)", "sector": "Technology", "authority": "DPIIT", "min_age": 2, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Must be operational for 2 years"},
+    "required_documents": ["Incubator Registration", "Supported Startups List", "Audit Reports", "Identity Proof"],
+    "application_mode": "Online (Startup India Portal)", "tags": ["incubator", "seed-fund", "startup-ecosystem", "funding"], "category": "Startup Support", "link": "https://seedfund.startupindia.gov.in/"
+  },
+  {
+    "name": "National Startup Awards",
+    "description": "Recognizes and rewards outstanding startups and ecosystem enablers building innovative and scalable products.",
+    "benefits": ["Cash prize and national recognition.", "Opportunity for networking with investors and government bodies."],
+    "eligibility_criteria": {"type": "DPIIT Recognized Startups", "sector": "All Innovative Sectors", "authority": "DPIIT", "min_age": 1, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Startup India Certificate", "Proof of Innovation", "Impact Data", "Audited Financials"],
+    "application_mode": "Online (Startup India Portal)", "tags": ["startup-awards", "innovation", "recognition", "scaling"], "category": "Startup Support", "link": "https://www.startupindia.gov.in/"
+  },
+  {
+    "name": "Promotion of Piggery Entrepreneurship",
+    "description": "Supports pig farming entrepreneurship by providing capital subsidy for establishing breeder farms.",
+    "benefits": ["One-time capital subsidy up to ₹30 Lakhs.", "Supports the establishment of modern piggery units."],
+    "eligibility_criteria": {"type": "Entrepreneurs / Organizations", "sector": "Animal Husbandry", "authority": "DAHD / NLM", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Individual/Entity"},
+    "required_documents": ["Project Report", "Land Proof", "Aadhaar Card", "Bank Account Details"],
+    "application_mode": "Online (NLM Portal)", "tags": ["piggery", "livestock", "subsidy", "farming-business"], "category": "Agriculture", "link": "https://nlm.udyamimitra.in/"
+  },
+  {
+    "name": "Genetic Improvement: Pig Semen Collection Lab",
+    "description": "Financial assistance for establishing semen collection and processing labs to improve indigenous pig productivity.",
+    "benefits": ["Grants for setting up labs at government and private farms.", "Reduces inbreeding and improves animal productivity."],
+    "eligibility_criteria": {"type": "State Agencies / Entrepreneurs", "sector": "Animal Husbandry", "authority": "Ministry of Fisheries", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Qualified Entity"},
+    "required_documents": ["Lab Blueprint", "Technical Qualifications", "Project Costing", "Land Proof"],
+    "application_mode": "Offline/Online (DAHD)", "tags": ["pig-farming", "genetic-improvement", "livestock-tech", "breeding"], "category": "Agriculture", "link": "https://dof.gov.in/"
+  },
+  {
+    "name": "Modified Market Development Assistance (Khadi)",
+    "description": "Aims to enhance Khadi production and sales through technology upgradation and market promotion.",
+    "benefits": ["Incentives to Khadi artisans and Karyakartas.", "Financial support for Khadi institutions to upgrade machinery."],
+    "eligibility_criteria": {"type": "Khadi Institutions / Artisans", "sector": "Khadi / Textiles", "authority": "KVIC / Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "Rural", "ownership_stake": "Registered Khadi Institution"},
+    "required_documents": ["KVIC Registration", "Artisan ID Card", "Audit Reports", "Production Data"],
+    "application_mode": "Through KVIC Offices", "tags": ["khadi", "textiles", "artisan-support", "marketing-incentive"], "category": "MSME", "link": "https://www.kviconline.gov.in/"
+  },
+  {
+    "name": "Khadi Karigar Janashree Bima Yojana",
+    "description": "A group insurance scheme for Khadi artisans providing cover against death and disability.",
+    "benefits": ["Insurance cover for normal and accidental death.", "Support for disability and social security for artisans."],
+    "eligibility_criteria": {"type": "Khadi Artisans (Spinners/Weavers)", "sector": "Textiles", "authority": "KVIC", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Member of Khadi Institution"},
+    "required_documents": ["Artisan ID", "Aadhaar Card", "Bank Passbook", "Nominee Details"],
+    "application_mode": "Through Khadi Institution", "tags": ["insurance", "khadi-artisan", "social-security", "welfare"], "category": "Social Welfare", "link": "https://www.kviconline.gov.in/"
+  },
+  {
+    "name": "URBAN HAAT - Infrastructure Support",
+    "description": "Aims to set up permanent marketing infrastructure in urban cities for artisans and weavers to sell directly to customers.",
+    "benefits": ["Direct marketing facilities for handicrafts.", "Elimination of middlemen and increased artisan income."],
+    "eligibility_criteria": {"type": "Artisans / Weavers / Implementing Agencies", "sector": "Handicrafts / Handloom", "authority": "Ministry of Textiles", "min_age": 18, "social_category": ["All"], "geography": "Statutory Towns / Cities", "ownership_stake": "N/A"},
+    "required_documents": ["Artisan Card", "Agency Registration", "ID Proof", "Udyam Certificate"],
+    "application_mode": "Offline (DC Handicrafts)", "tags": ["urban-haat", "marketing-platform", "handicrafts", "weaver-support"], "category": "Infrastructure", "link": "http://www.handicrafts.nic.in/"
+  },
+  {
+    "name": "Advance Authorisation (AA) Scheme",
+    "description": "Enables duty-free import of inputs for export production, helping manufacturers enhance global competitiveness.",
+    "benefits": ["Zero customs duty on imported raw materials for export goods.", "Reduces manufacturing cost for exporters."],
+    "eligibility_criteria": {"type": "Manufacturer Exporters / Merchant Exporters", "sector": "Export / Industry", "authority": "DGFT", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "PAN Based IEC holder"},
+    "required_documents": ["IEC Code", "PAN Card", "Digital Signature", "SION Details"],
+    "application_mode": "Online (DGFT Portal)", "tags": ["duty-free-import", "export-promotion", "manufacturing-raw-material"], "category": "Trade", "link": "https://www.dgft.gov.in/"
+  },
+  {
+    "name": "GROUP WORKSHED SCHEME",
+    "description": "Facilitates the establishment of worksheds for powerlooms to provide scale of economy for business operations.",
+    "benefits": ["Subsidies for construction of industrial sheds/worksheds.", "Supports weavers in operating more efficient machinery."],
+    "eligibility_criteria": {"type": "Powerloom Weavers / Cooperatives", "sector": "Textiles / Weaving", "authority": "Ministry of Textiles", "min_age": 18, "social_category": ["All"], "geography": "Clusters", "ownership_stake": "Cooperative/Group"},
+    "required_documents": ["Group Registration", "Land Proof", "Building Plan", "Aadhaar"],
+    "application_mode": "Offline (Textile Commissioner Offices)", "tags": ["weaving", "powerloom", "workshed", "industrial-infrastructure"], "category": "Infrastructure", "link": "https://texmin.nic.in/"
+  },
+  {
+    "name": "Assistance to Training Institutions (ATI)",
+    "description": "Assistance for creation and expansion of training infrastructure under the Ministry of MSME.",
+    "benefits": ["Financial support for new branches and training centres.", "Strengthens entrepreneurship training ecosystem."],
+    "eligibility_criteria": {"type": "Training Institutions (EDI/NIESBUD etc)", "sector": "Education/Skill", "authority": "Ministry of MSME", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "Recognized Institution"},
+    "required_documents": ["Institution Registration", "Project Expansion Plan", "Financial Audit", "Aadhaar of Head"],
+    "application_mode": "Online/Offline (MSME)", "tags": ["training-infrastructure", "msme-skill", "entrepreneurship-training"], "category": "Skill Development", "link": "https://msme.gov.in/"
+  },
+  {
+    "name": "Consortia & Tender Marketing Scheme",
+    "description": "Helps MSMEs participate in large government tenders by forming consortia to execute orders collaboratively.",
+    "benefits": ["Facilitates participation in large tenders.", "Joint marketing and brand building support for small units."],
+    "eligibility_criteria": {"type": "Micro & Small Enterprises", "sector": "Manufacturing", "authority": "NSIC", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "NSIC Registered Consortia"},
+    "required_documents": ["NSIC Registration", "Udyam Certificate", "Product Catalog", "Joint Venture Agreement"],
+    "application_mode": "NSIC Offices", "tags": ["tender-marketing", "government-procurement", "msme-consortia"], "category": "MSME", "link": "https://www.nsic.co.in/"
+  },
+  {
+    "name": "Term Loan (TL) for SC Entrepreneurs",
+    "description": "Provides financial support in the form of term loans for Scheduled Caste category entrepreneurs for starting companies.",
+    "benefits": ["Loans for industrial and service sector projects.", "Concessional rates for SC-led societies and companies."],
+    "eligibility_criteria": {"type": "SC Entrepreneurs / Societies", "sector": "All Sectors", "authority": "Ministry of Social Justice", "min_age": 18, "social_category": ["SC"], "geography": "India-wide", "ownership_stake": "Majority SC Owned"},
+    "required_documents": ["Caste Certificate", "Business Plan", "PAN Card", "Identity Proof"],
+    "application_mode": "Online/SCA Offices", "tags": ["term-loan", "sc-finance", "entrepreneurship", "credit"], "category": "Finance", "link": "https://socialjustice.gov.in/"
+  },
+  {
+    "name": "Import of Exotic Pig Germplasm",
+    "description": "Supports the import of high-quality pig germplasm for genetic upgradation and enhancing meat productivity.",
+    "benefits": ["Access to international genetic stocks.", "Enhances livestock meat quality for exports."],
+    "eligibility_criteria": {"type": "Livestock Agencies / Boards", "sector": "Animal Husbandry", "authority": "DAHD / NLM", "min_age": 18, "social_category": ["All"], "geography": "India-wide", "ownership_stake": "N/A"},
+    "required_documents": ["Import License", "Livestock Board Approval", "Quarantine Compliance", "Bank Details"],
+    "application_mode": "Through DAHD (Ministry)", "tags": ["pig-breeding", "exotic-import", "genetic-upgradation", "agriculture"], "category": "Agriculture", "link": "https://nlm.udyamimitra.in/"
+  },
+  {
+    "name": "National Livestock Mission: Breed Development (General)",
+    "description": "Comprehensive mission for breed development across various livestock sectors in India.",
+    "benefits": ["Capital subsidies for entrepreneurs.", "Technical assistance for rural farming models."],
+    "eligibility_criteria": {"type": "Entrepreneurs / SHGs / Farmers", "sector": "Livestock", "authority": "Ministry of Fisheries", "min_age": 18, "social_category": ["All"], "geography": "Rural focus", "ownership_stake": "Individual/Group"},
+    "required_documents": ["Aadhaar", "Land Records", "Project Report", "Identity Proof"],
+    "application_mode": "Online (NLM Portal)", "tags": ["livestock", "breed-development", "agriculture-mission", "rural-growth"], "category": "Agriculture", "link": "https://nlm.udyamimitra.in/"
+  },
+  {
+    "name": "UP Startup Policy 2020",
+    "description": "A comprehensive framework to support tech-startups in UP through sustenance allowances and seed capital.",
+    "benefits": ["Sustenance allowance of ₹17,500/month for 1 year.", "Seed funding up to ₹5 Lakhs.", "Patent filing reimbursement up to ₹2 Lakhs."],
+    "eligibility_criteria": {"type": "Startups", "sector": "IT / Tech / Electronics", "authority": "UP IT & Electronics Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Registered in UP"},
+    "required_documents": ["UP Startup Registration", "DPIIT Certificate", "Pitch Deck", "PAN/GST"],
+    "application_mode": "Online (UP Startup Portal)",
+    "tags": ["startup", "seed-fund", "tech-business", "sustenance"],
+    "category": "Startup Finance",
+    "link": "https://upstartup.in/"
+  },
+  {
+    "name": "Mukhyamantri Yuva Swarozgar Yojana",
+    "description": "Promotes self-employment among educated youth of UP by providing subsidized loans for industries and services.",
+    "benefits": ["Loans up to ₹25 Lakhs (Industry) / ₹10 Lakhs (Service).", "25% margin money subsidy by state govt."],
+    "eligibility_criteria": {"type": "Unemployed Youth", "sector": "Manufacturing / Service", "authority": "DIIC UP", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Individual Proprietorship"},
+    "required_documents": ["High School Certificate", "UP Domicile", "Aadhaar Card", "Project Report"],
+    "application_mode": "Online (MSME UP Portal)",
+    "tags": ["loan", "subsidy", "self-employment", "youth-entrepreneur"],
+    "category": "Finance",
+    "link": "https://diupmsme.upsdc.gov.in/"
+  },
+  {
+    "name": "One District One Product (ODOP) Margin Money Scheme",
+    "description": "Financial assistance for artisans and entrepreneurs working on district-specific traditional products.",
+    "benefits": ["Financial grant from 10% to 25% of project cost.", "Support for marketing and global branding of local products."],
+    "eligibility_criteria": {"type": "Artisans / Entrepreneurs", "sector": "ODOP Specified", "authority": "UP MSME Dept", "min_age": 18, "social_category": ["All"], "geography": "District Specific (UP)", "ownership_stake": "Proprietorship / Partner"},
+    "required_documents": ["Artisan Card / ODOP Reg", "Udyam Registration", "Project Blueprint", "Bank Details"],
+    "application_mode": "Online (ODOP Portal)",
+    "tags": ["odop", "traditional-trade", "msme", "district-specialty"],
+    "category": "MSME / Marketing",
+    "link": "https://odopup.in/"
+  },
+  {
+    "name": "Mukhyamantri Gramodyog Rozgar Yojana",
+    "description": "Focuses on rural entrepreneurship by providing loans for setting up village industries.",
+    "benefits": ["Loans up to ₹10 Lakhs for rural units.", "Interest subsidy for SC/ST and Women entrepreneurs."],
+    "eligibility_criteria": {"type": "Rural Entrepreneurs", "sector": "Village Industries", "authority": "UP Khadi & Village Industries Board", "min_age": 18, "social_category": ["All"], "geography": "Rural Uttar Pradesh", "ownership_stake": "Individual"},
+    "required_documents": ["Rural Domicile Certificate", "Aadhaar", "Caste Certificate (if applicable)", "Project Summary"],
+    "application_mode": "Online (UPKVIB Portal)",
+    "tags": ["rural-business", "khadi", "village-industry", "employment"],
+    "category": "Rural Finance",
+    "link": "http://upkvib.gov.in/"
+  },
+  {
+    "name": "UP Information Technology & ITeS Policy",
+    "description": "Support for software companies and IT startups setting up operations in Uttar Pradesh.",
+    "benefits": ["Capital interest subsidy and electricity duty exemption.", "Reimbursement of lease rentals for IT entities."],
+    "eligibility_criteria": {"type": "IT Companies", "sector": "IT / ITeS / Software", "authority": "UP IT Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Registered IT Unit"},
+    "required_documents": ["Company Incorporation", "Operational Proof in UP", "Lease Documents", "PAN/GST"],
+    "application_mode": "Online (Nivesh Mitra)",
+    "tags": ["it-sector", "software-startup", "tech-infrastructure", "subsidy"],
+    "category": "IT / Startup",
+    "link": "https://niveshmitra.up.nic.in/"
+  },
+  {
+    "name": "Mahila Samarthya Yojana",
+    "description": "Empowers women entrepreneurs by providing support for cluster development and marketing.",
+    "benefits": ["Assistance for setting up Common Facility Centres (CFC).", "Training and branding support for women-led groups."],
+    "eligibility_criteria": {"type": "Women Entrepreneurs / SHGs", "sector": "Micro Enterprises", "authority": "UP MSME Dept", "min_age": 18, "social_category": ["Women"], "geography": "Uttar Pradesh", "ownership_stake": "Women-led Group/Entity"},
+    "required_documents": ["Group Registration", "Member Aadhaar Cards", "Project Proposal", "Bank Passbook"],
+    "application_mode": "Through District MSME Offices",
+    "tags": ["women-entrepreneur", "shg", "cluster-development", "empowerment"],
+    "category": "Social Welfare / MSME",
+    "link": "https://diupmsme.upsdc.gov.in/"
+  },
+  {
+    "name": "Vishwakarma Shram Samman Yojana",
+    "description": "Supports traditional artisans like carpenters, tailors, and goldsmiths with skill training and advanced toolkits.",
+    "benefits": ["6 days free skill training.", "Free advanced toolkit for the specific trade to start a business."],
+    "eligibility_criteria": {"type": "Traditional Artisans", "sector": "Handicrafts", "authority": "UP MSME Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "N/A"},
+    "required_documents": ["Aadhaar Card", "Ration Card / Voter ID", "Affidavit for Trade", "Bank Details"],
+    "application_mode": "Online (DIUPMSME Portal)",
+    "tags": ["artisan", "traditional-skill", "toolkit", "self-employment"],
     "category": "Skill Development",
-    "link": "https://pmvishwakarma.gov.in/"
+    "link": "https://diupmsme.upsdc.gov.in/"
   },
   {
-    "name": "SFURTI Scheme",
-    "description": "Cluster-based development scheme for traditional industries.",
-    "benefits": "Financial assistance for cluster development.",
-    "eligibility_criteria": {
-      "type": "Traditional Industry Clusters",
-      "sector": "Khadi, Village, Coir",
-      "project_type": "Cluster"
-    },
-    "category": "Cluster Development",
-    "link": "https://sfurti.msme.gov.in/SFURTI/Home.aspx"
+    "name": "UP Food Processing Industry Policy 2023",
+    "description": "Incentivizes the establishment of food processing units to bridge the gap between farmers and markets.",
+    "benefits": ["Capital investment subsidy up to 35% (Max ₹5 Crores).", "Interest subsidy for a period of 5 years."],
+    "eligibility_criteria": {"type": "Agri-Entrepreneurs / Companies", "sector": "Food Processing", "authority": "UP Horticulture & Food Processing", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Registered Unit"},
+    "required_documents": ["DPR", "FSSAI License", "Land Ownership/Lease", "Pollution Clearance"],
+    "application_mode": "Online (Nivesh Mitra)",
+    "tags": ["food-processing", "agri-business", "manufacturing", "subsidy"],
+    "category": "Industry / Agri",
+    "link": "http://uphorticulture.gov.in/"
   },
   {
-    "name": "ASPIRE Scheme",
-    "description": "Promotes entrepreneurship through incubation and innovation.",
-    "benefits": "Incubation and startup support.",
-    "eligibility_criteria": {
-      "type": "Startups and MSMEs",
-      "sector": "Agro-based and rural industries",
-      "support_type": "Incubation"
-    },
-    "category": "Innovation",
-    "link": "https://aspire.msme.gov.in/ASPIRE/AFHome.aspx"
+    "name": "Mukhyamantri Bunkar Soure Urja Yojana",
+    "description": "Assistance for weavers to adopt solar power for their powerlooms to reduce operational costs.",
+    "benefits": ["Subsidy up to 50% for general and 75% for SC/ST weavers for solar plants.", "Solar inverter and battery support for business."],
+    "eligibility_criteria": {"type": "Powerloom Weavers", "sector": "Textiles", "authority": "UP Textile Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh Clusters", "ownership_stake": "Proprietorship / Cooperative"},
+    "required_documents": ["Weaver ID Card", "Caste Certificate (if applicable)", "Solar Quotation", "Electricity Bill"],
+    "application_mode": "Through District Textile Offices",
+    "tags": ["textiles", "solar-energy", "weavers", "cost-reduction"],
+    "category": "Infrastructure / MSME",
+    "link": "https://texmin.up.gov.in/"
   },
   {
-    "name": "ZED Certification Scheme",
-    "description": "Encourages Zero Defect Zero Effect manufacturing.",
-    "benefits": "Subsidy for certification and quality improvement.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "Manufacturing",
-      "certification": "ZED"
-    },
-    "category": "Quality",
-    "link": "https://zed.msme.gov.in/"
+    "name": "UP Electronics Manufacturing Policy",
+    "description": "Incentives for startups and companies involved in electronic component manufacturing (ESDM).",
+    "benefits": ["Capital subsidy up to 15%.", "Interest subsidy on loans for hardware R&D."],
+    "eligibility_criteria": {"type": "Hardware Startups / Companies", "sector": "Electronics Manufacturing", "authority": "UP IT Dept", "min_age": 18, "social_category": ["All"], "geography": "Noida / Greater Noida / Yamuna Expressway focus", "ownership_stake": "Registered Entity"},
+    "required_documents": ["Company Registration", "Investment Blueprint", "GST/PAN", "Factory License"],
+    "application_mode": "Online (Nivesh Mitra)",
+    "tags": ["electronics", "hardware-startup", "manufacturing", "esdm"],
+    "category": "Industry",
+    "link": "https://it.up.gov.in/"
   },
   {
-    "name": "Lean Manufacturing Scheme",
-    "description": "Improves MSME competitiveness through lean tools.",
-    "benefits": "Productivity and cost improvement.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "Manufacturing",
-      "participation": "Group based"
-    },
-    "category": "Productivity",
-    "link": "https://lean.msme.gov.in/"
+    "name": "UP Agriculture Export Policy 2019",
+    "description": "Focuses on boosting exports of agricultural produce from UP through logistics and quality support.",
+    "benefits": ["Transport subsidy up to 25% for air/sea export.", "Reimbursement of 50% for international quality certifications."],
+    "eligibility_criteria": {"type": "Merchant Exporters / Farmers", "sector": "Agriculture", "authority": "UP Mandi Parishad", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Registered Exporter"},
+    "required_documents": ["IEC Code", "APEDA Registration", "Mandi Parishad Certificate", "Shipping Bill"],
+    "application_mode": "Offline (UP Mandi Parishad)",
+    "tags": ["export", "agri-trade", "global-market", "merchant-support"],
+    "category": "Trade / Export",
+    "link": "http://upmandiparishad.upsdc.gov.in/"
   },
   {
-    "name": "myScheme Platform",
-    "description": "National platform to discover government schemes.",
-    "benefits": "Personalized scheme discovery.",
-    "eligibility_criteria": {
-      "type": "Citizens and Businesses",
-      "sector": "All sectors",
-      "usage": "Discovery"
-    },
-    "category": "Portal",
-    "link": "https://www.myscheme.gov.in/"
+    "name": "UP Micro-Entrepreneur Accident Insurance",
+    "description": "Safety net for small merchants and traders in case of unfortunate accidents.",
+    "benefits": ["Accidental death/disability cover up to ₹5 Lakhs.", "Social security for family members of the entrepreneur."],
+    "eligibility_criteria": {"type": "Small Traders / Merchants", "sector": "Retail / Trading", "authority": "UP MSME Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Registered Micro Entity"},
+    "required_documents": ["Udyam Registration", "Nominee Details", "Aadhaar Card", "Bank Details"],
+    "application_mode": "Online (DIUPMSME Portal)",
+    "tags": ["insurance", "merchant-safety", "social-security", "micro-trade"],
+    "category": "Social Welfare",
+    "link": "https://diupmsme.upsdc.gov.in/"
   },
   {
-    "name": "MSME Schemes e-Book",
-    "description": "Official e-book containing MSME schemes.",
-    "benefits": "Authoritative scheme reference.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "All sectors",
-      "access": "Public"
-    },
-    "category": "Information",
-    "link": "https://msme.gov.in/e-book-schemes-msme"
+    "name": "UP Tourism Policy 2022 (Entrepreneur Focus)",
+    "description": "Support for entrepreneurs setting up heritage hotels, homestays, or tourism-related services.",
+    "benefits": ["Subsidy up to 25% on capital investment.", "Support for marketing and branding of tourist spots."],
+    "eligibility_criteria": {"type": "Entrepreneurs / Homestay Owners", "sector": "Tourism", "authority": "UP Tourism Dept", "min_age": 18, "social_category": ["All"], "geography": "Tourism Hubs in UP", "ownership_stake": "Registered Homestay/Hotel"},
+    "required_documents": ["Tourism Dept Approval", "Building Plan", "Aadhaar", "Fire/Safety Clearance"],
+    "application_mode": "Online (Nivesh Mitra)",
+    "tags": ["tourism", "homestay", "service-business", "hospitality"],
+    "category": "Tourism / Business",
+    "link": "https://uptourism.gov.in/"
   },
   {
-    "name": "MSME Cluster Development Programme (MSE-CDP)",
-    "description": "Infrastructure and soft support for MSME clusters.",
-    "benefits": "Funding for cluster infrastructure.",
-    "eligibility_criteria": {
-      "type": "MSME Clusters",
-      "sector": "All sectors",
-      "project_type": "Cluster"
-    },
+    "name": "UP MSME Promotion Policy 2022",
+    "description": "A policy providing capital subsidies and tax exemptions to boost the MSME sector, with a special focus on backward regions like Purvanchal and Bundelkhand.",
+    "benefits": ["Capital subsidy up to 25% for micro units.", "100% Stamp Duty exemption in Purvanchal and Bundelkhand regions.", "Interest subsidy up to ₹25 Lakhs per year for 5 years."],
+    "eligibility_criteria": {"type": "MSME Units", "sector": "Manufacturing", "authority": "UP MSME Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Registered MSME"},
+    "required_documents": ["Udyam Registration", "Investment Proof", "Land Documents", "PAN/GST"],
+    "application_mode": "Online (Nivesh Mitra)",
+    "tags": ["msme", "subsidy", "stamp-duty", "industrial-growth"],
+    "category": "MSME / Finance",
+    "link": "https://niveshmitra.up.nic.in/"
+  },
+  {
+    "name": "Mukhyamantri Shikshuta Protsahan Yojana (CMAPS)",
+    "description": "A scheme providing internship opportunities and stipends to educated youth in various industries to encourage future entrepreneurship.",
+    "benefits": ["Monthly stipend of ₹2,500 (shared by Govt and Industry).", "Industry-recognized training and certificate.", "Priority in state self-employment loan schemes after completion."],
+    "eligibility_criteria": {"type": "Educated Youth", "sector": "Cross-sector", "authority": "UP Training & Employment Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "N/A"},
+    "required_documents": ["Educational Certificates", "UP Domicile", "Aadhaar Card", "Bank Passbook"],
+    "application_mode": "Online (UP Training Portal)",
+    "tags": ["internship", "stipend", "youth-skill", "employment"],
+    "category": "Skill Development / Youth",
+    "link": "https://sewayojan.up.nic.in/"
+  },
+  {
+    "name": "Mini / Micro Dairy Scheme",
+    "description": "Supports agri-entrepreneurs in setting up dairy units to increase milk production and provide self-employment in rural areas.",
+    "benefits": ["Bank loans for purchasing 2 to 10 cattle units.", "Interest subsidy provided by the state government on the loan amount."],
+    "eligibility_criteria": {"type": "Agri-Entrepreneurs / Farmers", "sector": "Animal Husbandry", "authority": "UP Dairy Development Dept", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Individual"},
+    "required_documents": ["Land Documents", "Cattle Purchase Quotation", "Aadhaar Card", "Project Summary"],
+    "application_mode": "Through District Dairy Development Office",
+    "tags": ["dairy", "agri-loan", "livestock", "rural-business"],
+    "category": "Agri-Business",
+    "link": "http://updairydevelopment.gov.in/"
+  },
+  {
+    "name": "UP Solar Energy Policy 2022",
+    "description": "Incentivizes the development of solar energy projects, including rooftop solar and utility-scale solar parks for commercial use.",
+    "benefits": ["100% Electricity Duty exemption for a period of 10 years.", "Capital subsidy for solar plants and commercial setups.", "Stamp duty exemption on land purchased for solar projects."],
+    "eligibility_criteria": {"type": "Solar Developers / Entrepreneurs", "sector": "Renewable Energy", "authority": "UPNEDA", "min_age": 18, "social_category": ["All"], "geography": "Uttar Pradesh", "ownership_stake": "Registered Entity"},
+    "required_documents": ["Project Report", "Land Lease/Ownership", "Technical Feasibility Study", "PAN/GST"],
+    "application_mode": "Online (UPNEDA Portal)",
+    "tags": ["solar", "green-energy", "clean-tech", "subsidy"],
+    "category": "Renewable Energy",
+    "link": "https://upneda.org.in/"
+  },
+  {
+    "name": "UP Warehousing & Logistics Policy",
+    "description": "Facilitates the creation of high-quality logistics infrastructure and warehouses to support the state's industrial supply chain.",
+    "benefits": ["75% concession on land conversion charges for logistics use.", "Interest subsidy on loans taken for warehouse construction.", "Capital subsidy for logistics park infrastructure development."],
+    "eligibility_criteria": {"type": "Infrastructure Developers", "sector": "Logistics & Warehousing", "authority": "UP Commerce & Industry Dept", "min_age": 18, "social_category": ["All"], "geography": "Strategic Hubs in UP", "ownership_stake": "Registered Unit"},
+    "required_documents": ["Land Allotment Letter", "Detailed Project Report", "Compliance Clearances", "Bank Sanction Letter"],
+    "application_mode": "Online (Nivesh Mitra)",
+    "tags": ["logistics", "warehouse", "infrastructure", "supply-chain"],
     "category": "Infrastructure",
-    "link": "https://cluster.dcmsme.gov.in/"
+    "link": "https://niveshmitra.up.nic.in/"
   },
   {
-    "name": "Innovative MSME Scheme",
-    "description": "Support for design, IPR and innovation.",
-    "benefits": "Funding for innovation and IP protection.",
-    "eligibility_criteria": {
-      "type": "MSMEs and Startups",
-      "sector": "All sectors",
-      "support_area": "IPR and Design"
-    },
-    "category": "Innovation",
-    "link": "https://innovative.msme.gov.in/"
-  },
-  {
-    "name": "MSME Scheme Document",
-    "description": "Official MSME scheme document.",
-    "benefits": "Detailed scheme guidelines.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "All sectors",
-      "format": "PDF"
-    },
-    "category": "Document",
-    "link": "https://msme.gov.in/sites/default/files/Sch-vol1-151214.pdf-sri.pdf"
-  },
-  {
-    "name": "NI-MSME Schemes",
-    "description": "Training and entrepreneurship schemes by NI-MSME.",
-    "benefits": "Skill development and capacity building.",
-    "eligibility_criteria": {
-      "type": "Entrepreneurs and MSMEs",
-      "sector": "All sectors",
-      "support_type": "Training"
-    },
-    "category": "Training",
-    "link": "https://www.nimsme.gov.in/msme-schemes"
-  },
-  {
-    "name": "DC MSME Scheme Compendium",
-    "description": "Compiled MSME schemes by DC MSME.",
-    "benefits": "Comprehensive scheme reference.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "All sectors",
-      "format": "PDF"
-    },
-    "category": "Document",
-    "link": "https://dcmsme.gov.in/SAMACHAR/eBook%20of%20Schemes%20for%20MSMEs.pdf"
-  },
-  {
-    "name": "MSME Scheme Booklet",
-    "description": "Official MSME scheme booklet.",
-    "benefits": "Overview of MSME schemes.",
-    "eligibility_criteria": {
-      "type": "MSMEs",
-      "sector": "All sectors",
-      "format": "PDF"
-    },
-    "category": "Document",
-    "link": "https://msme.gov.in/sites/default/files/Scheme-booklet-Eng.pdf"
+    "name": "Industrial Plot Allotment for Women",
+    "description": "Specifically reserves industrial land and provides financial concessions for 100% women-led enterprises in the state.",
+    "benefits": ["5% to 10% land reservation in industrial areas managed by UPSIDA.", "Concessional rates on land allotment and priority processing for women."],
+    "eligibility_criteria": {"type": "Women Entrepreneurs", "sector": "Manufacturing / Service", "authority": "UPSIDA", "min_age": 18, "social_category": ["Women"], "geography": "UP Industrial Areas", "ownership_stake": "100% Women-owned"},
+    "required_documents": ["MSME Registration", "Women Ownership Proof", "Business Plan", "Aadhaar Card"],
+    "application_mode": "Online (UPSIDA Portal)",
+    "tags": ["women-in-business", "land-allotment", "industrial-plot", "concession"],
+    "category": "Industrial Land / Women",
+    "link": "https://onlineupsidc.com/"
   }
+
 ]
