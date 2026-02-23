@@ -1,8 +1,7 @@
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Heart, Globe, Lightbulb } from 'lucide-react';
-import aboutVideo from '../Assets/MAYA ABOUT MOTION.mp4';
-
+import aboutImage from '../Assets/about-m.png';
 export function AboutPage() {
   return (
     <div className="min-h-screen bg-black overflow-hidden font-sans relative">
@@ -28,16 +27,11 @@ export function AboutPage() {
                     </p>
                 </div>
                 <div className="flex-1 relative animate-in fade-in zoom-in duration-1000 delay-200 max-w-xl group">
-                    <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full animate-pulse" style={{ animationDuration: '4s' }} />
-                    <div className="relative z-10 rounded-2xl border border-emerald-500/30 shadow-2xl overflow-hidden backdrop-blur-sm bg-black/20 p-2 group-hover:border-emerald-500/50 transition-all duration-500 group-hover:shadow-emerald-500/20 rotate-2 group-hover:rotate-0">
-                        <video 
-                            src={aboutVideo}
-                            autoPlay 
-                            loop 
-                            muted 
-                            playsInline
-                            className="rounded-xl w-full h-auto group-hover:scale-105 transition-transform duration-500"
-                        />
+                    <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full" style={{ animationDuration: '4s' }} />
+                    <div className="relative z-10 rounded-2xl border border-emerald-500/30 shadow-2xl overflow-hidden backdrop-blur-sm bg-black/20 p-2 ">
+                        <div className="aspect-video w-full h-80%">
+                            <img src={aboutImage} alt="About image" className="w-full h-80% object-cover rounded-xl" />
+                        </div>
                         {/* Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     </div>
@@ -136,7 +130,6 @@ export function AboutPage() {
     </div>
   );
 }
-
 function ValueCard({ icon, title, desc, iconBg, borderColor }: { icon: React.ReactNode, title: string, desc: string, iconBg: string, borderColor: string }) {
     return (
         <div className={`group relative p-8 rounded-2xl border ${borderColor} backdrop-blur-md bg-black/40 flex flex-col items-center gap-4 hover:border-emerald-500/40 hover:-translate-y-2 transition-all duration-500 overflow-hidden hover:shadow-2xl hover:shadow-emerald-500/10`}>

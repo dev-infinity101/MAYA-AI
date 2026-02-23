@@ -7,7 +7,6 @@ import { FuturisticBeam } from '../components/FuturisticBeam';
 import { ArrowRight, Shield, MessageSquare, CheckCircle2 , Megaphone} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GreenMotion from '../Assets/GREEN_MOTION.mp4';
-import { PixelMaya } from '../components/PixelMaya';
 
 export function LandingPage() {
   const [index, setIndex] = useState(0);
@@ -90,12 +89,13 @@ export function LandingPage() {
             {/* Hero Visual with Parallax Effect */}
             <div className="mt-20 relative animate-in fade-in zoom-in duration-1000 delay-500 group">
               <div className="glass-panel p-2 rounded-2xl max-w-5xl mx-auto shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden backdrop-blur-md bg-black/40 group-hover:border-emerald-500/40 transition-all duration-500 group-hover:shadow-emerald-500/20">
-                 <video 
+                  <video 
                    autoPlay 
                    loop 
                    muted 
                    playsInline
-                   className="rounded-xl w-full h-auto opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+                   preload="auto"
+                   className="rounded-xl w-full h-auto opacity-90 group-hover:opacity-100 transition-opacity duration-500 object-cover"
                  >
                    <source src={GreenMotion} type="video/mp4" />
                    Your browser does not support the video tag.
@@ -436,9 +436,8 @@ export function LandingPage() {
               </Link>
           </div>
         </section>
-
         <Footer />
-        <PixelMaya />
+      
       </div>
   );
 }
@@ -463,7 +462,6 @@ function ValueCard({ icon, title, desc }: { icon: React.ReactNode, title: string
     </div>
   );
 }
-
 function AgentCard({ icon, title, color, borderColor }: { icon: React.ReactNode, title: string, color: string, borderColor: string }) {
     return (
         <div className={`group p-6 rounded-2xl flex flex-col items-center text-center gap-4 backdrop-blur-md bg-black/40 border ${borderColor} hover:border-emerald-500/40 hover:-translate-y-2 transition-all duration-500 hover:shadow-lg hover:shadow-emerald-500/20`}>

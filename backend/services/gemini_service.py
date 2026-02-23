@@ -37,7 +37,19 @@ class GeminiService:
         """Generates text response for MAYA-AI Agent"""
         try:
             response = await self.llm.ainvoke(prompt)
-            return response.content
+            content = response.content
+            
+            # Handle case where content is a list (e.g., [{'type': 'text', 'text': '...'}] from Gemini)
+            if isinstance(content, list):
+                text_parts = []
+                for part in content:
+                    if isinstance(part, dict) and 'text' in part:
+                        text_parts.append(part['text'])
+                    elif isinstance(part, str):
+                        text_parts.append(part)
+                return "".join(text_parts)
+                
+            return str(content)
         except Exception as e:
             print(f"❌ Gemini Generation Error: {e}")
             return "MAYA is currently unavailable. Please try again later."

@@ -177,13 +177,25 @@ async def off_topic_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     
-    response = (
-        "I specialize in helping Indian businesses and MSMEs with growth strategies, "
-        "government schemes, market research, and financial planning.\n\n"
-        "I cannot assist with topics outside this scope. How can I help your business today?"
-    )
+    prompt = f"""
+    The user asked an off-topic question: "{last_message}"
     
-    return {"messages": [AIMessage(content=response)]}
+    Task:
+    1. Politely explain that you are MAYA, India's Business AI Assistant.
+    2. Mention that the query is outside your current specialization.
+    3. Remind the user what you CAN help with: Government Schemes, Market Research, Branding, Finance, and Marketing for MSMEs.
+    4. Keep the response concise, professional, and friendly.
+    
+    CRITICAL: Do NOT start with a greeting. Jump straight into the explanation.
+    """
+    
+    response = await gemini_service.generate_response(prompt)
+    
+    return {
+        "messages": [AIMessage(content=response)],
+        "schemes": [], # Clear previous schemes to avoid UI confusion
+        "current_agent": "off_topic"
+    }
 
 async def market_agent_node(state: AgentState):
     messages = state["messages"]
