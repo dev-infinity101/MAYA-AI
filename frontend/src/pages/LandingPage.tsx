@@ -6,12 +6,13 @@ import FancyOutlineLiftButton from '../components/FancyOutlineLiftButton';
 import { FuturisticBeam } from '../components/FuturisticBeam';
 import { ArrowRight, Shield, MessageSquare, CheckCircle2 , Megaphone} from 'lucide-react';
 import { Link } from 'react-router-dom';
-import GreenMotion from '../Assets/GREEN_MOTION.mp4';
+import chatInterface from '../Assets/chat-interface.png';
 
 export function LandingPage() {
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const containerRef = useRef<HTMLSpanElement>(null);
+  const heroVisualRef = useRef<HTMLDivElement>(null);
   
   const rotatingTexts = ["AI Guidance", "Scheme Navigation", "Agentic workflow"];
   const totalItems = rotatingTexts.length;
@@ -26,6 +27,47 @@ export function LandingPage() {
     return () => clearInterval(timer);
   }, [isPaused, totalItems]);
 
+  useEffect(() => {
+    const el = heroVisualRef.current;
+    if (!el) return;
+
+    let rafId: number | null = null;
+
+    const update = () => {
+      rafId = null;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const start = vh * 0.92;
+      const end = vh * 0.68;
+      const raw = (start - rect.top) / (start - end);
+      const t = Math.min(1, Math.max(0, raw));
+
+      const translateY = (1 - t) * 120;
+      const blur = (1 - t) * 14;
+      const opacity = 0.55 + t * 0.45;
+      const scale = 0.98 + t * 0.02;
+
+      el.style.transform = `translate3d(0, ${translateY}px, 0) scale(${scale})`;
+      el.style.filter = `blur(${blur}px)`;
+      el.style.opacity = `${opacity}`;
+    };
+
+    const requestUpdate = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+
+    return () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-black overflow-hidden">
         {/* Enhanced Animated Background Gradients */}
@@ -38,7 +80,7 @@ export function LandingPage() {
         <Header />
       
         {/* 1. HERO SECTION */}
-        <section className="relative min-h-screen flex items-center justify-center pt-40">
+        <section className="relative min-h-screen flex items-center justify-center pt-32">
           {/* Background Effects */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/20 blur-[120px] rounded-full opacity-30 pointer-events-none animate-pulse" style={{ animationDuration: '4s' }} />
           <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none animate-pulse" style={{ animationDuration: '6s' }} />
@@ -87,25 +129,27 @@ export function LandingPage() {
             </div>
 
             {/* Hero Visual with Parallax Effect */}
-            <div className="mt-20 relative animate-in fade-in zoom-in duration-1000 delay-500 group">
-              <div className="glass-panel p-2 rounded-2xl max-w-5xl mx-auto shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden backdrop-blur-md bg-black/40 group-hover:border-emerald-500/40 transition-all duration-500 group-hover:shadow-emerald-500/20">
-                  <video 
-                   autoPlay 
-                   loop 
-                   muted 
-                   playsInline
-                   preload="auto"
-                   className="rounded-xl w-full h-auto opacity-90 group-hover:opacity-100 transition-opacity duration-500 object-cover"
-                 >
-                   <source src={GreenMotion} type="video/mp4" />
-                   Your browser does not support the video tag.
-                 </video>
+            <div
+              ref={heroVisualRef}
+              className="mt-14 relative animate-in fade-in zoom-in duration-1000 delay-500 group"
+              style={{
+                transform: 'translate3d(0, 120px, 0) scale(0.98)',
+                filter: 'blur(14px)',
+                opacity: 0.55,
+                willChange: 'transform, filter, opacity',
+              }}
+            >
+              <div className="glass-panel p-2 rounded-2xl max-w-5xl mx-auto shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden backdrop-blur-md bg-black/40">
+                 <div className="aspect-video bg-white/10 rounded-xl border border-white/20 flex items-center justify-center text-white/50 text-2xl w-full h-auto">
+                   <img src={chatInterface} alt="Chat Interface" className="w-full h-auto object-cover rounded-xl" />
+                 </div>
                  {/* Enhanced Overlay Gradients */}
                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent h-full w-full rounded-2xl pointer-events-none" />
                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-cyan-500/5 h-full w-full rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
             </div>
           </div>
+          <div className="pointer-events-none absolute -bottom-24 left-0 right-0 h-64 bg-gradient-to-b from-transparent via-black/60 to-black" />
         </section>
 
         {/* Glowing Section Divider */}

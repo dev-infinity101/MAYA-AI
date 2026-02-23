@@ -79,7 +79,7 @@
 
   .hero-title {
     font-family: __esbuild_6b67ff, __esbuild_Fallback_6b67ff, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    font-size: 42px;
+    font-size: 18px;
     line-height: 1.1;
     letter-spacing: -0.02em;
     font-weight: 600;
@@ -120,9 +120,9 @@
 
   @screen md {
     .hero-title {
-      font-size: 72px;
-      line-height: 72px;
-      letter-spacing: -2.16px;
+      font-size: 60px;
+      line-height: 60px;
+      letter-spacing: -1.8px;
     }
   }
   
