@@ -23,11 +23,11 @@ class MimoService:
             api_key=api_key,
             base_url="https://openrouter.ai/api/v1",
             default_headers={
-                "HTTP-Referer": "http://localhost:3000", # Aapka site URL
-                "X-Title": "MAYA-AI-Local"               # Aapke app ka naam
+                "HTTP-Referer": "http://localhost:3000", 
+                "X-Title": "MAYA-AI-Local"               
             }
         )
-        self.model = "xiaomi/mimo-v2-flash:free"
+        self.model = "arcee-ai/trinity-large-preview:free"
 
     async def generate_text(self, prompt: str) -> str:
         """

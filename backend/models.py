@@ -11,11 +11,11 @@ class Scheme(Base):
     name = Column(String, index=True)
     description = Column(Text)
     
-    # UPDATED: String se JSON kar diya taaki list store ho sake
+    # UPDATED: String to JSON for storing lists
     benefits = Column(JSON) 
     eligibility_criteria = Column(JSON)  # Nested JSON (age, sector, category, ownership)
     
-    # NEW FIELDS: Pro Version ke liye
+    # NEW FIELDS: For storing scheme-specific requirements
     required_documents = Column(JSON)    # List of docs
     application_mode = Column(String)    # Online/Offline
     tags = Column(JSON)                  # AI search keywords

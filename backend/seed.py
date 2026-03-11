@@ -11,11 +11,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 async def get_embedding_with_retry(text_to_embed, max_attempts=3):
-    """Wait and retry logic for Gemini Free Tier with exit condition (UNTOUCHED)"""
+    """Wait and retry logic for Gemini Free Tier with exit condition"""
     attempt = 0
     while attempt < max_attempts:
         try:
-            emb = await gemini_service.get_embeddings(text_to_embed)
+            # UPDATED: Added is_document=True because we are STORING data into the DB
+            emb = await gemini_service.get_embeddings(text_to_embed, is_document=True)
             if emb:
                 return emb
             

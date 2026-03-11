@@ -10,7 +10,7 @@ export interface Scheme {
   description: string;
   benefits: string[]; // NeonDB JSONB List
   
-  // Database se aane waale core fields
+  // Eligibility Criteria (NeonDB JSONB Nested Object)
   eligibility_criteria?: {
     type?: string;
     sector?: string;

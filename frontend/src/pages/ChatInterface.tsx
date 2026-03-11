@@ -213,7 +213,7 @@ export function ChatInterface() {
               <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
             </div>
           ) : messages.length === 0 ? (
-            /* Welcome Screen - Naya Centered UI */
+            /* Welcome Screen */
             <div className="flex flex-col items-center justify-center h-full px-4 text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 border border-primary/20 animate-in zoom-in duration-500">
                 <Sparkles size={32} className="text-primary" />

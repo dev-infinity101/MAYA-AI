@@ -79,7 +79,7 @@ async def scheme_agent_node(state: AgentState):
         ai_response = await mimo_service.generate_text(prompt)
         
         try:
-            # AI JSON Parse karna
+            # PARSE AI JSON RESPONSE
             cleaned_json = ai_response.replace('```json', '').replace('```', '').strip()
             parsed = json.loads(cleaned_json)
             chat_text = parsed.get("chat_summary", "I found these relevant schemes for you:")

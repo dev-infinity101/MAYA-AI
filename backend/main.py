@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="MAYA AI - Multi-Agent System", lifespan=lifespan)
 
-# CORS: Frontend (Vite) connect karne ke liye
+# CORS: Frontend (Vite) connects to Backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://localhost:3000"],
