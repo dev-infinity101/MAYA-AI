@@ -8,7 +8,7 @@ export function Footer() {
           <div className="absolute w-full max-w-[1400px] h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
           <div className="absolute w-full max-w-[1000px] h-[40px] bg-emerald-500/10 blur-[50px] rounded-full" />
         </div>
-      <img src={footerImg} alt="Footer" className="w-full h-auto object-cover mx-auto px-16" />
+      <img src={footerImg} alt="Footer" className="w-full h-auto bg-black object-cover mx-auto px-16" />
     </footer>
   );
 }
