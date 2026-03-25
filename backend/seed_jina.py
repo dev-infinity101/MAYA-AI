@@ -29,7 +29,7 @@ async def seed_schemes():
 
         # Load schemes from JSON
         try:
-            with open("data/schemes.json", "r") as f:
+            with open("data/schemes.json", "r", encoding="utf-8") as f:
                 schemes_data = json.load(f)
         except FileNotFoundError:
             print("Error: data/schemes.json not found.")

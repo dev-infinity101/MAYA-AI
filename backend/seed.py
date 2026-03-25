@@ -44,7 +44,7 @@ async def seed_schemes():
         await session.commit()
 
         # Ensure your data/schemes.json has the new fields
-        with open("data/schemes.json", "r") as f:
+        with open("data/schemes.json", "r", encoding="utf-8") as f:
             schemes_data = json.load(f)
 
         for i, data in enumerate(schemes_data):

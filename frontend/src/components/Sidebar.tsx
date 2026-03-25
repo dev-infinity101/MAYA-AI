@@ -54,7 +54,7 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
                 <SquarePen size={18} className="text-text-secondary group-hover:text-primary transition-colors" />
                 <span className="text-sm font-medium">New chat</span>
             </div>
-            <span className="text-xs text-text-secondary opacity-50 hidden md:block group-hover:opacity-80 transition-opacity">Ctrl + Shift + O</span>
+            <span className="text-xs text-text-secondary opacity-50 hidden md:block group-hover:opacity-80 transition-opacity"> </span>
         </button>
 
         <div className="flex-1 overflow-y-auto space-y-2 pr-2">

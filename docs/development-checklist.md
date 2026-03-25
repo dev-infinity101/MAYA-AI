@@ -60,9 +60,9 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
     - [x] User types query -> Backend searches schemes -> Frontend displays cards
 
 ### Day 7: Buffer & Refinement 🛠️
-- [ ] Fix CORS issues (Partially done)
+- [x] Fix CORS issues (Backend CORS fully configured)
 - [x] Refine Prompt Engineering for Scheme Ranking
-- [ ] Ensure Mobile Responsiveness
+- [x] Ensure Mobile Responsiveness (Tailwind responsive classes implemented in ChatInterface & Sidebar)
 
 ---
 
@@ -115,16 +115,16 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
 - [x] **End-to-End Testing**
     - [x] Test all agent types (`verify_agentic.py`)
     - [x] Test scheme search with various industries (`test_jina_search.py`)
-- [ ] **Edge Cases**
-    - [ ] Handle empty search results
-    - [ ] Handle API timeouts
+- [x] **Edge Cases**
+    - [x] Handle empty search results (Handled appropriately in scheme_agent_node fallback)
+    - [x] Handle API timeouts (Implemented via AbortController abort signals in the frontend)
 
 ### Day 14: Final Polish & Demo 🏆
 - [ ] **Documentation**
     - [ ] Update README.md
 - [x] **UI Polish**
     - [x] Glassmorphism theme implementation
-    - [ ] Add animations (framer-motion)
+    - [x] Add animations (Tailwind generic keyframes/`animate-in` effectively replaced framer-motion approach)
 - [ ] **MVP COMPLETE**
 
 ---
@@ -155,3 +155,9 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
 - **Test Suite Expansion**: Added `verify_agentic.py` and `test_identity.py` for comprehensive multi-agent verification.
 - **Jina AI**: Successfully integrated Jina AI for scheme embeddings and retrieval.
 - **UI Redesign**: Overhauled `ChatInterface.tsx` to match modern "ChatGPT-style" UX with history and rich responses.
+
+### [Date: 2026-03-26]
+- **Bug Fix**: Fixed garbled character encoding (`â‚¹` to `₹`) causing UI issues by implementing utf-8 encoding specifically for reading JSON data. Updated DB seeding scripts to prevent future errors.
+- **Maintenance**: Created `fix_db.py` to retroactively repair garbled characters in the pgvector database without dropping the costly AI embeddings.
+- **UI Optimization**: Refactored `ThinkingIndicator.tsx`. Replaced the CSS-heavy black gradient loop overlay with a simple, high-performance neon green dot pulse for the 'thinking' mode. Removed `overflow: hidden` dependencies to reduce layout paints.
+- **UI Redesign**: Simplified 'New Chat' sidebar button by removing "Ctrl+Shift+O" visual clutter to enhance minimalist aesthetic.
