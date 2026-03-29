@@ -37,6 +37,7 @@ export interface Message {
   type: 'text' | 'scheme-list'; // Identifies if the message has cards
   schemes?: Scheme[];           // Optional array for the grid
   agent?: string;               // Name of the agent (e.g., 'Scheme Navigator', 'Finance')
+  isStreaming?: boolean;
 }
 
 // 3. API Response from /api/chat/agent
@@ -69,4 +70,23 @@ export interface UserProfile {
   industry?: string;
   business_stage?: 'idea' | 'startup' | 'scaling';
   social_category?: string;
+}
+
+export interface AuthProfile {
+  id: string;
+  email: string;
+  role?: string;
+  metadata?: {
+    full_name?: string;
+    email_verified?: boolean;
+    [key: string]: any;
+  };
+}
+
+export interface ChatSessionSummary {
+  id: string;
+  title: string;
+  pinned?: boolean;
+  preview?: string;
+  updated_at?: string | null;
 }

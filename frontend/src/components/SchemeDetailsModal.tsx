@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { X, ExternalLink, FileText, UserCheck, CheckCircle, Info, Sparkles, LayoutGrid, Calendar } from 'lucide-react';
-import { Scheme } from '../types'; // Ensure this path is correct based on your folder structure
+import { Scheme } from '../types';
 
 interface SchemeDetailsModalProps {
   scheme: Scheme;

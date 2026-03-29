@@ -1,4 +1,6 @@
 import os
+from typing import AsyncIterator
+
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
@@ -51,5 +53,27 @@ class MimoService:
         except Exception as e:
             print(f"Error generating text with MimoService: {e}")
             return "I apologize, but I encountered an error while processing your request."
+
+    async def generate_text_stream(self, prompt: str) -> AsyncIterator[str]:
+        """
+        Streams text using the Xiaomi Mimo V2 Flash model via OpenRouter.
+        """
+        try:
+            completion = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are MAYA, a helpful AI assistant for MSMEs in India. Provide direct, professional, and actionable advice. Do not include unnecessary greetings or self-introductions unless specifically asked who you are."},
+                    {"role": "user", "content": prompt}
+                ],
+                stream=True,
+            )
+
+            async for chunk in completion:
+                delta = chunk.choices[0].delta.content or ""
+                if delta:
+                    yield delta
+        except Exception as e:
+            print(f"Error streaming text with MimoService: {e}")
+            yield "I apologize, but I encountered an error while processing your request."
 
 mimo_service = MimoService()

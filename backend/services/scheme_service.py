@@ -7,7 +7,7 @@ class SchemeService:
     async def search_schemes(self, db: AsyncSession, query: str, limit: int = 5):
         try:
             # 1. Get Gemini embedding for query
-            query_embedding = await gemini_service.get_embeddings(query)
+            query_embedding = await gemini_service.get_embeddings(query, mode="query")
             
             if not query_embedding:
                 print("⚠️ Could not generate embedding for query")

@@ -76,15 +76,17 @@ export function LandingPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-              <Link to="/chat">
+              <Link to="/signup">
                   <button className="btn-modern-glow w-full sm:w-auto ">
                     <span className="relative z-10">Start Free Trial <ArrowRight className="inline-block ml-2 w-6 h-5" /></span>
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </button>
               </Link>
-              <Button variant="ghost" size="lg" className="w-full sm:w-auto btn-glow">
-                View Demo
-              </Button>
+              <Link to="/chat">
+                <Button variant="ghost" size="lg" className="w-full sm:w-auto btn-glow">
+                  View Demo
+                </Button>
+              </Link>
             </div>
 
             {/* Hero Visual with Parallax Effect */}
@@ -428,7 +430,7 @@ export function LandingPage() {
                   Make smarter <br/> business decisions.
               </h2>
               <p className="text-xl text-emerald-100/60 mb-12">No credit card required. Start growing today.</p>
-              <Link to="/chat">
+              <Link to="/signup">
                   <button className="btn-modern-glow sm:w-auto ">
                     <span className="relative z-10">Start Free</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

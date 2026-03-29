@@ -1,6 +1,36 @@
 {
   "dependencies": {
+    "@supabase/supabase-js": "^2.100.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "chat": "^4.23.0",
+    "express": "^5.2.1",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
-  }
+    "remark-gfm": "^4.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  },
+  "name": "maya-ai",
+  "version": "1.0.0",
+  "description": "The MAYA AI Project is a full-stack web application designed to leverage advanced AI capabilities, primarily through Google Gemini, to provide an interactive experience. The application features a robust backend built with Python's FastAPI, focusing on AI agent orchestration, data management with PostgreSQL (including vector embeddings), and secure authentication. The frontend, developed using React and Vite, offers a dynamic and responsive user interface for interacting with the AI functionalities.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev:all": "powershell -ExecutionPolicy Bypass -File .\\run.ps1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-infinity101/MAYA-AI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dev-infinity101/MAYA-AI/issues"
+  },
+  "homepage": "https://github.com/dev-infinity101/MAYA-AI#readme"
 }

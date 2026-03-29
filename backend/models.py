@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, JSON, DateTime, ForeignKey, Boolean, Float
+from sqlalchemy import Column, Integer, String, Text, JSON, DateTime, ForeignKey, Boolean, Float, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from pgvector.sqlalchemy import Vector
@@ -39,11 +39,30 @@ class User(Base):
 
 class ChatHistory(Base):
     __tablename__ = "chat_history"
+    __table_args__ = (
+        Index("ix_chat_history_session_timestamp", "session_id", "timestamp"),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     session_id = Column(String, index=True) 
     role = Column(String) 
     content = Column(Text)
+    embedding = Column(Vector(768), nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="chats")
+
+
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+    __table_args__ = (
+        Index("ix_chat_sessions_user_pinned_updated", "user_auth_id", "pinned", "updated_at"),
+    )
+
+    session_id = Column(String, primary_key=True, index=True)
+    user_auth_id = Column(String, nullable=False, index=True)
+    title = Column(String, nullable=True)
+    pinned = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
