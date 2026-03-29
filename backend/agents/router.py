@@ -1,54 +1,32 @@
-from langchain_core.prompts import ChatPromptTemplate
 from services.gemini_service import gemini_service
 from agents.state import AgentState
-from langchain_core.messages import HumanMessage, SystemMessage
 
-ROUTER_PROMPT = """
-You are an intelligent intent classifier for the MAYA AI Assistant.
-MAYA is STRICTLY focused on:
-1. Government Schemes & Loans for Business/MSME/Startups/Students
-2. Market Research & Competitor Analysis
-3. Branding & Marketing for Small Businesses
-4. Financial Planning for Business
-
-Classify the user's query into one of these categories:
-
-1. 'scheme': Questions about government schemes, loans, subsidies, eligibility, application processes. (Includes startup schemes, student entrepreneur schemes, women entrepreneur schemes, etc.)
-2. 'market': Questions about market data, industry trends, competitor analysis, demand/supply, or "current state" of a sector.
-3. 'brand': Questions about business names, logos, taglines, brand identity.
-4. 'finance': Questions about business finance, pricing, cost management, profit margins.
-5. 'marketing': Questions about HOW to sell, advertising strategies, social media promotion, digital marketing, or "low-cost strategies" to grow.
-6. 'general': ONLY for greetings (Hello, Hi) or questions asking "Who are you?".
-7. 'off_topic': ANY question that is NOT about Business, MSMEs, Schemes, or Markets (e.g., "Who won the cricket match?", "Tell me a joke", "Coding help", "Politics", "Movies").
-
-Return ONLY the category name.
-"""
+ROUTE_KEYWORDS = {
+    "scheme": ["scheme", "loan", "subsidy", "yojana", "fund", "startup india", "mudra", "eligibility", "msme scheme", "women entrepreneur", "grant"],
+    "market": ["market", "trend", "competitor", "industry", "demand", "supply", "research", "audience", "market size"],
+    "brand": ["brand", "logo", "name", "tagline", "slogan", "identity", "trademarks", "design"],
+    "finance": ["finance", "tax", "cost", "profit", "margin", "pricing", "budget", "gst", "revenue", "accounting"],
+    "marketing": ["marketing", "advertise", "promotion", "seo", "social media", "campaign", "sales", "ads", "digital", "instagram", "facebook"],
+}
 
 async def route_request(state: AgentState) -> dict:
     messages = state["messages"]
     last_message = messages[-1]
+    query = last_message.content.strip().lower()
+
+    scores = {agent: 0 for agent in ROUTE_KEYWORDS}
+    for agent, keywords in ROUTE_KEYWORDS.items():
+        for kw in keywords:
+            if kw in query:
+                scores[agent] += 1
     
-    # Simple logic for now, using LLM for classification
-    prompt = f"{ROUTER_PROMPT}\n\nUser Query: {last_message.content}"
-    
-    category = await gemini_service.generate_response(prompt)
-    category = category.strip().lower().replace("'", "").replace('"', "")
-    
-    # Normalize response
-    valid_categories = ['scheme', 'market', 'brand', 'finance', 'marketing', 'general', 'off_topic']
-    
-    # Handle potential extra text from LLM
-    found_category = None
-    for vc in valid_categories:
-        if vc in category:
-            found_category = vc
-            break
-            
-    if found_category:
-        category = found_category
+    best = max(scores, key=scores.get)
+    if scores[best] > 0:
+        found_category = best
     else:
-        # Fallback for uncertain queries - treat as off_topic if truly unknown
-        category = 'off_topic'
-        
-    print(f"Routing to: {category}")
-    return {"current_agent": category}
+        # Everything unrecognised goes to general
+        # The system_instruction handles refusals from here
+        found_category = "general"
+
+    print(f"Routing to: {found_category}")
+    return {"current_agent": found_category}

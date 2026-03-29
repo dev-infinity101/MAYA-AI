@@ -11,8 +11,21 @@ interface MessageProps {
 export function Message({ message }: MessageProps) {
   const isUser = message.role === 'user';
 
+  // Safely coerce content to string — handles:
+  //   • plain string (normal case)
+  //   • empty string "" (streaming start)
+  //   • JSONB object { text: "..." } or { summary: "..." } (history reload edge case)
+  const contentText: string = (() => {
+    if (typeof message.content === 'string') return message.content;
+    if (typeof message.content === 'object' && message.content !== null) {
+      const c = message.content as Record<string, any>;
+      return c.text ?? c.summary ?? JSON.stringify(c);
+    }
+    return '';
+  })();
+
   return (
-    <div 
+    <div
       className={clsx(
         "flex w-full animate-in slide-in-from-bottom-2 duration-500",
         isUser ? "justify-end" : "justify-start"
@@ -22,17 +35,17 @@ export function Message({ message }: MessageProps) {
           "max-w-[85%] md:max-w-[80%]",
           isUser ? "flex flex-col items-end" : "flex flex-col items-start"
       )}>
-        {/* Text Content */}
-        {message.content && (
+        {/* Text Content — always rendered (empty string = streaming placeholder) */}
+        {(contentText !== undefined) && (
            <>
                <div className={clsx(
                 "relative group",
-                isUser 
-                    ? "bg-[#006b33] text-white rounded-[24px] px-5 py-2.5 shadow-sm" 
+                isUser
+                    ? "bg-[#006b33] text-white rounded-[24px] px-5 py-2.5 shadow-sm"
                     : "bg-transparent text-white rounded-none border-none px-0 py-3"
                 )}>
                     <div className={clsx(
-                    "w-full text-white/90 leading-relaxed space-y-4 text-[14px]", // Main chat text 14px
+                    "w-full text-white/90 leading-relaxed space-y-4 text-[14px]",
                     isUser ? "text-right" : "text-left"
                 )}>
                     <ReactMarkdown
@@ -66,14 +79,14 @@ export function Message({ message }: MessageProps) {
                             ),
                             img: ({node, ...props}) => (
                                 <div className="relative group my-4 rounded-lg overflow-hidden border border-white/10 bg-black/20 max-w-md">
-                                    <img 
-                                        className="w-full h-auto object-cover" 
-                                        {...props} 
+                                    <img
+                                        className="w-full h-auto object-cover"
+                                        {...props}
                                         alt={props.alt || "Generated Image"}
                                     />
                                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <a 
-                                            href={props.src} 
+                                        <a
+                                            href={props.src}
                                             download={`maya-generated-${Date.now()}.png`}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -87,12 +100,12 @@ export function Message({ message }: MessageProps) {
                             ),
                         }}
                     >
-                        {message.content}
+                        {contentText}
                     </ReactMarkdown>
                 </div>
                 </div>
                 <div className={clsx(
-                    "mt-1 text-[11px] text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity", // Timestamp 11px
+                    "mt-1 text-[11px] text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity",
                     isUser ? "text-right pr-2" : "text-left"
                 )}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
