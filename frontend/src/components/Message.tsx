@@ -1,8 +1,10 @@
 import { clsx } from 'clsx';
-import { Download } from 'lucide-react';
+import { Download, FileSpreadsheet } from 'lucide-react';
 import { Message as MessageType } from '../types';
 import { SchemeCard } from './SchemeCard';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { exportMarkdownTableToExcel } from '../utils/exportToExcel';
 
 interface MessageProps {
   message: MessageType;
@@ -49,33 +51,48 @@ export function Message({ message }: MessageProps) {
                     isUser ? "text-right" : "text-left"
                 )}>
                     <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
                         components={{
                             h1: ({node, ...props}) => <h1 className="text-2xl font-semibold text-white mt-8 mb-4 first:mt-0" {...props} />,
                             h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-white mt-8 mb-4 first:mt-0" {...props} />,
                             h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-white mt-6 mb-3 first:mt-0" {...props} />,
-                            p: ({node, ...props}) => <p className="mb-4 last:mb-0" {...props} />,
-                            ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
                             ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
-                            li: ({node, ...props}) => <li className="pl-1" {...props} />,
                             hr: ({node, ...props}) => <hr className="border-white/10 my-8" {...props} />,
-                            strong: ({node, ...props}) => <strong className="font-semibold text-white" {...props} />,
                             table: ({node, ...props}) => (
-                                <div className="my-6 w-full overflow-hidden rounded-lg border border-white/10">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left text-sm" {...props} />
-                                    </div>
+                                <div className="overflow-x-auto my-3 md:max-w-[70vw]">
+                                    <table className="w-full border-collapse text-sm" {...props} />
                                 </div>
                             ),
-                            thead: ({node, ...props}) => <thead className="bg-white/5 text-white/90" {...props} />,
+                            thead: ({node, ...props}) => (
+                                <thead className="bg-white/5 border-b border-white/10" {...props} />
+                            ),
+                            th: ({node, ...props}) => (
+                                <th className="px-4 py-3 text-left text-white font-bold text-xs uppercase tracking-wider whitespace-nowrap" {...props} />
+                            ),
                             tbody: ({node, ...props}) => <tbody className="divide-y divide-white/5" {...props} />,
-                            tr: ({node, ...props}) => <tr className="transition-colors hover:bg-white/5" {...props} />,
-                            th: ({node, ...props}) => <th className="px-4 py-3 font-semibold" {...props} />,
-                            td: ({node, ...props}) => <td className="px-4 py-3 align-top text-white/70" {...props} />,
+                            tr: ({node, ...props}) => <tr className="hover:bg-white/5 transition-colors" {...props} />,
+                            td: ({node, ...props}) => <td className="px-4 py-3 text-gray-300 text-sm align-top" {...props} />,
+                            
                             code: ({node, ...props}) => (
-                                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-[0.9em] font-mono" {...props} />
+                                <code className="bg-black/40 text-white px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
                             ),
                             blockquote: ({node, ...props}) => (
-                                <blockquote className="border-l-2 border-primary/30 pl-4 italic text-white/70 my-4" {...props} />
+                                <blockquote className="border-l-2 border-white/30 pl-4 italic text-white/70 my-4" {...props} />
+                            ),
+                            ul: ({node, ...props}) => (
+                                <ul className="list-none space-y-2 my-4" {...props} />
+                            ),
+                            li: ({node, ...props}) => (
+                                <li className="flex gap-2 text-gray-300 text-sm" {...props}>
+                                    <span className="text-white mt-0.5">•</span>
+                                    <span>{props.children}</span>
+                                </li>
+                            ),
+                            p: ({node, ...props}) => (
+                                <p className="text-gray-300 text-sm leading-relaxed mb-4 last:mb-0" {...props} />
+                            ),
+                            strong: ({node, ...props}) => (
+                                <strong className="text-white font-bold" {...props} />
                             ),
                             img: ({node, ...props}) => (
                                 <div className="relative group my-4 rounded-lg overflow-hidden border border-white/10 bg-black/20 max-w-md">
@@ -102,6 +119,19 @@ export function Message({ message }: MessageProps) {
                     >
                         {contentText}
                     </ReactMarkdown>
+
+                    {!isUser && contentText.includes('|') && !message.isStreaming && (
+                        <button
+                            onClick={() => exportMarkdownTableToExcel(
+                                contentText,
+                                message.agent ? `maya_${message.agent}` : 'maya_export'
+                            )}
+                            className="mt-4 flex items-center gap-1.5 px-3 py-1.5 text-xs text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors duration-200"
+                        >
+                            <FileSpreadsheet size={14} />
+                            Export to Excel
+                        </button>
+                    )}
                 </div>
                 </div>
                 <div className={clsx(

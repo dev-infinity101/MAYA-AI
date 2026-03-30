@@ -61,30 +61,43 @@ const ChatInputBox = ({
     isCentered = false,
     onNewChat
 }: ChatInputProps) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    // Auto-resize logic whenever input changes
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = '52px'; // Reset to base height to calculate correctly
+            const scrollHeight = textareaRef.current.scrollHeight;
+            textareaRef.current.style.height = Math.min(scrollHeight, 200) + 'px';
+        }
+    }, [input]);
+
     return (
         <div className={`w-full max-w-2xl relative group animate-in fade-in duration-500 ${isCentered ? 'slide-in-from-bottom-6' : ''}`}>
             {/* Neon Gradient Animation */}
             <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-primary/70 rounded-[26px] blur transition duration-500 ${isCentered ? 'opacity-20 group-hover:opacity-40' : 'opacity-0 group-hover:opacity-100'}`} />
 
-            <div className="relative bg-[#212121] rounded-[26px] border border-white/5 shadow-xl overflow-hidden flex items-center min-h-[52px] transition-colors hover:bg-[#2f2f2f]">
+            <div className="relative bg-[#212121] rounded-[26px] border border-white/5 shadow-xl flex items-end min-h-[52px] transition-colors hover:bg-[#2f2f2f]">
                     <button
                         onClick={onNewChat}
-                        className="p-3 ml-1 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/10"
+                        className="p-3 ml-1 mb-1 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/10"
                         title="New Chat"
                     >
                         <Plus size={20} strokeWidth={2.5} />
                     </button>
 
                     <textarea
+                        ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={isCentered ? "Ask anything" : "Message MAYA..."}
-                        className="flex-1 bg-transparent border-none outline-none text-white placeholder-text-secondary/60 px-2 py-3 resize-none h-[52px] max-h-[200px] custom-scrollbar text-[16px] leading-relaxed flex items-center pt-3.5"
+                        className="flex-1 bg-transparent border-none outline-none text-white placeholder-text-secondary/60 px-2 py-3.5 resize-none max-h-[200px] custom-scrollbar text-[16px] leading-relaxed block"
                         rows={1}
+                        style={{ height: '52px' }}
                     />
 
-                    <div className="flex items-center gap-1 pr-2">
+                    <div className="flex items-center gap-1 pr-2 mb-2">
                         {isLoading ? (
                             <button
                                 onClick={handleStop}
@@ -143,8 +156,18 @@ export function ChatInterface() {
 
   const loadSessions = async () => {
     try {
-        const sessions = await chatService.getSessions();
-        setSessions(sessions);
+        const fetchedSessions = await chatService.getSessions();
+        setSessions(fetchedSessions);
+        
+        // Auto-load most recent chat history on mount if no active conversation is set
+        setConversationId((prevConvId) => {
+            if (!prevConvId && fetchedSessions.length > 0) {
+                // Instantly trigger history retrieval on the newest session
+                loadSessionHistory(fetchedSessions[0].id);
+                return fetchedSessions[0].id;
+            }
+            return prevConvId;
+        });
     } catch (error) {
         console.error('Failed to load sessions', error);
     }
@@ -403,6 +426,23 @@ export function ChatInterface() {
     }
   };
 
+  const handleRenameSession = async (id: string, newTitle: string) => {
+    const success = await chatService.renameSession(id, newTitle);
+    if (success) {
+      setSessions(prev => prev.map(s => s.id === id ? { ...s, title: newTitle } : s));
+    }
+  };
+
+  const handleDeleteSession = async (id: string) => {
+    const success = await chatService.deleteSession(id);
+    if (success) {
+      setSessions(prev => prev.filter(s => s.id !== id));
+      if (conversationId === id) {
+        handleNewChat();
+      }
+    }
+  };
+
   // ─────────────────────────────────────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
@@ -416,6 +456,8 @@ export function ChatInterface() {
         currentSessionId={conversationId}
         onSelectSession={loadSessionHistory}
         onNewChat={handleNewChat}
+        onRenameSession={handleRenameSession}
+        onDeleteSession={handleDeleteSession}
       />
 
       {/* Main Chat Area */}

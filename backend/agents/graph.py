@@ -1,6 +1,7 @@
 import asyncio
 import json
 import re
+import time
 import logging
 import uuid
 from typing import Dict, List, Any
@@ -85,6 +86,7 @@ async def scheme_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
+    t0 = time.time()
 
     # 1. Number extraction (e.g., "top 3")
     match = re.search(r'\b\d+\b', last_message)
@@ -94,6 +96,8 @@ async def scheme_agent_node(state: AgentState):
     try:
         async with AsyncSessionLocal() as db:
             schemes = await scheme_service.search_schemes(db, last_message, limit=5)
+        t1 = time.time()
+        logger.info(f"⏱️  Embedding + vector search: {t1 - t0:.2f}s")
     except Exception as e:
         logger.error(f"Database Connection Error in Scheme Agent: {e}")
         # Save error message to DB
@@ -154,26 +158,62 @@ async def scheme_agent_node(state: AgentState):
         schemes_data.append(sd)
 
     # 3. AI ANALYSIS (REASONING)
-    analysis_input = [{"id": x["id"], "name": x["name"], "desc": x["description"]} for x in schemes_data]
+    analysis_input = [
+        {
+            "id": x["id"],
+            "name": x["name"],
+            "description": x["description"], 
+            "eligibility": x["eligibility_criteria"],
+            "benefits": x["benefits"],
+            "tags": x["tags"]
+        }
+        for x in schemes_data
+    ]
+
     prompt = f"""
-    Analyze these government schemes for the query: "{last_message}"
-    Data: {json.dumps(analysis_input)}
-    
-    Return ONLY a JSON object with this structure:
+    You are an expert government scheme advisor for Indian MSMEs.
+
+    Analyze these schemes for the user query: "{last_message}"
+
+    Schemes data:
+    {json.dumps(analysis_input, indent=2)}
+
+    Return ONLY a valid JSON object:
     {{
-        "chat_summary": "Friendly 1-2 sentence overview",
+        "chat_summary": "Friendly 2-3 sentence overview explaining what you found and why",
         "schemes_metadata": [
             {{
-                "id": "scheme_id", 
-                "relevance_score": 0-100, 
-                "explanation": "Why this fits?",
-                "key_benefit": "The single most important benefit for this user"
+                "id": "scheme_id",
+                "relevance_score": 0-100,
+                "explanation": "Specific reason why this scheme fits the query",
+                "key_benefit": "Single most important benefit for this user"
             }}
         ]
     }}
+
+    Scoring rules:
+    - Score 80-100 only if scheme directly addresses the query topic
+    - Score 50-79 if partially relevant
+    - Score below 50 if loosely related
+    - Never give high scores to schemes just because they mention 
+      similar words — judge actual fit
     """
 
-    ai_response = await gemini_service.generate_response(prompt)
+    t_rank_start = time.time()
+    
+    # Fire Gemini ranking — don't await yet.
+    # While Gemini is thinking, you can optionally do merge prep 
+    # work or profile filtering concurrently.
+    ranking_task = asyncio.create_task(
+        gemini_service.generate_response(prompt)
+    )
+    
+    # ... any concurrent code will execute perfectly parallel here ...
+
+    ai_response = await ranking_task
+    t_end = time.time()
+    logger.info(f"⏱️  Gemini ranking: {t_end - t_rank_start:.2f}s")
+    logger.info(f"⏱️  Total scheme agent: {t_end - t0:.2f}s")
 
     try:
         # AI JSON Parse

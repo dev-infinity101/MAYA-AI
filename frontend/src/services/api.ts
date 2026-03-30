@@ -91,7 +91,6 @@ export const chatService = {
         }
     },
 
-    /** Returns all messages for a conversation in the new JSONB format */
     getSessionHistory: async (conversation_id: string) => {
         try {
             const response = await api.get(`/api/history/${conversation_id}`);
@@ -99,6 +98,28 @@ export const chatService = {
         } catch (error) {
             console.error('Error fetching history:', error);
             throw error;
+        }
+    },
+
+    /** Renames a session title */
+    renameSession: async (conversation_id: string, newTitle: string): Promise<boolean> => {
+        try {
+            await api.put(`/api/history/${conversation_id}`, { title: newTitle });
+            return true;
+        } catch (error) {
+            console.error('Error renaming session:', error);
+            return false;
+        }
+    },
+
+    /** Deletes a session and all its messages */
+    deleteSession: async (conversation_id: string): Promise<boolean> => {
+        try {
+            await api.delete(`/api/history/${conversation_id}`);
+            return true;
+        } catch (error) {
+            console.error('Error deleting session:', error);
+            return false;
         }
     },
 

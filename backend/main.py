@@ -6,10 +6,11 @@ from contextlib import asynccontextmanager
 from typing import List, Optional, Dict, Any, AsyncGenerator
 
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 from langchain_core.messages import HumanMessage
 
 from database import engine, Base, get_db, AsyncSessionLocal
@@ -45,15 +46,41 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"❌ Initialization Error: {e}")
 
-    # Pre-warm Gemini — eliminates the ~1.5s cold-start overhead on first real call
-    try:
-        await gemini_service.generate_response("hello")
-        logger.info("✅ Gemini pre-warmed successfully.")
-    except Exception as e:
-        logger.warning(f"⚠️  Gemini pre-warm failed (non-critical): {e}")
+    # Pre-warm Gemini — eliminates the ~1.5s cold-start on first real call.
+    # create_task runs this in the background so the server starts accepting
+    # requests immediately — do NOT use await here.
+    async def _prewarm():
+        try:
+            await gemini_service.generate_response("hello")
+            logger.info("✅ Gemini pre-warmed successfully.")
+        except Exception as e:
+            logger.warning(f"⚠️  Gemini pre-warm failed (non-critical): {e}")
+    asyncio.create_task(_prewarm())
+
+    async def _keep_db_alive():
+        """
+        Neon suspends after 5 min inactivity.
+        We ping every 4 min to prevent suspension entirely.
+        This is the single most impactful fix for your latency.
+        """
+        while True:
+            try:
+                async with AsyncSessionLocal() as db:
+                    await db.execute(text("SELECT 1"))
+            except Exception as e:
+                logger.warning(f"DB keepalive failed: {e}")
+            await asyncio.sleep(240)  # 4 minutes
+
+    # Keep Neon awake — ping every 4 minutes (creates a background worker task)
+    keepalive_task = asyncio.create_task(_keep_db_alive())
 
     yield
+    
     logger.info("🛑 MAYA AI Backend Shutting Down...")
+    keepalive_task.cancel()
+    
+    from services.jina_service import jina_service
+    await jina_service.close()
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -91,7 +118,11 @@ async def root():
 
 def _build_agent_prompt(message: str, agent: str) -> tuple[str, str]:
     """Returns (agent_name, prompt) — keeps prompt logic out of the endpoint."""
-    base = "CRITICAL: Do NOT start with a greeting. Answer directly.\n"
+    base = """CRITICAL: Do NOT start with a greeting.
+When presenting comparative data, loan amounts, scheme lists, 
+pricing options, or any structured information — always use 
+markdown tables for clarity. Use **bold** for important numbers 
+and terms."""
     prompts = {
         "market":    ("market",    f"You are an expert Market Research Analyst for MSMEs in India.\nQuery: {message}\n{base}"),
         "brand":     ("brand",     f"You are a creative Brand Consultant for Indian MSMEs.\nQuery: {message}\nProvide 3-5 distinct options.\n{base}"),
@@ -262,15 +293,18 @@ async def chat_stream(request: schemas.ChatRequest, db: AsyncSession = Depends(g
 
     # ── SSE generator with 15s keepalive ping ─────────────────────────────────
     async def event_stream() -> AsyncGenerator[str, None]:
+        import time
         full_response = ""
         PING_INTERVAL = 15  # seconds between keepalive pings
+        first_chunk = True
+        t0 = time.time()
 
         try:
             # Send conversation_id first so frontend can store it immediately
             yield f"data: {json.dumps({'type': 'init', 'conversation_id': conversation_id})}\n\n"
 
             # Use a Queue so we can interleave generator chunks and ping logic
-            queue: asyncio.Queue[str | None] = asyncio.Queue()
+            queue: asyncio.Queue[str | Exception | None] = asyncio.Queue()
 
             async def _feed_queue():
                 """Reads chunks from Gemini and puts them into the queue. Sends None when done."""
@@ -279,6 +313,7 @@ async def chat_stream(request: schemas.ChatRequest, db: AsyncSession = Depends(g
                         await queue.put(chunk)
                 except Exception as e:
                     logger.error(f"Gemini stream feed error: {e}")
+                    await queue.put(e)
                 finally:
                     await queue.put(None)  # sentinel
 
@@ -295,6 +330,17 @@ async def chat_stream(request: schemas.ChatRequest, db: AsyncSession = Depends(g
 
                 if chunk is None:
                     break  # sentinel received — stream is complete
+
+                if isinstance(chunk, Exception):
+                    # API key exhausted or other LLM failure
+                    error_msg = "agent not available"
+                    full_response = error_msg
+                    yield f"data: {json.dumps({'type': 'error', 'message': error_msg})}\n\n"
+                    break
+
+                if first_chunk:
+                    logger.info(f"⏱️  Time to first chunk: {time.time() - t0:.2f}s")
+                    first_chunk = False
 
                 full_response += chunk
                 yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
@@ -380,6 +426,40 @@ async def get_conversation_history(conversation_id: str, db: AsyncSession = Depe
         logger.error(f"Error fetching history for {conversation_id}: {e}")
         return {"conversation_id": conversation_id, "history": []}
 
+
+@app.put("/api/history/{conversation_id}", tags=["History"])
+async def rename_conversation(conversation_id: str, payload: dict = Body(...), db: AsyncSession = Depends(get_db)):
+    """Renames a conversation title."""
+    try:
+        from sqlalchemy import update
+        new_title = payload.get("title")
+        if not new_title:
+            raise HTTPException(status_code=400, detail="Title is required")
+        
+        stmt = update(Conversation).where(Conversation.id == uuid.UUID(conversation_id)).values(title=new_title)
+        await db.execute(stmt)
+        await db.commit()
+        return {"status": "success", "title": new_title}
+    except Exception as e:
+        logger.error(f"Error renaming conversation {conversation_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.delete("/api/history/{conversation_id}", tags=["History"])
+async def delete_conversation(conversation_id: str, db: AsyncSession = Depends(get_db)):
+    """Deletes a conversation and cascaded messages."""
+    try:
+        from sqlalchemy import delete
+        stmt = delete(Conversation).where(Conversation.id == uuid.UUID(conversation_id))
+        result = await db.execute(stmt)
+        if result.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        await db.commit()
+        return {"status": "success"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting conversation {conversation_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

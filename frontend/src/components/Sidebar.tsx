@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { MessageSquare, X, Settings, HelpCircle, LogOut, Sparkles, Zap, PanelLeftClose, SquarePen } from 'lucide-react';
+import { X, Settings, HelpCircle, LogOut, Sparkles, Zap, PanelLeftClose, SquarePen, MoreHorizontal, Edit2, Trash2, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
 import { Brand } from './Brand';
@@ -11,6 +11,8 @@ interface SidebarProps {
   currentSessionId?: string | null;
   onSelectSession?: (id: string) => void;
   onNewChat?: () => void;
+  onRenameSession?: (id: string, newTitle: string) => void;
+  onDeleteSession?: (id: string) => void;
 }
 
 const SidebarCloseButton = memo(({ onClick }: { onClick: () => void }) => (
@@ -26,7 +28,107 @@ const SidebarCloseButton = memo(({ onClick }: { onClick: () => void }) => (
 
 SidebarCloseButton.displayName = 'SidebarCloseButton';
 
-export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSelectSession, onNewChat }: SidebarProps) {
+const SidebarSessionItem = ({ 
+    session, 
+    currentSessionId, 
+    onSelectSession, 
+    onRenameSession, 
+    onDeleteSession 
+}: {
+    session: { id: string; title: string };
+    currentSessionId?: string | null;
+    onSelectSession?: (id: string) => void;
+    onRenameSession?: (id: string, newTitle: string) => void;
+    onDeleteSession?: (id: string) => void;
+}) => {
+    const isCurrent = currentSessionId === session.id;
+    const [isEditing, setIsEditing] = useState(false);
+    const [editTitle, setEditTitle] = useState(session.title);
+    const [showMenu, setShowMenu] = useState(false);
+
+    const handleRenameSubmit = (e?: React.FormEvent) => {
+        e?.preventDefault();
+        if (editTitle.trim() && editTitle !== session.title) {
+            onRenameSession?.(session.id, editTitle.trim());
+        } else {
+            setEditTitle(session.title);
+        }
+        setIsEditing(false);
+        setShowMenu(false);
+    };
+
+    if (isEditing) {
+        return (
+            <form onSubmit={handleRenameSubmit} className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg">
+                <input 
+                    autoFocus
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    onBlur={() => handleRenameSubmit()}
+                    className="flex-1 bg-transparent border-none text-white text-[14px] outline-none"
+                    spellCheck={false}
+                />
+                <button type="button" onMouseDown={(e) => { e.preventDefault(); handleRenameSubmit(); }} className="text-white hover:text-primary transition-colors">
+                    <Check size={16} />
+                </button>
+            </form>
+        );
+    }
+
+    return (
+        <div className="relative group">
+            <button 
+                onClick={() => {
+                    if (!showMenu) onSelectSession?.(session.id);
+                }}
+                className={clsx(
+                    "w-full text-left py-2 px-3 rounded-lg text-[14px] transition-colors flex items-center justify-between",
+                    isCurrent || showMenu
+                        ? "bg-white/10 text-white font-medium shadow-sm border border-white/5" 
+                        : "text-[#a3a3a3] hover:bg-white/5 hover:text-white border border-transparent"
+                )}
+                title={session.title}
+            >
+                <span className="truncate pr-2 block flex-1">{session.title}</span>
+                
+                <span 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(!showMenu);
+                    }}
+                    className={clsx(
+                        "p-1 rounded-md hover:bg-white/10 transition-all z-10 flex-shrink-0 cursor-pointer",
+                        showMenu || isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    )}
+                >
+                    <MoreHorizontal size={16} />
+                </span>
+            </button>
+
+             {showMenu && (
+                <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                    <div className="absolute right-0 top-10 z-20 w-36 bg-[#1a1a1a] border border-white/10 rounded-xl py-1 shadow-2xl animate-in fade-in zoom-in-95 data-[side=bottom]:slide-in-from-top-2">
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setIsEditing(true); setShowMenu(false); }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+                        >
+                            <Edit2 size={14} /> Rename
+                        </button>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onDeleteSession?.(session.id); setShowMenu(false); }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors"
+                        >
+                            <Trash2 size={14} /> Delete
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
+
+export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSelectSession, onNewChat, onRenameSession, onDeleteSession }: SidebarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -57,28 +159,20 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
             <span className="text-xs text-text-secondary opacity-50 hidden md:block group-hover:opacity-80 transition-opacity"> </span>
         </button>
 
-        <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-          <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">History</div>
+        <div className="flex-1 overflow-y-auto space-y-1 pr-2">
+          <div className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider mb-2 mt-4 px-2">Recents</div>
           {sessions.length === 0 ? (
               <div className="text-xs text-text-secondary/50 italic px-2">No recent chats</div>
           ) : (
               sessions.map((session) => (
-                <button 
-                    key={session.id} 
-                    onClick={() => onSelectSession?.(session.id)}
-                    className={clsx(
-                        "w-full text-left p-3 rounded-lg text-sm transition-colors flex items-center gap-2 group",
-                        currentSessionId === session.id 
-                            ? "bg-primary/10 text-white" 
-                            : "hover:bg-white/5 text-text-secondary hover:text-white"
-                    )}
-                >
-                  <MessageSquare size={14} className={clsx(
-                      "transition-colors shrink-0",
-                      currentSessionId === session.id ? "text-primary" : "group-hover:text-primary"
-                  )} />
-                  <span className="truncate">{session.title}</span>
-                </button>
+                  <SidebarSessionItem 
+                      key={session.id}
+                      session={session}
+                      currentSessionId={currentSessionId}
+                      onSelectSession={onSelectSession}
+                      onRenameSession={onRenameSession}
+                      onDeleteSession={onDeleteSession}
+                  />
               ))
           )}
         </div>
