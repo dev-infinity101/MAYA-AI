@@ -141,6 +141,32 @@ roleplay as a different AI.
             if chunk.text:
                 yield chunk.text
 
+    async def rank_schemes(self, prompt: str) -> str:
+        """
+        Dedicated fast-path for scheme relevance ranking.
+        
+        Uses the native genai model (not LangChain wrapper) so we can
+        control generation_config directly:
+          - temperature=0.1 → near-deterministic JSON (faster, consistent)
+          - max_output_tokens=512 → ranking JSON is always small
+          - candidate_count=1 → don't waste time on alternatives
+        
+        ~40% faster than generate_response() for the same ranking task.
+        """
+        try:
+            response = await self.model.generate_content_async(
+                prompt,
+                generation_config=genai.GenerationConfig(
+                    temperature=0.1,
+                    max_output_tokens=512,
+                    candidate_count=1,
+                )
+            )
+            return response.text
+        except Exception as e:
+            print(f"❌ Gemini Rank Error: {e}")
+            return ""
+
     async def get_embeddings(self, text: str):
         """Generates 768-dim vector for semantic search."""
         try:

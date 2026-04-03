@@ -48,9 +48,13 @@ export const chatService = {
     chatAgent: async (
         message: string,
         conversation_id?: string | null,
-        signal?: AbortSignal
+        signal?: AbortSignal,
+        token?: string | null,
     ): Promise<ChatResponse> => {
         try {
+            const headers: Record<string, string> = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
             const response = await api.post<ChatResponse>(
                 '/api/chat/agent',
                 {
@@ -58,7 +62,7 @@ export const chatService = {
                     conversation_id: conversation_id || null,
                     session_id: conversation_id || null,  // legacy compat
                 },
-                { signal }
+                { signal, headers }
             );
             return response.data;
         } catch (error) {
@@ -136,37 +140,26 @@ export const chatService = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NEW: chatStream — text agents via SSE (Step 3.3)
+// chatStream — text agents via SSE (Step 3.3)
+// Now accepts an optional Clerk JWT token to pass as Authorization header.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * chatStream — uses browser-native fetch() + ReadableStream for SSE.
- * Axios cannot read SSE chunks natively, so we drop down to fetch here.
- *
- * Event types from server:
- *   init  { type: 'init',  conversation_id: string }
- *   chunk { type: 'chunk', text: string }
- *   done  { type: 'done' }
- *   error { type: 'error', message: string }
- *
- * @param payload        - Request body
- * @param onChunk        - Called for each text chunk
- * @param onInit         - Called once with the conversation_id
- * @param onDone         - Called when stream is complete
- * @param onError        - Called if stream encounters an error
- */
 export const chatStream = async (
     payload: ChatPayload,
     onChunk: (text: string) => void,
     onInit: (conversationId: string) => void,
     onDone: () => void,
     onError: (msg: string) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    token?: string | null,
 ): Promise<void> => {
     try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const response = await fetch(`${API_BASE}/api/chat/stream`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(payload),
             signal,
         });
@@ -178,42 +171,33 @@ export const chatStream = async (
 
         const reader = response.body!.getReader();
         const decoder = new TextDecoder();
-
-        // ── KEY FIX: buffer accumulates raw text across multiple read() calls.
-        // A single read() can deliver a partial SSE frame, or multiple frames
-        // glued together. We only parse when we see a complete "\n\n" boundary.
         let buffer = '';
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            // Append new bytes to buffer (keep stream:true for multi-byte chars)
             buffer += decoder.decode(value, { stream: true });
-
-            // Split on the SSE double-newline boundary
             const parts = buffer.split('\n\n');
-
-            // Last element may be an incomplete frame — keep it in the buffer
             buffer = parts.pop() ?? '';
 
             for (const part of parts) {
                 const line = part.trim();
                 if (!line.startsWith('data: ')) continue;
                 try {
-                    const event = JSON.parse(line.slice(6)); // remove "data: "
-                    if (event.type === 'ping')  continue;           // ignore keepalive
+                    const event = JSON.parse(line.slice(6));
+                    if (event.type === 'ping')  continue;
                     if (event.type === 'init')  onInit(event.conversation_id);
                     if (event.type === 'chunk') onChunk(event.text);
                     if (event.type === 'done')  onDone();
                     if (event.type === 'error') onError(event.message);
                 } catch {
-                    /* malformed frame — skip silently */
+                    /* malformed frame — skip */
                 }
             }
         }
     } catch (err: any) {
-        if (err?.name === 'AbortError') return;   // user cancelled — not an error
+        if (err?.name === 'AbortError') return;
         console.error('chatStream error:', err);
         onError('Connection error. Please try again.');
     }

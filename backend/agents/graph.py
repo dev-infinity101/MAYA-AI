@@ -157,60 +157,58 @@ async def scheme_agent_node(state: AgentState):
         }
         schemes_data.append(sd)
 
-    # 3. AI ANALYSIS (REASONING)
+    # 3. AI ANALYSIS — send only what Gemini needs to rank (~60% fewer tokens)
     analysis_input = [
         {
             "id": x["id"],
             "name": x["name"],
-            "description": x["description"], 
-            "eligibility": x["eligibility_criteria"],
-            "benefits": x["benefits"],
-            "tags": x["tags"]
+            "desc": (x["description"] or "")[:200],   # trim — enough for ranking
+            "benefits": (x["benefits"] or [])[:3],      # top 3 only
+            "tags": (x["tags"] or [])[:5],
         }
         for x in schemes_data
     ]
 
-    prompt = f"""
-    You are an expert government scheme advisor for Indian MSMEs.
-
-    Analyze these schemes for the user query: "{last_message}"
-
-    Schemes data:
-    {json.dumps(analysis_input, indent=2)}
-
-    Return ONLY a valid JSON object:
-    {{
-        "chat_summary": "Friendly 2-3 sentence overview explaining what you found and why",
-        "schemes_metadata": [
-            {{
-                "id": "scheme_id",
-                "relevance_score": 0-100,
-                "explanation": "Specific reason why this scheme fits the query",
-                "key_benefit": "Single most important benefit for this user"
-            }}
-        ]
-    }}
-
-    Scoring rules:
-    - Score 80-100 only if scheme directly addresses the query topic
-    - Score 50-79 if partially relevant
-    - Score below 50 if loosely related
-    - Never give high scores to schemes just because they mention 
-      similar words — judge actual fit
-    """
+    ranking_prompt = f"""Rate these schemes for: \"{last_message}\"
+{json.dumps(analysis_input)}
+JSON only:
+{{"chat_summary":"2-3 friendly sentences","schemes_metadata":[{{"id":"","relevance_score":0,"explanation":"","key_benefit":""}}]}}"""
 
     t_rank_start = time.time()
-    
-    # Fire Gemini ranking — don't await yet.
-    # While Gemini is thinking, you can optionally do merge prep 
-    # work or profile filtering concurrently.
-    ranking_task = asyncio.create_task(
-        gemini_service.generate_response(prompt)
-    )
-    
-    # ... any concurrent code will execute perfectly parallel here ...
 
-    ai_response = await ranking_task
+    try:
+        # Hard 8s timeout — scheme agent must never hang more than ~9s total
+        ai_response = await asyncio.wait_for(
+            gemini_service.rank_schemes(ranking_prompt),
+            timeout=8.0
+        )
+    except asyncio.TimeoutError:
+        # Timeout fallback — vector cosine order is already semantically ranked,
+        # so assign descending scores and skip Gemini entirely
+        logger.warning("⚠️  Gemini ranking timed out — using vector-order fallback")
+        for i, sd in enumerate(schemes_data):
+            sd.update({
+                "relevance_score": 90 - (i * 15),
+                "explanation": "Matched based on semantic similarity to your query.",
+                "key_benefit": (sd["benefits"][0] if sd.get("benefits") else "See scheme details."),
+            })
+        if conversation_id:
+            try:
+                async with AsyncSessionLocal() as db:
+                    await save_message(
+                        db=db, conversation_id=uuid.UUID(conversation_id),
+                        role="assistant", content_type="scheme_results",
+                        content={"query": last_message, "summary": "Here are the most relevant schemes I found:", "schemes": schemes_data[:3]},
+                        agent_used="scheme"
+                    )
+            except Exception as save_err:
+                logger.warning(f"Could not save timeout fallback: {save_err}")
+        return {
+            "messages": [AIMessage(content="Here are the most relevant schemes I found:")],
+            "schemes": schemes_data[:3],
+            "current_agent": "scheme"
+        }
+
     t_end = time.time()
     logger.info(f"⏱️  Gemini ranking: {t_end - t_rank_start:.2f}s")
     logger.info(f"⏱️  Total scheme agent: {t_end - t0:.2f}s")

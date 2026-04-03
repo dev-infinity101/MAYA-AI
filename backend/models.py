@@ -68,17 +68,18 @@ class UserProfile(Base):
     clerk_user_id       = Column(String, ForeignKey("users.clerk_user_id"), unique=True, nullable=False)
 
     # Demographic / business fields
-    category            = Column(String)       # SC/ST/OBC/General/Women
-    state               = Column(String)
-    city                = Column(String)
-    business_name       = Column(String)
-    business_type       = Column(String)       # Manufacturing/Services/Trading
-    sector              = Column(String)       # Food/Textile/Tech/Retail
-    business_age        = Column(String)       # <1yr / 1-3yr / 3yr+
-    turnover_range      = Column(String)       # <10L / 10-50L / 50L-5Cr
-    udyam_registered    = Column(Boolean, default=False)
-    existing_loan       = Column(Boolean, default=False)
-    primary_goal        = Column(String)       # Funding/Equipment/Training
+    full_name           = Column(String, nullable=True)
+    category            = Column(String, nullable=True)
+    state               = Column(String, nullable=True)
+    city                = Column(String, nullable=True)
+    business_name       = Column(String, nullable=True)
+    business_type       = Column(String, nullable=True)
+    sector              = Column(String, nullable=True)
+    turnover_range      = Column(String, nullable=True)
+    udyam_registered    = Column(Boolean, nullable=True, default=False)
+    existing_loan       = Column(Boolean, nullable=True, default=False)
+    primary_goal        = Column(String, nullable=True)
+    
     onboarding_complete = Column(Boolean, default=False)
 
     user = relationship("User", back_populates="profile")

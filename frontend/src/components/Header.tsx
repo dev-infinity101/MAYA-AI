@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Brand } from './Brand';
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
@@ -38,7 +39,7 @@ export function Header() {
           <Brand />
         </Link>
 
-        {/* Desktop Nav shifted to right */}
+        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8 ml-auto mr-4">
           {navLinks.map((link) => (
             <Link 
@@ -54,8 +55,37 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Empty CTA div (placeholder for future use) */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Auth CTA */}
+        <div className="hidden md:flex items-center gap-3">
+          <SignedOut>
+            <Link
+              to="/sign-in"
+              className="text-sm text-gray-300 hover:text-white transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/sign-up"
+              className="px-4 py-2 bg-emerald-500 text-black text-sm font-semibold rounded-lg hover:bg-emerald-400 transition-colors"
+            >
+              Get Started
+            </Link>
+          </SignedOut>
+
+          <SignedIn>
+            <Link
+              to="/chat"
+              className="text-sm text-gray-300 hover:text-white transition-colors mr-1"
+            >
+              Open Chat
+            </Link>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                variables: { colorPrimary: '#10b981' }
+              }}
+            />
+          </SignedIn>
         </div>
 
         {/* Mobile Toggle */}
@@ -80,6 +110,16 @@ export function Header() {
               {link.name}
             </Link>
           ))}
+          <div className="border-t border-white/10 pt-4 flex flex-col gap-3">
+            <SignedOut>
+              <Link to="/sign-in" className="text-base text-gray-300" onClick={() => setIsMobileMenuOpen(false)}>Sign In</Link>
+              <Link to="/sign-up" className="px-4 py-2 bg-emerald-500 text-black text-sm font-semibold rounded-lg text-center" onClick={() => setIsMobileMenuOpen(false)}>Get Started</Link>
+            </SignedOut>
+            <SignedIn>
+              <Link to="/chat" className="text-base text-gray-300" onClick={() => setIsMobileMenuOpen(false)}>Open Chat</Link>
+              <UserButton afterSignOutUrl="/" appearance={{ variables: { colorPrimary: '#10b981' } }} />
+            </SignedIn>
+          </div>
         </div>
       )}
     </header>

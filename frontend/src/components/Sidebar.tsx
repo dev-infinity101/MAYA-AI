@@ -1,7 +1,8 @@
 import { memo, useState } from 'react';
-import { X, Settings, HelpCircle, LogOut, Sparkles, Zap, PanelLeftClose, SquarePen, MoreHorizontal, Edit2, Trash2, Check } from 'lucide-react';
+import { X, Settings, HelpCircle, Sparkles, Zap, PanelLeftClose, SquarePen, MoreHorizontal, Edit2, Trash2, Check, LogOut } from 'lucide-react';
 import { clsx } from 'clsx';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { UserButton, useClerk } from '@clerk/clerk-react';
 import { Brand } from './Brand';
 
 interface SidebarProps {
@@ -13,6 +14,8 @@ interface SidebarProps {
   onNewChat?: () => void;
   onRenameSession?: (id: string, newTitle: string) => void;
   onDeleteSession?: (id: string) => void;
+  userProfile?: Record<string, any> | null;
+  clerkUser?: any | null;
 }
 
 const SidebarCloseButton = memo(({ onClick }: { onClick: () => void }) => (
@@ -25,7 +28,6 @@ const SidebarCloseButton = memo(({ onClick }: { onClick: () => void }) => (
     <PanelLeftClose size={20} className="group-hover:scale-110 transition-transform" />
   </button>
 ));
-
 SidebarCloseButton.displayName = 'SidebarCloseButton';
 
 const SidebarSessionItem = ({ 
@@ -108,7 +110,7 @@ const SidebarSessionItem = ({
              {showMenu && (
                 <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                    <div className="absolute right-0 top-10 z-20 w-36 bg-[#1a1a1a] border border-white/10 rounded-xl py-1 shadow-2xl animate-in fade-in zoom-in-95 data-[side=bottom]:slide-in-from-top-2">
+                    <div className="absolute right-0 top-10 z-20 w-36 bg-[#1a1a1a] border border-white/10 rounded-xl py-1 shadow-2xl animate-in fade-in zoom-in-95">
                         <button 
                             onClick={(e) => { e.stopPropagation(); setIsEditing(true); setShowMenu(false); }}
                             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
@@ -128,8 +130,30 @@ const SidebarSessionItem = ({
     );
 };
 
-export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSelectSession, onNewChat, onRenameSession, onDeleteSession }: SidebarProps) {
+export function Sidebar({ 
+    isOpen, onClose, sessions = [], currentSessionId, 
+    onSelectSession, onNewChat, onRenameSession, onDeleteSession,
+    userProfile, clerkUser
+}: SidebarProps) {
+  const { signOut } = useClerk();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Resolve display name: prefer onboarding full_name → Clerk name → fallback
+  const displayName = userProfile?.display_name 
+    || userProfile?.full_name 
+    || clerkUser?.fullName 
+    || clerkUser?.firstName 
+    || 'Business Owner';
+
+  const email = userProfile?.email 
+    || clerkUser?.primaryEmailAddress?.emailAddress 
+    || '';
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <div 
@@ -156,7 +180,6 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
                 <SquarePen size={18} className="text-text-secondary group-hover:text-primary transition-colors" />
                 <span className="text-sm font-medium">New chat</span>
             </div>
-            <span className="text-xs text-text-secondary opacity-50 hidden md:block group-hover:opacity-80 transition-opacity"> </span>
         </button>
 
         <div className="flex-1 overflow-y-auto space-y-1 pr-2">
@@ -177,15 +200,23 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
           )}
         </div>
         
-        {/* User Settings Popover */}
+        {/* User menu popover */}
         {isMenuOpen && (
           <div className="absolute bottom-20 left-4 right-4 bg-[#1a1a1a] border border-white/10 rounded-2xl p-2 shadow-2xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-200">
              <div className="p-2 border-b border-white/5 mb-1">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary" />
+                  {/* Clerk UserButton — handles avatar, account management */}
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-8 h-8",
+                      }
+                    }}
+                  />
                   <div>
-                    <div className="text-sm text-white font-medium">Business Owner</div>
-                    <div className="text-[10px] text-text-secondary">@gstunnerbeats</div>
+                    <div className="text-sm text-white font-medium">{displayName}</div>
+                    <div className="text-[10px] text-text-secondary truncate max-w-[160px]">{email}</div>
                   </div>
                 </div>
              </div>
@@ -198,10 +229,14 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
                 <Zap size={16} />
                 <span>Personalization</span>
              </button>
-             <button className="w-full flex items-center gap-3 p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors">
+             <Link 
+                to="/settings"
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full flex items-center gap-3 p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors"
+             >
                 <Settings size={16} />
                 <span>Settings</span>
-             </button>
+             </Link>
              <div className="h-px bg-white/5 my-1" />
              <button className="w-full flex items-center justify-between p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors">
                 <div className="flex items-center gap-3">
@@ -210,13 +245,17 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
                 </div>
                 <X size={14} className="rotate-45 text-text-secondary" />
              </button>
-             <button className="w-full flex items-center gap-3 p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors">
+             <button 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 p-2.5 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+             >
                 <LogOut size={16} />
                 <span>Log out</span>
              </button>
           </div>
         )}
 
+        {/* User avatar + name trigger */}
         <div className="mt-auto pt-4 border-t border-white/10">
            <div 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -225,9 +264,19 @@ export function Sidebar({ isOpen, onClose, sessions = [], currentSessionId, onSe
               isMenuOpen ? "bg-white/10" : "hover:bg-white/5"
             )}
            >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary" />
-              <div className="text-sm flex-1">
-                  <div className="text-white font-medium">Business Owner</div>
+              {/* Clerk UserButton as avatar */}
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8",
+                    // Hide the default dropdown — we use our own menu
+                    userButtonPopoverCard: "hidden",
+                  }
+                }}
+              />
+              <div className="text-sm flex-1 min-w-0">
+                  <div className="text-white font-medium truncate">{displayName}</div>
                   <div className="text-text-secondary text-xs">Free Plan</div>
               </div>
            </div>

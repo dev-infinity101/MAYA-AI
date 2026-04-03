@@ -59,8 +59,23 @@ export function Message({ message }: MessageProps) {
                             ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
                             hr: ({node, ...props}) => <hr className="border-white/10 my-8" {...props} />,
                             table: ({node, ...props}) => (
-                                <div className="overflow-x-auto my-3 md:max-w-[70vw]">
-                                    <table className="w-full border-collapse text-sm" {...props} />
+                                <div className="my-6 flex flex-col items-start gap-2">
+                                    <div className="overflow-x-auto w-full md:max-w-[70vw] rounded-lg border border-white/10 bg-black/20">
+                                        <table className="w-full border-collapse text-sm" {...props} />
+                                    </div>
+                                    {!isUser && !message.isStreaming && (
+                                        <button
+                                            onClick={() => exportMarkdownTableToExcel(
+                                                contentText,
+                                                message.agent ? `maya_${message.agent}` : 'maya_export'
+                                            )}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors duration-200"
+                                            title="Export table data to Excel"
+                                        >
+                                            <FileSpreadsheet size={14} />
+                                            Export to Excel
+                                        </button>
+                                    )}
                                 </div>
                             ),
                             thead: ({node, ...props}) => (
@@ -119,19 +134,6 @@ export function Message({ message }: MessageProps) {
                     >
                         {contentText}
                     </ReactMarkdown>
-
-                    {!isUser && contentText.includes('|') && !message.isStreaming && (
-                        <button
-                            onClick={() => exportMarkdownTableToExcel(
-                                contentText,
-                                message.agent ? `maya_${message.agent}` : 'maya_export'
-                            )}
-                            className="mt-4 flex items-center gap-1.5 px-3 py-1.5 text-xs text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors duration-200"
-                        >
-                            <FileSpreadsheet size={14} />
-                            Export to Excel
-                        </button>
-                    )}
                 </div>
                 </div>
                 <div className={clsx(

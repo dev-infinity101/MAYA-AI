@@ -1,868 +1,485 @@
-# MAYA — Upgrade Implementation Guide
-
-> This document covers every change needed across three major upgrades.
-> Follow sections in order — each builds on the previous one.
-> Code shown is for key functions only. Full context is in the conversation history.
+Two weeks changes everything. Here's the honest truth first.
 
 ---
 
-## TABLE OF CONTENTS
+## The Hard Truth About Your Deadline
 
-1. [Schema Redesign](#1-schema-redesign)
-2. [Graph.py Changes](#2-graphpy-changes)
-3. [Streaming Implementation](#3-streaming-implementation)
+With 2 weeks left, you cannot build WhatsApp integration properly. Meta's Business API verification alone takes 3-7 business days. If you start today you'll be waiting for approval during your submission window. That's a deadline killer.
 
----
+Here's what you **can** build in 2 weeks that makes a stronger grant submission than half-built WhatsApp:
 
 ---
 
-# 1. SCHEMA REDESIGN
+## The 2-Week UPCST Sprint Plan
 
-## What This Fixes
-
-| Problem Now | After This Fix |
-|---|---|
-| Scheme cards lost on reload | Scheme cards persist forever via JSONB |
-| No user profile storage | Onboarding data stored in `user_profiles` |
-| No image/file storage plan | `media_assets` table ready for brand kit |
-| No bookmark tracking | `user_scheme_interactions` tracks everything |
-| No migration system | Alembic manages all future changes cleanly |
-| `schemes` table works fine | Schemes table completely untouched ✅ |
-
----
-
-## Step 1.1 — Install and Configure Alembic
-
-**Why:** Right now your DB was created manually. Alembic gives you version-controlled migrations — every schema change from now on is tracked, reversible, and repeatable.
-
-```bash
-# In your backend directory
-pip install alembic
-alembic init alembic
 ```
-
-This creates:
-```
-backend/
-  alembic/
-    versions/      ← generated migration files live here
-    env.py         ← you configure this
-  alembic.ini      ← you configure this
-```
-
-**In `alembic.ini`:** Find the `sqlalchemy.url` line and blank it out:
-```ini
-sqlalchemy.url =
-```
-You'll inject the real URL dynamically from your `.env` in `env.py`.
-
-**Replace entire `alembic/env.py`** with an async-compatible version:
-
-```python
-import asyncio
-from logging.config import fileConfig
-from sqlalchemy.ext.asyncio import async_engine_from_config
-from sqlalchemy import pool
-from alembic import context
-from app.database import Base
-from app.config import settings
-import app.models  # critical — all models must be imported here
-
-config = context.config
-fileConfig(config.config_file_name)
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
-target_metadata = Base.metadata
-
-def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
-    with context.begin_transaction():
-        context.run_migrations()
-
-async def run_migrations_online():
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-    await connectable.dispose()
-
-asyncio.run(run_migrations_online())
-```
-
-> **Why async:** Your entire backend uses `asyncpg` — the Alembic env must match
-> or you'll get connection errors during migration.
-
----
-
-## Step 1.2 — Rewrite `models.py`
-
-**Why:** Your current `users` and `chat_history` tables are too simple.
-`chat_history` stores only raw text — no structure, no type info, nothing
-the frontend can use to reconstruct rich UI components like scheme cards.
-
-Open `app/models.py` and make these changes:
-
-### What to DELETE
-- The old `User` model (id, email, hashed_password)
-- The old `ChatHistory` model (session_id, role, content as Text)
-
-### What to KEEP EXACTLY AS-IS
-- The entire `Scheme` model — do not touch a single field
-
-### New models to ADD
-
-**`User`** — Clerk-based, no password:
-```python
-class User(Base):
-    __tablename__ = "users"
-    id            = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    clerk_user_id = Column(String, unique=True, nullable=False, index=True)
-    email         = Column(String, unique=True, nullable=False)
-    name          = Column(String)
-    created_at    = Column(DateTime, default=datetime.utcnow)
-    # relationships: profile, conversations, scheme_interactions, media_assets
-```
-
-**`UserProfile`** — Onboarding answers live here:
-```python
-class UserProfile(Base):
-    __tablename__ = "user_profiles"
-    id                  = Column(UUID, primary_key=True)
-    clerk_user_id       = Column(String, ForeignKey("users.clerk_user_id"), unique=True)
-    category            = Column(String)      # SC/ST/OBC/General/Women
-    state               = Column(String)
-    city                = Column(String)
-    business_name       = Column(String)
-    business_type       = Column(String)      # Manufacturing/Services/Trading
-    sector              = Column(String)      # Food/Textile/Tech/Retail
-    business_age        = Column(String)      # <1yr / 1-3yr / 3yr+
-    turnover_range      = Column(String)      # <10L / 10-50L / 50L-5Cr
-    udyam_registered    = Column(Boolean, default=False)
-    existing_loan       = Column(Boolean, default=False)
-    primary_goal        = Column(String)      # Funding/Equipment/Training
-    onboarding_complete = Column(Boolean, default=False)
-```
-
-**`Conversation`** — Replaces `session_id` strings:
-```python
-class Conversation(Base):
-    __tablename__ = "conversations"
-    id            = Column(UUID, primary_key=True)
-    clerk_user_id = Column(String, ForeignKey("users.clerk_user_id"), index=True)
-    title         = Column(String(255))   # first 50 chars of first message
-    created_at    = Column(DateTime, default=datetime.utcnow)
-    updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # relationships: messages
-```
-
-**`Message`** — The core fix. JSONB + content_type:
-```python
-class Message(Base):
-    __tablename__ = "messages"
-    id              = Column(UUID, primary_key=True)
-    conversation_id = Column(UUID, ForeignKey("conversations.id", ondelete="CASCADE"), index=True)
-    role            = Column(String(20), nullable=False)   # user | assistant
-    content_type    = Column(String(50), nullable=False, default="text")
-    # Valid content_type values:
-    #   "text"             → plain message
-    #   "scheme_results"   → scheme cards — full structured payload
-    #   "agent_response"   → market/brand/finance/marketing output
-    #   "brand_kit"        → logos + social posts (future)
-    #   "financial_report" → PDF report data (future)
-    content         = Column(JSONB, nullable=False)
-    agent_used      = Column(String(50))
-    created_at      = Column(DateTime, default=datetime.utcnow)
-```
-
-> **Why JSONB over TEXT:** PostgreSQL JSONB is binary-stored, indexed, and
-> queryable. You can do `WHERE content->>'agent' = 'market'` on it.
-> More importantly, it stores the full scheme card data — match score,
-> eligibility reasons, documents needed — so the frontend can rebuild
-> the exact card on reload without re-running RAG.
-
-**`MediaAsset`** — Future image/file storage:
-```python
-class MediaAsset(Base):
-    __tablename__ = "media_assets"
-    id              = Column(UUID, primary_key=True)
-    clerk_user_id   = Column(String, ForeignKey("users.clerk_user_id"))
-    conversation_id = Column(UUID, ForeignKey("conversations.id"), nullable=True)
-    message_id      = Column(UUID, ForeignKey("messages.id"), nullable=True)
-    asset_type      = Column(String(50))    # logo | social_post | report_pdf | user_upload
-    storage_url     = Column(Text)          # Cloudflare R2 public URL
-    storage_key     = Column(Text)          # key for deletion management
-    file_size_bytes = Column(Integer)
-    metadata        = Column(JSONB, default={})
-    created_at      = Column(DateTime, default=datetime.utcnow)
-```
-
-**`UserSchemeInteraction`** — Bookmarks + application tracking:
-```python
-class UserSchemeInteraction(Base):
-    __tablename__ = "user_scheme_interactions"
-    id                 = Column(UUID, primary_key=True)
-    clerk_user_id      = Column(String, ForeignKey("users.clerk_user_id"))
-    scheme_id          = Column(Integer, ForeignKey("schemes.id"))
-    bookmarked         = Column(Boolean, default=False)
-    application_status = Column(String(30), default="not_started")
-    # not_started | draft_generated | submitted | approved
-    draft_letter       = Column(Text)   # AI-generated application letter
-    notes              = Column(Text)
-    updated_at         = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+Week 1 — Impact Metrics (what judges actually fund)
+Week 2 — Polish + Demo Video + Submission
 ```
 
 ---
 
-## Step 1.3 — Create `message_schemas.py`
+## Week 1 — Build What Judges Fund
 
-**Why:** These Pydantic models define exactly what goes inside the JSONB
-`content` field for each `content_type`. Using Pydantic ensures you never
-save malformed data.
+### Day 1-2: Business Health Score
+This is your highest-leverage feature for the grant. It creates a **measurable, repeatable impact metric** — exactly what UPCST evaluates.
 
-Create `app/message_schemas.py`:
+**What to build:**
 
-```python
-from pydantic import BaseModel
-from typing import Optional
-
-class TextPayload(BaseModel):
-    text: str
-
-class SchemeResult(BaseModel):
-    scheme_id: int
-    name: str
-    category: str
-    match_score: int          # 0-100
-    explanation: str
-    qualify_status: str       # eligible | partial | check_manually
-    match_reasons: list[str]
-    missing_docs: list[str]
-    application_mode: str
-    link: str
-
-class SchemeResultsPayload(BaseModel):
-    query: str
-    summary: str              # conversational text from LLM
-    schemes: list[SchemeResult]
-
-class AgentSection(BaseModel):
-    title: str
-    body: str
-
-class AgentResponsePayload(BaseModel):
-    agent: str                # market | financial | brand | marketing
-    summary: str
-    sections: list[AgentSection]
-    sources: Optional[list[str]] = []
-```
-
----
-
-## Step 1.4 — Create `message_service.py`
-
-**Why:** Centralises all DB message saves in one place. Both `graph.py`
-nodes and `main.py` import and call this — no duplicated DB logic.
-
-Create `services/message_service.py`:
+The score is entirely rule-based — no extra LLM calls needed. Calculate from data you already have in `user_profiles`:
 
 ```python
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Message
-import uuid
+# services/health_score_service.py
 
-async def save_message(
-    db: AsyncSession,
-    conversation_id: uuid.UUID,
-    role: str,
-    content_type: str,
-    content: dict,
-    agent_used: str = None
-) -> Message:
-    message = Message(
-        conversation_id=conversation_id,
-        role=role,
-        content_type=content_type,
-        content=content,       # dict → stored as JSONB automatically
-        agent_used=agent_used
-    )
-    db.add(message)
-    await db.commit()
-    await db.refresh(message)
-    return message
-```
+def calculate_health_score(profile: UserProfile) -> dict:
+    """
+    Pure rule-based scoring — instant, no API calls.
+    Returns score breakdown across 5 dimensions.
+    """
+    scores = {}
+    recommendations = {}
 
----
-
-## Step 1.5 — Run Migration
-
-```bash
-# Auto-generate migration from your new models
-alembic revision --autogenerate -m "rebuild_schema_v2"
-
-# BEFORE running: open the generated file in alembic/versions/
-# and verify the schemes table shows zero changes
-# If it tries to modify schemes — remove those lines
-
-# Drop old tables and apply new schema
-alembic upgrade head
-
-# Re-populate schemes (untouched table, same seed.py)
-python seed.py
-```
-
-> **Verify after running:**
-> Open Neon DB console and confirm these tables exist:
-> `users`, `user_profiles`, `conversations`, `messages`,
-> `media_assets`, `user_scheme_interactions`, `schemes` (with data)
-
----
-
----
-
-# 2. GRAPH.PY CHANGES
-
-## What This Fixes
-
-| Problem Now | After This Fix |
-|---|---|
-| Scheme cards vanish on reload | Saved as JSONB in `messages` table |
-| Agent responses lost on reload | All agents save structured responses |
-| No conversation threading | Every node receives `conversation_id` |
-| `main.py` saves only text | Agents save themselves, `main.py` saves user message only |
-
----
-
-## Step 2.1 — Update `agents/state.py`
-
-**Why:** Every agent node needs to know which conversation it belongs to
-so it can save directly to the DB. Add two fields to `AgentState`:
-
-```python
-from typing import TypedDict, List, Dict, Optional
-from langchain_core.messages import BaseMessage
-
-class AgentState(TypedDict):
-    messages: List[BaseMessage]
-    schemes: List[Dict]
-    current_agent: str
-    conversation_id: str     # UUID string — passed in from API endpoint
-    clerk_user_id: str       # identifies the user
-```
-
-These two fields flow through the entire graph automatically once you
-pass them in from `main.py` during `graph.ainvoke()`.
-
----
-
-## Step 2.2 — Update `scheme_agent_node`
-
-**Why:** This is the main fix. Currently the node returns `display_schemes`
-in state, `main.py` sends them to frontend once, then they're gone.
-After this change, the node saves the full structured payload itself.
-
-**Key concept — save inside the node, not in `main.py`:**
-
-The node is the only place that has both `chat_text` AND `display_schemes`
-at the same time. Once it returns to `main.py`, schemes are just a list
-in state — you'd have to reconstruct all the context again.
-Save here while you have everything.
-
-Changes to make in `scheme_agent_node`:
-
-1. Extract `conversation_id` from state at the top:
-```python
-conversation_id = state.get("conversation_id")
-```
-
-2. In your empty-result early return, save a text message:
-```python
-if conversation_id:
-    async with AsyncSessionLocal() as db:
-        await save_message(db, uuid.UUID(conversation_id), "assistant",
-            "text", {"text": "No schemes found."}, "scheme")
-```
-
-3. After you build `display_schemes`, save the full payload:
-```python
-if conversation_id:
-    async with AsyncSessionLocal() as db:
-        await save_message(
-            db=db,
-            conversation_id=uuid.UUID(conversation_id),
-            role="assistant",
-            content_type="scheme_results",   # tells frontend to render cards
-            content={
-                "query": last_message,       # original query for context
-                "summary": chat_text,        # conversational text
-                "schemes": display_schemes   # full structured scheme data
-            },
-            agent_used="scheme"
+    # 1. Scheme Utilization (0-20 points)
+    # How many schemes has this user engaged with?
+    # Pull from user_scheme_interactions count
+    scheme_score = min(interactions_count * 5, 20)
+    scores["scheme_utilization"] = scheme_score
+    if scheme_score < 10:
+        recommendations["scheme_utilization"] = (
+            "You haven't applied to any schemes yet. "
+            "PMEGP could give you up to ₹25L — ask MAYA about it."
         )
+
+    # 2. Registration Compliance (0-20 points)
+    reg_score = 0
+    if profile.udyam_registered:        reg_score += 12
+    if profile.turnover_range != "Not started": reg_score += 8
+    scores["registration"] = reg_score
+    if not profile.udyam_registered:
+        recommendations["registration"] = (
+            "Register on Udyam portal — it's free and unlocks "
+            "10+ additional government schemes."
+        )
+
+    # 3. Financial Health (0-20 points)
+    turnover_points = {
+        "Not started": 0, "Under ₹10 Lakh": 8,
+        "₹10L - ₹50L": 14, "₹50L - ₹5Cr": 18, "Above ₹5Cr": 20
+    }
+    fin_score = turnover_points.get(profile.turnover_range or "Not started", 0)
+    loan_penalty = -5 if profile.existing_loan else 0
+    scores["financial"] = max(0, fin_score + loan_penalty)
+
+    # 4. Market Presence (0-20 points)
+    # Based on sector and business age — proxy for market establishment
+    sector_points = {
+        "Technology": 18, "Food & Beverage": 15,
+        "Textile & Garments": 15, "Healthcare": 16,
+        "Handicrafts": 14, "Retail": 12, "Other": 10
+    }
+    market_score = sector_points.get(profile.sector or "Other", 10)
+    scores["market_presence"] = market_score
+
+    # 5. Growth Readiness (0-20 points)
+    goal_points = {
+        "Funding / Loan": 15, "Equipment / Machinery": 14,
+        "Market Access": 16, "All of the above": 20,
+        "Training / Skills": 12, "Brand Building": 13
+    }
+    growth_score = goal_points.get(profile.primary_goal or "", 10)
+    scores["growth_readiness"] = growth_score
+
+    total = sum(scores.values())
+
+    return {
+        "total_score": total,
+        "max_score": 100,
+        "grade": _get_grade(total),
+        "dimensions": scores,
+        "recommendations": recommendations,
+        "eligible_scheme_count": _count_eligible_schemes(profile)
+    }
+
+def _get_grade(score: int) -> dict:
+    if score >= 80: return {"label": "Excellent",  "color": "emerald"}
+    if score >= 60: return {"label": "Good",        "color": "blue"}
+    if score >= 40: return {"label": "Developing",  "color": "yellow"}
+    return              {"label": "Getting Started","color": "orange"}
 ```
 
-4. The `return` statement at the end is unchanged — still returns
-   `messages`, `schemes`, `current_agent` for `main.py` to use.
-
-> **Critical understanding:** The JSONB payload contains everything
-> the frontend card needs — name, category, match_score, explanation,
-> required_documents, link, application_mode. When the user reloads,
-> frontend fetches messages, sees `content_type="scheme_results"`,
-> and rebuilds cards from this stored data. Zero RAG re-run needed.
-
----
-
-## Step 2.3 — Add `_save_agent_response` Helper
-
-**Why:** market, brand, finance, marketing, general, off_topic all return
-plain text. Instead of copy-pasting DB save logic in 6 places, one helper
-handles it. Add this function above all agent nodes:
-
+Add endpoint to `routers/user.py`:
 ```python
-async def _save_agent_response(
-    conversation_id: str,
-    agent_name: str,
-    summary: str,
-    sources: list = None
+@router.get("/health-score")
+async def get_health_score(
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str = Depends(get_current_user_id)
 ):
-    """Persists any text agent response as structured JSONB."""
-    if not conversation_id:
-        return
-    async with AsyncSessionLocal() as db:
-        await save_message(
-            db=db,
-            conversation_id=uuid.UUID(conversation_id),
-            role="assistant",
-            content_type="agent_response",
-            content={
-                "agent": agent_name,
-                "summary": summary,
-                "sections": [],
-                "sources": sources or []
-            },
-            agent_used=agent_name
-        )
+    profile = await _get_profile(db, clerk_user_id)
+    interactions = await _get_interaction_count(db, clerk_user_id)
+    score_data = calculate_health_score(profile, interactions)
+    return score_data
 ```
 
----
+**Frontend — Health Score Card in dashboard:**
 
-## Step 2.4 — Update All Text Agent Nodes
+```tsx
+// components/HealthScoreCard.tsx
+export const HealthScoreCard = ({ score }: { score: HealthScore }) => {
+    const dimensions = [
+        { key: "scheme_utilization", label: "Scheme Access" },
+        { key: "registration",       label: "Compliance" },
+        { key: "financial",          label: "Financial Health" },
+        { key: "market_presence",    label: "Market Presence" },
+        { key: "growth_readiness",   label: "Growth Readiness" },
+    ]
 
-**Pattern is identical for every text agent.** For each of:
-`general_agent_node`, `off_topic_agent_node`, `market_agent_node`,
-`brand_agent_node`, `finance_agent_node`, `marketing_agent_node`:
+    return (
+        <div className="bg-black/40 border border-emerald-500/20 
+                       rounded-2xl p-6 space-y-6">
+            {/* Score circle */}
+            <div className="flex items-center gap-6">
+                <div className="relative w-24 h-24">
+                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                        <circle cx="50" cy="50" r="40"
+                            fill="none" stroke="rgba(255,255,255,0.05)"
+                            strokeWidth="8" />
+                        <circle cx="50" cy="50" r="40"
+                            fill="none" stroke="#10b981"
+                            strokeWidth="8"
+                            strokeDasharray={`${score.total_score * 2.51} 251`}
+                            strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col 
+                                   items-center justify-center">
+                        <span className="text-2xl font-bold text-white">
+                            {score.total_score}
+                        </span>
+                        <span className="text-xs text-gray-400">/ 100</span>
+                    </div>
+                </div>
+                <div>
+                    <p className="text-emerald-400 font-semibold text-lg">
+                        {score.grade.label}
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                        {score.eligible_scheme_count} schemes you qualify for
+                    </p>
+                </div>
+            </div>
 
-1. Add at the top of the function:
-```python
-conversation_id = state.get("conversation_id")
-```
-
-2. After generating `response`, add before the return:
-```python
-await _save_agent_response(conversation_id, "market", response)
-# replace "market" with the correct agent name per node
-```
-
-3. For `market_agent_node` specifically — also extract and pass Tavily URLs:
-```python
-sources = [r.get("url", "") for r in search_results.get("results", [])]
-await _save_agent_response(conversation_id, "market", response, sources=sources)
-```
-
-The `return` statements in all nodes are unchanged.
-
----
-
-## Step 2.5 — Update `main.py` Endpoint
-
-**Why:** `main.py` currently saves the assistant message itself. After
-the graph changes, agents save themselves — `main.py` should only save
-the user message, and pass `conversation_id` into the graph state.
-
-In your `POST /api/chat/agent` endpoint:
-
-1. Replace session_id logic with proper conversation creation:
-```python
-conversation_id = request.conversation_id
-if not conversation_id:
-    conversation = Conversation(
-        clerk_user_id=request.clerk_user_id,
-        title=request.message[:50]
+            {/* Dimension bars */}
+            <div className="space-y-3">
+                {dimensions.map(dim => (
+                    <div key={dim.key}>
+                        <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-400">{dim.label}</span>
+                            <span className="text-white font-medium">
+                                {score.dimensions[dim.key]}/20
+                            </span>
+                        </div>
+                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-emerald-500 rounded-full 
+                                           transition-all duration-700"
+                                style={{
+                                    width: `${(score.dimensions[dim.key] / 20) * 100}%`
+                                }}
+                            />
+                        </div>
+                        {score.recommendations[dim.key] && (
+                            <p className="text-xs text-yellow-500/70 mt-1">
+                                ↗ {score.recommendations[dim.key]}
+                            </p>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
     )
-    db.add(conversation)
-    await db.commit()
-    conversation_id = str(conversation.id)
+}
 ```
 
-2. Save only the user message here:
+---
+
+### Day 3-4: Outcome Tracking (your funding pitch numbers)
+
+This is what UPCST actually funds — **evidence of impact**. Even with 5 test users, having real tracking in place is more credible than promising it.
+
 ```python
-await save_message(db, uuid.UUID(conversation_id), "user",
-    "text", {"text": request.message}, None)
+# Add to models.py
+class OutcomeTracking(Base):
+    __tablename__ = "outcome_tracking"
+
+    id              = Column(UUID, primary_key=True, default=uuid.uuid4)
+    clerk_user_id   = Column(String, ForeignKey("users.clerk_user_id"))
+    scheme_id       = Column(Integer, ForeignKey("schemes.id"))
+    draft_generated = Column(Boolean, default=False)
+    draft_date      = Column(DateTime)
+    submitted       = Column(Boolean, default=False)
+    submit_date     = Column(DateTime)
+    approved        = Column(Boolean)
+    amount_approved = Column(Integer)   # in rupees
+    reported_at     = Column(DateTime, default=datetime.utcnow)
 ```
 
-3. Pass `conversation_id` into graph state:
+Add a simple follow-up prompt in chat — 30 days after draft generation:
+
 ```python
-result = await app_graph.ainvoke({
-    "messages": [HumanMessage(content=request.message)],
-    "schemes": [],
-    "current_agent": "",
-    "conversation_id": conversation_id,     # ← NEW
-    "clerk_user_id": request.clerk_user_id  # ← NEW
-})
+# In scheme_agent_node — check for pending follow-ups
+async def check_pending_followups(clerk_user_id: str, db: AsyncSession):
+    """
+    If user generated a draft 30+ days ago with no outcome reported,
+    add a follow-up prompt to the top of their chat response.
+    """
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    result = await db.execute(
+        select(UserSchemeInteraction).where(
+            UserSchemeInteraction.clerk_user_id == clerk_user_id,
+            UserSchemeInteraction.application_status == "draft_generated",
+            UserSchemeInteraction.updated_at <= thirty_days_ago
+        )
+    )
+    pending = result.scalars().all()
+    return pending  # frontend shows a "Did you submit?" banner
 ```
 
-4. Remove any old `chat_history_service.save_message()` call for
-   the assistant response — agents handle this now.
+**Impact dashboard — add to your admin/settings view:**
 
-5. Return `conversation_id` in the response so frontend can store it:
-```python
-return ChatResponse(
-    message=result["messages"][-1].content,
-    schemes=result.get("schemes", []),
-    agent=result.get("current_agent", "general"),
-    conversation_id=conversation_id   # ← NEW
+```tsx
+// Simple numbers display — this is your UPCST slide
+const ImpactNumbers = () => (
+    <div className="grid grid-cols-2 gap-4">
+        {[
+            { label: "Drafts Generated",    value: stats.drafts,   color: "emerald" },
+            { label: "Applications Submitted", value: stats.submitted, color: "blue" },
+            { label: "Schemes Accessed",    value: stats.schemes,  color: "purple" },
+            { label: "Est. Funding Unlocked", value: `₹${stats.funding_cr}Cr`, color: "yellow" },
+        ].map(stat => (
+            <div key={stat.label}
+                 className="bg-black/40 border border-white/10 
+                           rounded-xl p-4 text-center">
+                <p className={`text-2xl font-bold text-${stat.color}-400`}>
+                    {stat.value}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">{stat.label}</p>
+            </div>
+        ))}
+    </div>
 )
 ```
 
 ---
 
----
+### Day 5: Apply for WhatsApp Access (parallel, not building)
 
-# 3. STREAMING IMPLEMENTATION
+Don't build WhatsApp yet. **Apply for access today** so approval comes during Week 2:
 
-## What This Adds
+1. Go to developers.facebook.com
+2. Create Meta Business App → WhatsApp → Cloud API
+3. Submit business verification with your college/project details
+4. Add phone number for testing
 
-| Feature | Detail |
-|---|---|
-| Scheme agent | Unchanged — still returns JSON, renders cards |
-| All text agents | Stream word by word via SSE |
-| DB persistence | Complete response saved AFTER stream ends |
-| Frontend | Text appends in real time, no layout shift |
-| Latency | Gemini concurrent calls, pre-warming on startup |
+This runs in background while you build other things. If approved before submission — great, mention it. If not — still mention it as "in verification" in your grant proposal.
 
 ---
 
-## Step 3.1 — Add Streaming Method to `gemini_service.py`
+## Week 2 — Polish + Grant Submission
 
-**Why:** Your existing `generate_response()` waits for the full response
-before returning — that's why there's a delay before anything appears.
-`generate_stream()` yields chunks as they arrive from Gemini's API.
+### Day 6-7: Demo Flow Polish
 
-Add this method to your `GeminiService` class. Do not remove the
-existing `generate_response()` — scheme agent still needs it:
+Your demo video is worth more than any feature. Script it exactly:
+
+```
+0:00 - 0:20  Problem statement (text overlay)
+             "90 lakh MSMEs. ₹12,000Cr in schemes. 8% access rate."
+
+0:20 - 0:50  Signup + Onboarding
+             Show the 3-step onboarding, data being collected
+
+0:50 - 1:30  Scheme Discovery
+             Type: "I want funding for my textile business in Lucknow"
+             Show scheme cards appearing with match scores
+             Click a scheme → eligibility check shows
+
+1:30 - 2:00  Draft Generation
+             Click Generate Draft → modal pre-filled from profile
+             Fill 2-3 remaining fields → draft appears
+             Download button → show the PDF
+
+2:00 - 2:20  Health Score
+             Show the score dashboard updating
+             Show one recommendation linking to a scheme
+
+2:20 - 2:30  Impact numbers
+             Show the outcome tracking dashboard
+             "X drafts generated, ₹X lakh in scheme access unlocked"
+```
+
+---
+
+### Day 8-9: UPCST Proposal Writing
+
+Your proposal needs these exact sections for UPCST:
+
+```
+1. Problem Statement with UP-specific data
+   → 90L MSMEs in UP, ₹3,200Cr annual scheme budget,
+     less than 8% utilization rate, cite MSME ministry data
+
+2. Solution Architecture (one diagram)
+   → Signup → Onboard → Chat → Scheme Match → 
+     Eligibility Check → Draft Generate → Submit
+
+3. Social Impact Metrics (your actual numbers)
+   → Even 10 test users with drafts generated is real data
+   → Project: 2,000 UP MSMEs in year 1
+
+4. UP-Specific Alignment
+   → ODOP scheme support (UP's flagship)
+   → Vishwakarma Shram Samman coverage
+   → Focus on Lucknow, Kanpur, Varanasi districts
+   → Hindi language roadmap (even if not built yet)
+
+5. Budget Breakdown
+   → Server costs: ₹1,200/month × 12 = ₹14,400
+   → API costs: ₹1,500/month × 12 = ₹18,000
+   → Development: your time (no cost)
+   → Total ask: ₹50,000-75,000 for year 1 infrastructure
+
+6. Team + Institution
+   → Your name, GITM affiliation, supervisor name
+   → GitHub link showing active development
+   → Live demo URL
+```
+
+---
+
+### Day 10-12: Hindi Voice Input (minimal viable)
+
+This is achievable in 2-3 days and is a massive grant differentiator:
 
 ```python
-async def generate_stream(self, prompt: str):
+# routers/voice.py — minimal implementation
+from fastapi import APIRouter, UploadFile, File, Depends
+import httpx
+
+router = APIRouter(prefix="/api/voice")
+
+@router.post("/transcribe")
+async def transcribe_hindi(
+    audio: UploadFile = File(...),
+    clerk_user_id: str = Depends(get_current_user_id)
+):
     """
-    AsyncGenerator — yields text chunks as Gemini produces them.
-    The 'stream=True' flag tells Gemini to send partial results
-    instead of waiting for the full response to complete.
+    Send audio to OpenAI Whisper API.
+    Returns Hindi transcription + English translation.
+    Cost: ~₹0.50 per minute of audio.
     """
-    response = await self.model.generate_content_async(
-        prompt,
-        stream=True,
-        generation_config=genai.GenerationConfig(
-            max_output_tokens=1024,
-            temperature=0.7
+    audio_bytes = await audio.read()
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://api.openai.com/v1/audio/transcriptions",
+            headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
+            files={"file": ("audio.webm", audio_bytes, "audio/webm")},
+            data={
+                "model": "whisper-1",
+                "language": "hi",        # Hindi
+                "response_format": "json"
+            }
         )
-    )
-    async for chunk in response:
-        if chunk.text:
-            yield chunk.text
-```
 
-> `max_output_tokens=1024` is intentional — chat responses don't need
-> to be longer. This alone cuts average response time by ~40%.
-
----
-
-## Step 3.2 — Add New Streaming Endpoint to `main.py`
-
-**Why:** Don't modify your existing `/api/chat/agent` endpoint.
-Scheme agent needs the existing JSON flow. Create a separate endpoint
-for text agents that uses `StreamingResponse`.
-
-Add these imports to `main.py`:
-```python
-from fastapi.responses import StreamingResponse
-from typing import AsyncGenerator
-import json
-```
-
-Add the new endpoint:
-
-```python
-@app.post("/api/chat/stream")
-async def chat_stream(request: ChatRequest, db: AsyncSession = Depends(get_db)):
-    """
-    Server-Sent Events (SSE) endpoint for text agent streaming.
-    
-    SSE format: each message is  data: {json}\n\n
-    Frontend reads these chunks as they arrive and appends to UI.
-    Three event types:
-      init  → carries conversation_id, sent first
-      chunk → carries text piece, sent many times
-      done  → signals stream complete, sent once at end
-    """
-    # ── Create conversation if needed ────────────────────────
-    conversation_id = request.conversation_id
-    if not conversation_id:
-        conversation = Conversation(
-            clerk_user_id=request.clerk_user_id,
-            title=request.message[:50]
-        )
-        db.add(conversation)
-        await db.commit()
-        conversation_id = str(conversation.id)
-
-    # ── Save user message immediately ────────────────────────
-    await save_message(db, uuid.UUID(conversation_id), "user",
-        "text", {"text": request.message}, None)
-
-    # ── Build prompt for the requested agent ─────────────────
-    agent_name, prompt = _build_agent_prompt(request.message, request.agent)
-
-    # ── SSE generator ─────────────────────────────────────────
-    async def event_stream() -> AsyncGenerator[str, None]:
-        full_response = ""  # accumulate complete text for DB save
-
-        try:
-            yield f"data: {json.dumps({'type': 'init', 'conversation_id': conversation_id})}\n\n"
-
-            async for chunk in gemini_service.generate_stream(prompt):
-                full_response += chunk
-                yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
-
-            yield f"data: {json.dumps({'type': 'done'})}\n\n"
-
-            # Save AFTER stream ends — full response is now assembled
-            async with AsyncSessionLocal() as save_db:
-                await save_message(
-                    db=save_db,
-                    conversation_id=uuid.UUID(conversation_id),
-                    role="assistant",
-                    content_type="agent_response",
-                    content={"agent": agent_name, "summary": full_response,
-                             "sections": [], "sources": []},
-                    agent_used=agent_name
-                )
-        except Exception as e:
-            logger.error(f"Stream error: {e}")
-            yield f"data: {json.dumps({'type': 'error', 'message': 'Stream interrupted'})}\n\n"
-
-    return StreamingResponse(
-        event_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",  # critical — prevents Nginx from buffering chunks
-        }
-    )
-```
-
-Add `_build_agent_prompt()` helper alongside the endpoint:
-
-```python
-def _build_agent_prompt(message: str, agent: str) -> tuple[str, str]:
-    """Returns (agent_name, prompt) — keeps prompt logic out of endpoint."""
-    base = "CRITICAL: Do NOT start with a greeting. Answer directly.\n"
-    prompts = {
-        "market":    ("market",    f"You are an expert Market Research Analyst for MSMEs in India.\nQuery: {message}\n{base}"),
-        "brand":     ("brand",     f"You are a creative Brand Consultant for Indian MSMEs.\nQuery: {message}\nProvide 3-5 distinct options.\n{base}"),
-        "finance":   ("finance",   f"You are a Financial Advisor for MSMEs.\nQuery: {message}\nNo specific legal/tax advice.\n{base}"),
-        "marketing": ("marketing", f"You are a Marketing Strategist for small businesses.\nQuery: {message}\nFocus on low-cost, immediate steps.\n{base}"),
+    transcript = response.json()["text"]
+    return {
+        "transcript": transcript,
+        "language": "hi"
     }
-    return prompts.get(agent, ("general", f"Answer this helpfully: {message}\n{base}"))
 ```
 
----
+Frontend mic button — add to chat input:
 
-## Step 3.3 — Update `chatService.ts`
-
-**Why:** Axios doesn't read SSE streams chunk by chunk natively.
-For the streaming endpoint you use the browser's native `fetch()` with
-`response.body.getReader()` which gives you raw stream access.
-
-Keep your existing `chatAgent` for scheme queries. Add `chatStream`:
-
-```typescript
-export const chatStream = async (
-    payload: ChatPayload,
-    onChunk: (text: string) => void,
-    onInit: (conversationId: string) => void,
-    onDone: () => void,
-    onError: (msg: string) => void
-): Promise<void> => {
-    const response = await fetch(`${API_BASE}/api/chat/stream`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-    });
-
-    const reader = response.body!.getReader();
-    const decoder = new TextDecoder();
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const raw = decoder.decode(value, { stream: true });
-        const lines = raw.split("\n\n").filter(Boolean);
-
-        for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            try {
-                const event = JSON.parse(line.replace("data: ", ""));
-                if (event.type === "init")  onInit(event.conversation_id);
-                if (event.type === "chunk") onChunk(event.text);
-                if (event.type === "done")  onDone();
-                if (event.type === "error") onError(event.message);
-            } catch { /* malformed chunk — skip */ }
-        }
-    }
-};
-```
-
----
-
-## Step 3.4 — Update `ChatInterface.tsx`
-
-**Why:** Frontend needs to detect whether the query is for scheme agent
-(use existing JSON flow) or a text agent (use streaming flow), and handle
-both gracefully.
-
-**Key state additions:**
-```typescript
-const [isStreaming, setIsStreaming] = useState(false);
-const [conversationId, setConversationId] = useState<string | null>(null);
-```
-
-**Routing logic in `handleSend`:**
-
-```typescript
-const handleSend = async (userMessage: string) => {
-    // Add user message to UI immediately — both paths need this
-    addMessage({ role: "user", content_type: "text", content: { text: userMessage } });
-
-    const isSchemeQuery = detectedAgent === "scheme"; // your existing detection
-
-    if (isSchemeQuery) {
-        // Existing path — unchanged, renders scheme cards
-        const data = await chatAgent({ message: userMessage, conversation_id: conversationId });
-        addMessage({ role: "assistant", content_type: "scheme_results",
-            content: { summary: data.message, schemes: data.schemes } });
-        if (!conversationId) setConversationId(data.conversation_id);
-
-    } else {
-        // New streaming path
-        setIsStreaming(true);
-
-        // Add empty assistant message — this fills in real time
-        addMessage({ role: "assistant", content_type: "text",
-            content: { text: "" }, isStreaming: true });
-
-        await chatStream(
-            { message: userMessage, agent: detectedAgent, conversation_id: conversationId },
-            // onChunk — append to last message
-            (chunk) => updateLastMessage(prev => prev + chunk),
-            // onInit — store conversation_id for subsequent messages
-            (convId) => { if (!conversationId) setConversationId(convId); },
-            // onDone — remove streaming cursor
-            () => { setIsStreaming(false); markLastMessageDone(); },
-            // onError
-            (err) => { setIsStreaming(false); console.error(err); }
-        );
-    }
-};
-```
-
-**Streaming cursor UI** — add to your message component:
 ```tsx
-{message.isStreaming && (
-    <span className="inline-block w-2 h-4 bg-emerald-400 ml-1 animate-pulse" />
-)}
+// In your chat input component
+const [recording, setRecording] = useState(false)
+const mediaRecorder = useRef<MediaRecorder | null>(null)
+
+const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorder.current = new MediaRecorder(stream)
+    const chunks: Blob[] = []
+
+    mediaRecorder.current.ondataavailable = e => chunks.push(e.data)
+    mediaRecorder.current.onstop = async () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' })
+        const formData = new FormData()
+        formData.append('audio', blob, 'voice.webm')
+
+        const token = await getToken()
+        const res = await fetch('/api/voice/transcribe', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        })
+        const data = await res.json()
+        setInputText(data.transcript)  // fills chat input with Hindi text
+    }
+
+    mediaRecorder.current.start()
+    setRecording(true)
+}
+
+const stopRecording = () => {
+    mediaRecorder.current?.stop()
+    setRecording(false)
+}
+
+// In your input bar JSX:
+<button
+    onMouseDown={startRecording}
+    onMouseUp={stopRecording}
+    className={`p-2 rounded-lg transition-colors ${
+        recording
+            ? 'bg-red-500 text-white animate-pulse'
+            : 'text-gray-400 hover:text-emerald-400'
+    }`}
+>
+    <Mic size={18} />
+</button>
 ```
 
 ---
 
-## Step 3.5 — Latency Optimizations
-
-These are small changes with measurable impact:
-
-**Pre-warm Gemini on startup** — first cold call has ~1.5s overhead.
-Eliminates it for first user message:
-```python
-@app.on_event("startup")
-async def startup():
-    await gemini_service.generate_response("hello")
-```
-
-**Concurrent Tavily + Gemini in market agent** — currently sequential.
-Running both together saves ~800ms:
-```python
-async def market_agent_node(state: AgentState):
-    message = state["messages"][-1].content
-    # Fire search immediately — don't await yet
-    search_task = asyncio.create_task(tavily_service.search(message))
-    # Wait for search, then build prompt and stream
-    search_results = await search_task
-    prompt = f"...{search_results}..."
-    # stream response...
-```
-
-**Add to `requirements.txt`:**
-```
-boto3==1.34.0          # for Cloudflare R2 image storage (brand kit feature)
-python-multipart==0.0.9  # for file upload support
-```
-
----
-
-## Final Checklist
-
-Work through these in order. Each checkbox unblocks the next:
+## Complete 2-Week Checklist
 
 ```
-SCHEMA
-□ Alembic installed, env.py configured for asyncpg
-□ models.py rewritten — User, UserProfile, Conversation, Message,
-  MediaAsset, UserSchemeInteraction added. Scheme untouched.
-□ message_schemas.py created
-□ message_service.py created
-□ alembic revision --autogenerate -m "rebuild_schema_v2" run
-□ Migration file reviewed — schemes shows no changes
-□ alembic upgrade head run
-□ seed.py re-run — schemes repopulated
+WEEK 1
+□ Day 1-2: Business Health Score
+  □ health_score_service.py with rule-based calculation
+  □ GET /api/user/health-score endpoint
+  □ HealthScoreCard component with circular gauge
+  □ Dimension bars with recommendations
+  □ Score shown on dashboard/chat sidebar
 
-GRAPH
-□ agents/state.py updated with conversation_id, clerk_user_id
-□ scheme_agent_node saves full JSONB payload after building display_schemes
-□ _save_agent_response() helper added above all agent nodes
-□ All 6 text agent nodes call _save_agent_response()
-□ main.py endpoint creates Conversation, saves user message,
-  passes conversation_id into graph state, returns conversation_id
+□ Day 3-4: Outcome Tracking
+  □ outcome_tracking table in DB + Alembic migration
+  □ Auto-bookmark when draft generated
+  □ Impact numbers dashboard (drafts, submissions, funding)
+  □ 30-day follow-up detection in chat
 
-STREAMING
-□ gemini_service.py has generate_stream() method
-□ /api/chat/stream endpoint added to main.py
-□ _build_agent_prompt() helper added to main.py
-□ chatService.ts has chatStream() using fetch() reader
-□ ChatInterface.tsx routes scheme vs text agents to correct service
-□ Streaming cursor CSS added to message component
-□ Gemini pre-warm added to startup event
-□ Concurrent Tavily call added to market_agent_node
+□ Day 5: WhatsApp access application submitted to Meta
 
-VERIFY END TO END
-□ Send scheme query → reload page → cards still visible ✅
-□ Send market query → text streams word by word ✅
-□ Send brand query → streams, reload shows full response ✅
-□ New conversation creates row in conversations table ✅
-□ All messages have correct content_type in DB ✅
+WEEK 2
+□ Day 6-7: Demo video recorded (2:30 minutes, script above)
+□ Day 8-9: UPCST proposal written (6 sections above)
+□ Day 10-12: Hindi voice input (Whisper API + mic button)
+□ Day 13-14: Final testing, submission
+
+GRANT SUBMISSION PACKAGE
+□ Live demo URL (deploy to Koyeb + Vercel if not already)
+□ GitHub repo with clean README and demo GIF
+□ 2:30 demo video uploaded to YouTube (unlisted)
+□ Proposal PDF with impact metrics
+□ Budget breakdown document
 ```
 
----
-
-*MAYA Upgrade Guide — generated for portfolio implementation*
-*Stack: FastAPI + LangGraph + Neon PostgreSQL + React + Clerk*
+The single most important thing you can do today is record even a rough demo video and deploy a live URL. Judges who can click a link and try MAYA themselves will fund it over a polished PDF proposal with no working demo every single time.

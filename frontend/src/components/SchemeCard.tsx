@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ExternalLink, CheckCircle, Info } from 'lucide-react';
+import { ExternalLink, CheckCircle, Info, FileText } from 'lucide-react';
 import { Scheme } from '../types';
 import { SchemeDetailsModal } from './SchemeDetailsModal';
+import { DraftGeneratorModal } from './DraftGeneratorModal';
 
 interface SchemeCardProps {
   scheme: Scheme;
@@ -9,16 +10,23 @@ interface SchemeCardProps {
 
 export function SchemeCard({ scheme }: SchemeCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const [isDraftOpen, setIsDraftOpen] = useState(false);
+
+  // Schemes for which we have letter templates
+  const DRAFT_SUPPORTED = ['PMEGP', 'Mudra', 'Stand-Up India', 'ODOP', 'Vishwakarma'];
+  const hasDraftSupport = DRAFT_SUPPORTED.some(s =>
+    scheme.name.toLowerCase().includes(s.toLowerCase())
+  );
+
   // Benefits might be an array or a string (fallback)
-  const benefitsList = Array.isArray(scheme.benefits) 
-    ? scheme.benefits 
+  const benefitsList = Array.isArray(scheme.benefits)
+    ? scheme.benefits
     : (typeof scheme.benefits === 'string' ? [scheme.benefits] : []);
 
   return (
     <>
       <div className="glass-panel rounded-xl p-5 border border-white/10 hover:border-primary/30 transition-all group flex flex-col h-full bg-[#111] hover:bg-[#151515]">
-        
+
         {/* Header Section: Category, Name & Match Score */}
         <div className="flex justify-between items-start mb-3">
           <div className="flex-1 pr-2">
@@ -51,7 +59,7 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
             <ul className="space-y-1.5">
               {benefitsList.slice(0, 2).map((benefit, index) => (
                 <li key={index} className="text-xs text-white/90 flex gap-2 items-start">
-                  <span className="text-primary mt-1">•</span> 
+                  <span className="text-primary mt-1">•</span>
                   <span className="line-clamp-1">{benefit}</span>
                 </li>
               ))}
@@ -66,16 +74,16 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
 
         {/* Footer: 3-Button Action Grid */}
         <div className="grid grid-cols-2 gap-2 mt-auto pt-4 border-t border-white/10">
-          
+
           {/* Button 1: View Full Details (Triggers Modal) - Full Width */}
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="col-span-2 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-xs py-2.5 rounded-lg border border-white/10 transition-colors group/btn"
           >
-            <Info size={14} className="group-hover/btn:text-primary transition-colors" /> 
+            <Info size={14} className="group-hover/btn:text-primary transition-colors" />
             View Full Details
           </button>
-          
+
           {/* Button 2: Check Eligibility (Mock Action) */}
           <button className="flex items-center justify-center gap-1 bg-primary/5 hover:bg-primary/10 text-primary text-[10px] font-bold py-2 rounded-lg border border-primary/20 transition-all">
             Check Eligibility
@@ -83,27 +91,44 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
 
           {/* Button 3: Official Link */}
           {scheme.link ? (
-            <a 
-                href={scheme.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1 bg-primary text-black text-[10px] font-bold py-2 rounded-lg hover:bg-primary/90 transition-all"
+            <a
+              href={scheme.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1 bg-primary text-black text-[10px] font-bold py-2 rounded-lg hover:bg-primary/90 transition-all"
             >
-                Direct Link <ExternalLink size={10} />
+              Direct Link <ExternalLink size={10} />
             </a>
           ) : (
-             <button disabled className="bg-white/5 text-white/30 text-[10px] font-bold py-2 rounded-lg cursor-not-allowed">
-               No Link
-             </button>
+            <button disabled className="bg-white/5 text-white/30 text-[10px] font-bold py-2 rounded-lg cursor-not-allowed">
+              No Link
+            </button>
           )}
         </div>
+
+        {/* Generate Draft button — appears only for supported schemes */}
+        {hasDraftSupport && (
+          <button
+            onClick={() => setIsDraftOpen(true)}
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2 border border-emerald-500/30 text-emerald-400 text-xs font-semibold rounded-lg hover:bg-emerald-500/10 transition-all"
+          >
+            <FileText size={12} />
+            Generate Application Draft
+          </button>
+        )}
       </div>
 
-      {/* Modal Component (Renders outside the card structure visually) */}
+      {/* Modals */}
       {isModalOpen && (
-        <SchemeDetailsModal 
-          scheme={scheme} 
-          onClose={() => setIsModalOpen(false)} 
+        <SchemeDetailsModal
+          scheme={scheme}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+      {isDraftOpen && (
+        <DraftGeneratorModal
+          schemeName={scheme.name}
+          onClose={() => setIsDraftOpen(false)}
         />
       )}
     </>

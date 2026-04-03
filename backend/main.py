@@ -19,7 +19,11 @@ from models import Conversation
 from services.scheme_service import scheme_service
 from services.gemini_service import gemini_service
 from services.message_service import save_message
+from services.user_service import get_or_create_user
+from middleware.auth import get_optional_user_id
 from agents.graph import app_graph
+from routers.draft import router as draft_router
+from routers.user import router as user_router
 import schemas
 
 # Configure structured logging
@@ -102,10 +106,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(draft_router)
+app.include_router(user_router)
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # HEALTH
 # ──────────────────────────────────────────────────────────────────────────────
+
+@app.get("/api/health", tags=["Health"])
+async def health():
+    return {"status": "ok", "service": "MAYA API"}
+
 
 @app.get("/", tags=["Health"])
 async def root():
@@ -137,7 +149,11 @@ and terms."""
 # ──────────────────────────────────────────────────────────────────────────────
 
 @app.post("/api/chat/agent", response_model=schemas.ChatResponse, tags=["Chat"])
-async def chat_agent(request: schemas.ChatRequest, db: AsyncSession = Depends(get_db)):
+async def chat_agent(
+    request: schemas.ChatRequest,
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str | None = Depends(get_optional_user_id),
+):
     """
     Main Entry Point: Routes query via LangGraph and returns
     structured response (scheme cards or text).
@@ -145,12 +161,20 @@ async def chat_agent(request: schemas.ChatRequest, db: AsyncSession = Depends(ge
     V2: Creates/reuses a Conversation row, saves user message,
     passes conversation_id through the graph, returns conversation_id.
     """
+    # ── Upsert user on every authenticated request ───────────────────────────
+    effective_user_id = clerk_user_id or request.clerk_user_id
+    if effective_user_id:
+        try:
+            await get_or_create_user(db, effective_user_id)
+        except Exception as e:
+            logger.warning(f"User upsert failed (non-fatal): {e}")
+
     # ── Create or reuse conversation ─────────────────────────────────────────
     conversation_id = request.conversation_id or request.session_id
     if not conversation_id:
         try:
             conversation = Conversation(
-                clerk_user_id=request.clerk_user_id,
+                clerk_user_id=effective_user_id,
                 title=request.message[:50]
             )
             db.add(conversation)
@@ -243,7 +267,11 @@ async def chat_agent(request: schemas.ChatRequest, db: AsyncSession = Depends(ge
 # ──────────────────────────────────────────────────────────────────────────────
 
 @app.post("/api/chat/stream", tags=["Chat"])
-async def chat_stream(request: schemas.ChatRequest, db: AsyncSession = Depends(get_db)):
+async def chat_stream(
+    request: schemas.ChatRequest,
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str | None = Depends(get_optional_user_id),
+):
     """
     Server-Sent Events (SSE) endpoint for text-agent streaming.
 
@@ -259,12 +287,20 @@ async def chat_stream(request: schemas.ChatRequest, db: AsyncSession = Depends(g
     NOTE: Scheme queries should still go to /api/chat/agent (JSON flow).
     This endpoint is for market, brand, finance, marketing, general.
     """
+    # ── Upsert user ──────────────────────────────────────────────────────────
+    effective_user_id = clerk_user_id or request.clerk_user_id
+    if effective_user_id:
+        try:
+            await get_or_create_user(db, effective_user_id)
+        except Exception as e:
+            logger.warning(f"User upsert failed (non-fatal): {e}")
+
     # ── Create conversation if needed ─────────────────────────────────────────
     conversation_id = request.conversation_id or request.session_id
     if not conversation_id:
         try:
             conversation = Conversation(
-                clerk_user_id=request.clerk_user_id,
+                clerk_user_id=effective_user_id,
                 title=request.message[:50]
             )
             db.add(conversation)

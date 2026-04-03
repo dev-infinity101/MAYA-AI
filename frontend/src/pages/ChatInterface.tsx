@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, PanelLeftOpen, Square, Plus, ArrowUp } from 'lucide-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { Message } from '../types';
 import { Message as MessageComponent } from '../components/Message';
 import { Sidebar } from '../components/Sidebar';
 import { chatService, chatStream } from '../services/api';
 import { ThinkingWithText, ThinkingMode } from '../components/ThinkingIndicator';
+import { OnboardingModal } from '../components/OnboardingModal';
 import styles from './ChatInterface.module.css';
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -140,15 +144,43 @@ export function ChatInterface() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<{ id: string; title: string }[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [userProfile, setUserProfile] = useState<Record<string, any> | null>(null);
 
+  const { userId, getToken } = useAuth();
+  const { user: clerkUser } = useUser();
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   useEffect(() => { loadSessions(); }, []);
+  // Wait until Clerk loads the userId before checking onboarding
+  // Without this guard, getToken() returns null and the profile check
+  // silently fails, causing the modal to show every reload.
+  useEffect(() => {
+    if (userId) checkOnboarding();
+  }, [userId]);
   useEffect(() => { scrollToBottom(); }, [messages, isLoading, isStreaming, thinkingMode]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
+
+  const checkOnboarding = async () => {
+      try {
+          const token = await getToken();
+          if (!token) return; // Clerk not ready yet — skip silently
+          const res = await fetch(`${API_BASE}/api/user/profile`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (!res.ok) return; // Don't show modal on network errors
+          const data = await res.json();
+          setUserProfile(data); // Cache profile data for sidebar
+          if (!data.onboarding_complete) {
+              setShowOnboarding(true);
+          }
+      } catch (err) {
+          console.error('Failed to check onboarding status', err);
+      }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -299,10 +331,12 @@ export function ChatInterface() {
             // Switch to db-search mode while vector DB query runs
             setThinkingMode('db-search');
 
+            const token = await getToken().catch(() => null);
             const data = await chatService.chatAgent(
                 textToSend,
                 conversationId,
-                controller.signal
+                controller.signal,
+                token,
             );
 
             // Response arrived — hide indicator before rendering card
@@ -354,17 +388,19 @@ export function ChatInterface() {
             setIsStreaming(true);
             setIsLoading(false);
 
+            const streamToken = await getToken().catch(() => null);
             await chatStream(
                 {
                     message: textToSend,
                     agent: detectedAgent,
                     conversation_id: conversationId,
+                    clerk_user_id: userId,
                 },
                 // onChunk — hide thinking on first chunk, then append text
                 (chunk: string) => {
                     if (!firstChunkReceived) {
                         firstChunkReceived = true;
-                        setThinkingMode(null); // text is arriving — hide indicator
+                        setThinkingMode(null);
                     }
                     updateLastMessage(prev => prev + chunk);
                 },
@@ -375,7 +411,7 @@ export function ChatInterface() {
                         loadSessions();
                     }
                 },
-                // onDone — finalise message
+                // onDone
                 () => {
                     setIsStreaming(false);
                     setThinkingMode(null);
@@ -388,7 +424,8 @@ export function ChatInterface() {
                     markLastMessageDone();
                     console.error('Stream error:', err);
                 },
-                controller.signal
+                controller.signal,
+                streamToken,
             );
         }
 
@@ -449,6 +486,13 @@ export function ChatInterface() {
 
   return (
     <div className="flex h-screen bg-black overflow-hidden font-sans text-white">
+      {/* Onboarding Modal overlays everything */}
+      {showOnboarding && <OnboardingModal onComplete={() => {
+          setShowOnboarding(false);
+          // Refresh profile data so sidebar shows updated name immediately
+          checkOnboarding();
+      }} />}
+      
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -458,6 +502,8 @@ export function ChatInterface() {
         onNewChat={handleNewChat}
         onRenameSession={handleRenameSession}
         onDeleteSession={handleDeleteSession}
+        userProfile={userProfile}
+        clerkUser={clerkUser}
       />
 
       {/* Main Chat Area */}

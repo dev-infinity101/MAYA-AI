@@ -30,3 +30,6 @@ tenacity==8.2.3
 # Storage & File Upload (Brand Kit feature)
 boto3==1.34.0
 python-multipart==0.0.9
+
+# Auth
+clerk-backend-api>=5.0.0
