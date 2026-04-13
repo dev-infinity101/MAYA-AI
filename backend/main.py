@@ -15,7 +15,7 @@ from langchain_core.messages import HumanMessage
 
 from database import engine, Base, get_db, AsyncSessionLocal
 import models
-from models import Conversation
+from models import Conversation, Message, OutcomeTracking
 from services.scheme_service import scheme_service
 from services.gemini_service import gemini_service
 from services.message_service import save_message
@@ -24,6 +24,7 @@ from middleware.auth import get_optional_user_id
 from agents.graph import app_graph
 from routers.draft import router as draft_router
 from routers.user import router as user_router
+from routers.whatsapp import router as whatsapp_router
 import schemas
 
 # Configure structured logging
@@ -108,6 +109,7 @@ app.add_middleware(
 
 app.include_router(draft_router)
 app.include_router(user_router)
+app.include_router(whatsapp_router)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -496,6 +498,30 @@ async def delete_conversation(conversation_id: str, db: AsyncSession = Depends(g
     except Exception as e:
         logger.error(f"Error deleting conversation {conversation_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.get("/api/admin/migrate")
+async def admin_migrate():
+    from sqlalchemy import text
+    async with engine.begin() as conn:
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS outcome_tracking (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                clerk_user_id VARCHAR REFERENCES users(clerk_user_id) ON DELETE SET NULL,
+                scheme_id INTEGER REFERENCES schemes(id) ON DELETE SET NULL,
+                draft_generated BOOLEAN DEFAULT FALSE,
+                draft_date TIMESTAMP,
+                submitted BOOLEAN DEFAULT FALSE,
+                submit_date TIMESTAMP,
+                approved BOOLEAN,
+                amount_approved INTEGER,
+                reported_at TIMESTAMP DEFAULT NOW()
+            );
+        """))
+        await conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_outcome_tracking_user 
+            ON outcome_tracking(clerk_user_id);
+        """))
+    return {"status": "table created successfully"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

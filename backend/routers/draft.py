@@ -14,7 +14,7 @@ from database import get_db
 from middleware.auth import get_current_user_id
 from services.gemini_service import gemini_service
 from data.scheme_templates import SCHEME_TEMPLATES, resolve_scheme_template
-from models import UserSchemeInteraction, Scheme, UserProfile
+from models import UserSchemeInteraction, Scheme, UserProfile, OutcomeTracking
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/draft", tags=["Draft"])
@@ -177,6 +177,25 @@ async def _save_draft(db: AsyncSession, clerk_user_id: str, scheme_name: str, dr
             db.add(interaction)
 
         await db.commit()
+
+        # ── Auto-create OutcomeTracking row ──────────────────────────
+        ot_result = await db.execute(
+            select(OutcomeTracking).where(
+                OutcomeTracking.clerk_user_id == clerk_user_id,
+                OutcomeTracking.scheme_id == scheme.id,
+            )
+        )
+        ot = ot_result.scalar_one_or_none()
+        if not ot:
+            ot = OutcomeTracking(
+                clerk_user_id=clerk_user_id,
+                scheme_id=scheme.id,
+                draft_generated=True,
+                draft_date=date.today(),
+            )
+            db.add(ot)
+            await db.commit()
+
     except Exception as e:
         logger.warning(f"Draft save failed (non-fatal): {e}")
 

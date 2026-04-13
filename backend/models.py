@@ -164,3 +164,26 @@ class UserSchemeInteraction(Base):
 
     user   = relationship("User", back_populates="scheme_interactions")
     scheme = relationship("Scheme")
+
+
+class OutcomeTracking(Base):
+    """
+    Tracks real-world outcomes for UPCST grant impact metrics.
+    Populated automatically when drafts are generated, and manually
+    by the user when they submit/get approved.
+    """
+    __tablename__ = "outcome_tracking"
+
+    id              = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    clerk_user_id   = Column(String, ForeignKey("users.clerk_user_id"), nullable=True, index=True)
+    scheme_id       = Column(Integer, ForeignKey("schemes.id"), nullable=True)
+    draft_generated = Column(Boolean, default=False)
+    draft_date      = Column(DateTime, nullable=True)
+    submitted       = Column(Boolean, default=False)
+    submit_date     = Column(DateTime, nullable=True)
+    approved        = Column(Boolean, nullable=True)
+    amount_approved = Column(Integer, nullable=True)   # in rupees
+    reported_at     = Column(DateTime, default=datetime.utcnow)
+
+    user   = relationship("User")
+    scheme = relationship("Scheme")

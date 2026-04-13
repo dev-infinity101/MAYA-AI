@@ -7,13 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#000000',
-        surface: 'rgba(20, 20, 20, 0.6)',
-        primary: '#00FFB2', // Neon Mint
-        secondary: '#00C9FF', // Electric Blue
+        background: '#0B0F0C',
+        surface: '#121A14',
+        primary: '#10B981', // Slightly muted green
+        secondary: '#06B6D4', // Refined cyan/blue
         text: {
-            primary: '#FFFFFF',
-            secondary: '#BFBFBF'
+            primary: '#EAEAEA',
+            secondary: '#A1A1AA'
         }
       },
       glitch: {

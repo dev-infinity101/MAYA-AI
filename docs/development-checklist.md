@@ -120,8 +120,8 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
     - [x] Handle API timeouts (Implemented via AbortController abort signals in the frontend)
 
 ### Day 14: Final Polish & Demo 🏆
-- [ ] **Documentation**
-    - [ ] Update README.md
+- [x] **Documentation**
+    - [x] Update development-checklist.md and README.md with recent integrations.
 - [x] **UI Polish**
     - [x] Glassmorphism theme implementation
     - [x] Add animations (Tailwind generic keyframes/`animate-in` effectively replaced framer-motion approach)
@@ -137,6 +137,9 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
 - **Comprehensive Testing Suite**: Added `tests/` directory with specific scripts for identity, agent routing, and embedding verification.
 - **Advanced Landing Page**: Implemented a full modern landing page with Features, Pricing, and About sections.
 - **ChatGPT-Style Interface**: Redesigned Chat Interface with centered search, clean typography, and advanced loading animations.
+- **WhatsApp Channel Integration**: Launched live WhatsApp support via Twilio, allowing users to query schemes and get business advice via text.
+- **Automated Response Formatting**: Created a specialized formatting engine for WhatsApp to convert rich markdown/tables into clean, readable text.
+- **Twilio Request Validation**: Implemented security middleware to validate incoming WhatsApp webhooks directly from Twilio.
 
 ## Change Log
 
@@ -161,3 +164,14 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
 - **Maintenance**: Created `fix_db.py` to retroactively repair garbled characters in the pgvector database without dropping the costly AI embeddings.
 - **UI Optimization**: Refactored `ThinkingIndicator.tsx`. Replaced the CSS-heavy black gradient loop overlay with a simple, high-performance neon green dot pulse for the 'thinking' mode. Removed `overflow: hidden` dependencies to reduce layout paints.
 - **UI Redesign**: Simplified 'New Chat' sidebar button by removing "Ctrl+Shift+O" visual clutter to enhance minimalist aesthetic.
+
+### [Date: 2026-04-13]
+- **Major Integration**: Implemented full WhatsApp Bot functionality via Twilio.
+  - Developed `backend/routers/whatsapp.py` with webhook handling and request validation.
+  - Integrated `get_or_create_whatsapp_user` in `user_service.py` using phone-number-based identity.
+  - Built `format_agent_response_for_whatsapp` to handle markdown-to-WhatsApp text conversion.
+  - Connected WhatsApp channel to the LangGraph multi-agent system, supporting all specialized agents (Market, Brand, Finance, etc.).
+- **Frontend Bug Fixes**:
+  - Resolved several critical compilation and runtime errors in `ChatInterface.tsx` related to undefined variables (`input`, `isLoading`, etc.), broken template literals, and comma operator misuse.
+- **UI Refinement**: 
+  - Improved the `ChatInputBox` layout by shifting the attachment (clip) icon to the bottom-left action bar, creating a cleaner and more professional input area.

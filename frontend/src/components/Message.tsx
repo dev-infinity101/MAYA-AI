@@ -43,12 +43,12 @@ export function Message({ message }: MessageProps) {
                <div className={clsx(
                 "relative group",
                 isUser
-                    ? "bg-[#006b33] text-white rounded-[24px] px-5 py-2.5 shadow-sm"
-                    : "bg-transparent text-white rounded-none border-none px-0 py-3"
+                    ? "bg-primary text-black rounded-[20px] px-5 py-2.5 shadow-md"
+                    : "bg-transparent text-[#EAEAEA] rounded-none border-none py-1"
                 )}>
                     <div className={clsx(
-                    "w-full text-white/90 leading-relaxed space-y-4 text-[14px]",
-                    isUser ? "text-right" : "text-left"
+                    "w-full leading-relaxed space-y-4 text-[15px]",
+                    isUser ? "text-right font-medium text-black" : "text-left text-[#EAEAEA]"
                 )}>
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
@@ -98,16 +98,16 @@ export function Message({ message }: MessageProps) {
                                 <ul className="list-none space-y-2 my-4" {...props} />
                             ),
                             li: ({node, ...props}) => (
-                                <li className="flex gap-2 text-gray-300 text-sm" {...props}>
-                                    <span className="text-white mt-0.5">•</span>
+                                <li className="flex gap-2 text-[#EAEAEA] text-[15px] leading-7" {...props}>
+                                    <span className="text-primary mt-0.5">•</span>
                                     <span>{props.children}</span>
                                 </li>
                             ),
                             p: ({node, ...props}) => (
-                                <p className="text-gray-300 text-sm leading-relaxed mb-4 last:mb-0" {...props} />
+                                <p className="text-[#EAEAEA] text-[15px] leading-7 mb-4 last:mb-0" {...props} />
                             ),
                             strong: ({node, ...props}) => (
-                                <strong className="text-white font-bold" {...props} />
+                                <strong className="text-white font-semibold" {...props} />
                             ),
                             img: ({node, ...props}) => (
                                 <div className="relative group my-4 rounded-lg overflow-hidden border border-white/10 bg-black/20 max-w-md">

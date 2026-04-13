@@ -1,485 +1,473 @@
-Two weeks changes everything. Here's the honest truth first.
+Okay. Running locally means your first job is making your backend publicly accessible so Twilio can reach it. Here's the complete setup guide.
 
 ---
 
-## The Hard Truth About Your Deadline
-
-With 2 weeks left, you cannot build WhatsApp integration properly. Meta's Business API verification alone takes 3-7 business days. If you start today you'll be waiting for approval during your submission window. That's a deadline killer.
-
-Here's what you **can** build in 2 weeks that makes a stronger grant submission than half-built WhatsApp:
-
----
-
-## The 2-Week UPCST Sprint Plan
+## Architecture Overview
 
 ```
-Week 1 — Impact Metrics (what judges actually fund)
-Week 2 — Polish + Demo Video + Submission
+User WhatsApp message
+        ↓
+Twilio receives it
+        ↓
+Twilio POSTs to your webhook URL
+        ↓
+FastAPI /webhook/whatsapp endpoint
+        ↓
+Routes to existing MAYA agents (same graph.py)
+        ↓
+Response sent back via Twilio API
+        ↓
+User sees reply on WhatsApp
 ```
+
+Your existing agents require zero changes. WhatsApp is just a new input/output surface sitting on top of what already works.
 
 ---
 
-## Week 1 — Build What Judges Fund
+## Step 1 — Expose Localhost via ngrok (30 mins)
 
-### Day 1-2: Business Health Score
-This is your highest-leverage feature for the grant. It creates a **measurable, repeatable impact metric** — exactly what UPCST evaluates.
+Twilio needs a public HTTPS URL to send messages to. ngrok creates a temporary public tunnel to your local server.
 
-**What to build:**
+```bash
+# Install ngrok
+# Windows: download from ngrok.com and add to PATH
+# Mac: brew install ngrok
+# Linux: snap install ngrok
 
-The score is entirely rule-based — no extra LLM calls needed. Calculate from data you already have in `user_profiles`:
+# Authenticate (free account at ngrok.com)
+ngrok authtoken YOUR_NGROK_TOKEN
+
+# Start tunnel pointing to your FastAPI port
+ngrok http 8000
+```
+
+ngrok gives you a URL like:
+```
+Forwarding  https://abc123.ngrok-free.app -> http://localhost:8000
+```
+
+Copy that HTTPS URL — this is your webhook base URL. It changes every time you restart ngrok, so keep it running during development.
+
+---
+
+## Step 2 — Install Twilio SDK
+
+```bash
+pip install twilio
+```
+
+Add to your `.env`:
+```
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+```
+
+The sandbox number is always `+14155238886` for Twilio Sandbox.
+
+---
+
+## Step 3 — Create WhatsApp Router
+
+Create `routers/whatsapp.py`:
 
 ```python
-# services/health_score_service.py
+# routers/whatsapp.py
+import logging
+import asyncio
+from fastapi import APIRouter, Request, Response, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from twilio.rest import Client
+from twilio.request_validator import RequestValidator
+from langchain_core.messages import HumanMessage
 
-def calculate_health_score(profile: UserProfile) -> dict:
-    """
-    Pure rule-based scoring — instant, no API calls.
-    Returns score breakdown across 5 dimensions.
-    """
-    scores = {}
-    recommendations = {}
+from app.config import settings
+from database import get_db, AsyncSessionLocal
+from agents.graph import app_graph
+from models import Conversation, User, UserProfile
+from services.message_service import save_message
+from services.user_service import get_or_create_whatsapp_user
+import uuid
 
-    # 1. Scheme Utilization (0-20 points)
-    # How many schemes has this user engaged with?
-    # Pull from user_scheme_interactions count
-    scheme_score = min(interactions_count * 5, 20)
-    scores["scheme_utilization"] = scheme_score
-    if scheme_score < 10:
-        recommendations["scheme_utilization"] = (
-            "You haven't applied to any schemes yet. "
-            "PMEGP could give you up to ₹25L — ask MAYA about it."
+router = APIRouter(prefix="/webhook", tags=["whatsapp"])
+logger = logging.getLogger(__name__)
+
+# Twilio client — initialized once
+twilio_client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+validator = RequestValidator(settings.TWILIO_AUTH_TOKEN)
+
+
+def send_whatsapp_reply(to: str, message: str):
+    """
+    Send a WhatsApp message via Twilio.
+    Splits long messages — WhatsApp has 1600 char limit.
+    """
+    # WhatsApp message limit is 1600 characters
+    chunks = [message[i:i+1500] for i in range(0, len(message), 1500)]
+
+    for chunk in chunks:
+        twilio_client.messages.create(
+            from_=settings.TWILIO_WHATSAPP_NUMBER,
+            to=to,
+            body=chunk
         )
 
-    # 2. Registration Compliance (0-20 points)
-    reg_score = 0
-    if profile.udyam_registered:        reg_score += 12
-    if profile.turnover_range != "Not started": reg_score += 8
-    scores["registration"] = reg_score
-    if not profile.udyam_registered:
-        recommendations["registration"] = (
-            "Register on Udyam portal — it's free and unlocks "
-            "10+ additional government schemes."
+
+def format_schemes_for_whatsapp(schemes: list, summary: str) -> str:
+    """
+    Convert scheme cards to WhatsApp-friendly text.
+    No HTML, no markdown tables — just clean formatted text.
+    WhatsApp supports *bold* and _italic_.
+    """
+    if not schemes:
+        return summary
+
+    lines = [summary, ""]
+
+    for i, scheme in enumerate(schemes[:3], 1):  # max 3 schemes
+        score = scheme.get("relevance_score", 0)
+        name  = scheme.get("name", "")
+        explanation = scheme.get("explanation", "")
+        benefits = scheme.get("benefits", [])
+        link = scheme.get("link", "")
+        app_mode = scheme.get("application_mode", "")
+
+        lines.append(f"*{i}. {name}*")
+        lines.append(f"✅ Match: {score}%")
+
+        if explanation:
+            lines.append(f"📌 {explanation}")
+
+        if benefits:
+            first_benefit = benefits[0] if isinstance(benefits, list) else str(benefits)
+            lines.append(f"💰 {first_benefit}")
+
+        if app_mode:
+            lines.append(f"📋 Apply: {app_mode}")
+
+        if link:
+            lines.append(f"🔗 {link}")
+
+        lines.append("")  # blank line between schemes
+
+    lines.append("Reply with a scheme name to generate your application draft.")
+    return "\n".join(lines)
+
+
+def format_agent_response_for_whatsapp(text: str) -> str:
+    """
+    Clean markdown formatting that doesn't render on WhatsApp.
+    Convert markdown to WhatsApp-compatible format.
+    """
+    import re
+
+    # Convert markdown bold **text** to WhatsApp *text*
+    text = re.sub(r'\*\*(.*?)\*\*', r'*\1*', text)
+
+    # Remove markdown headers ### 
+    text = re.sub(r'#{1,6}\s+', '', text)
+
+    # Convert markdown tables to simple text
+    # Remove table separator rows like |---|---|
+    text = re.sub(r'\|[-| :]+\|\n', '', text)
+    # Convert table rows to simple lines
+    text = re.sub(r'\|(.*?)\|', lambda m: m.group(1).strip(), text)
+
+    # Remove excessive blank lines
+    text = re.sub(r'\n{3,}', '\n\n', text)
+
+    return text.strip()
+
+
+@router.post("/whatsapp")
+async def whatsapp_webhook(request: Request):
+    """
+    Main webhook endpoint — Twilio calls this on every incoming message.
+
+    Flow:
+    1. Parse incoming WhatsApp message
+    2. Identify or create user by phone number
+    3. Get or create conversation for this phone number
+    4. Run through MAYA's existing agent graph
+    5. Format response for WhatsApp
+    6. Send reply via Twilio
+    7. Return 200 immediately (Twilio requires fast response)
+    """
+    form_data = await request.form()
+    form_dict = dict(form_data)
+
+    # Extract message details from Twilio's payload
+    from_number  = form_dict.get("From", "")  # e.g. whatsapp:+919876543210
+    to_number    = form_dict.get("To", "")
+    message_body = form_dict.get("Body", "").strip()
+    num_media    = int(form_dict.get("NumMedia", 0))
+
+    logger.info(f"WhatsApp message from {from_number}: {message_body[:50]}")
+
+    # Handle empty messages
+    if not message_body and num_media == 0:
+        return Response(content="", media_type="text/xml")
+
+    # Handle voice notes (future — for now inform user)
+    if num_media > 0 and not message_body:
+        send_whatsapp_reply(
+            from_number,
+            "🎤 Voice messages coming soon! Please type your question for now.\n\n"
+            "Try: 'What schemes am I eligible for?' or 'I need a business loan'"
         )
+        return Response(content="", media_type="text/xml")
 
-    # 3. Financial Health (0-20 points)
-    turnover_points = {
-        "Not started": 0, "Under ₹10 Lakh": 8,
-        "₹10L - ₹50L": 14, "₹50L - ₹5Cr": 18, "Above ₹5Cr": 20
-    }
-    fin_score = turnover_points.get(profile.turnover_range or "Not started", 0)
-    loan_penalty = -5 if profile.existing_loan else 0
-    scores["financial"] = max(0, fin_score + loan_penalty)
-
-    # 4. Market Presence (0-20 points)
-    # Based on sector and business age — proxy for market establishment
-    sector_points = {
-        "Technology": 18, "Food & Beverage": 15,
-        "Textile & Garments": 15, "Healthcare": 16,
-        "Handicrafts": 14, "Retail": 12, "Other": 10
-    }
-    market_score = sector_points.get(profile.sector or "Other", 10)
-    scores["market_presence"] = market_score
-
-    # 5. Growth Readiness (0-20 points)
-    goal_points = {
-        "Funding / Loan": 15, "Equipment / Machinery": 14,
-        "Market Access": 16, "All of the above": 20,
-        "Training / Skills": 12, "Brand Building": 13
-    }
-    growth_score = goal_points.get(profile.primary_goal or "", 10)
-    scores["growth_readiness"] = growth_score
-
-    total = sum(scores.values())
-
-    return {
-        "total_score": total,
-        "max_score": 100,
-        "grade": _get_grade(total),
-        "dimensions": scores,
-        "recommendations": recommendations,
-        "eligible_scheme_count": _count_eligible_schemes(profile)
-    }
-
-def _get_grade(score: int) -> dict:
-    if score >= 80: return {"label": "Excellent",  "color": "emerald"}
-    if score >= 60: return {"label": "Good",        "color": "blue"}
-    if score >= 40: return {"label": "Developing",  "color": "yellow"}
-    return              {"label": "Getting Started","color": "orange"}
-```
-
-Add endpoint to `routers/user.py`:
-```python
-@router.get("/health-score")
-async def get_health_score(
-    db: AsyncSession = Depends(get_db),
-    clerk_user_id: str = Depends(get_current_user_id)
-):
-    profile = await _get_profile(db, clerk_user_id)
-    interactions = await _get_interaction_count(db, clerk_user_id)
-    score_data = calculate_health_score(profile, interactions)
-    return score_data
-```
-
-**Frontend — Health Score Card in dashboard:**
-
-```tsx
-// components/HealthScoreCard.tsx
-export const HealthScoreCard = ({ score }: { score: HealthScore }) => {
-    const dimensions = [
-        { key: "scheme_utilization", label: "Scheme Access" },
-        { key: "registration",       label: "Compliance" },
-        { key: "financial",          label: "Financial Health" },
-        { key: "market_presence",    label: "Market Presence" },
-        { key: "growth_readiness",   label: "Growth Readiness" },
-    ]
-
-    return (
-        <div className="bg-black/40 border border-emerald-500/20 
-                       rounded-2xl p-6 space-y-6">
-            {/* Score circle */}
-            <div className="flex items-center gap-6">
-                <div className="relative w-24 h-24">
-                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                        <circle cx="50" cy="50" r="40"
-                            fill="none" stroke="rgba(255,255,255,0.05)"
-                            strokeWidth="8" />
-                        <circle cx="50" cy="50" r="40"
-                            fill="none" stroke="#10b981"
-                            strokeWidth="8"
-                            strokeDasharray={`${score.total_score * 2.51} 251`}
-                            strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col 
-                                   items-center justify-center">
-                        <span className="text-2xl font-bold text-white">
-                            {score.total_score}
-                        </span>
-                        <span className="text-xs text-gray-400">/ 100</span>
-                    </div>
-                </div>
-                <div>
-                    <p className="text-emerald-400 font-semibold text-lg">
-                        {score.grade.label}
-                    </p>
-                    <p className="text-gray-400 text-sm mt-1">
-                        {score.eligible_scheme_count} schemes you qualify for
-                    </p>
-                </div>
-            </div>
-
-            {/* Dimension bars */}
-            <div className="space-y-3">
-                {dimensions.map(dim => (
-                    <div key={dim.key}>
-                        <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-400">{dim.label}</span>
-                            <span className="text-white font-medium">
-                                {score.dimensions[dim.key]}/20
-                            </span>
-                        </div>
-                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-emerald-500 rounded-full 
-                                           transition-all duration-700"
-                                style={{
-                                    width: `${(score.dimensions[dim.key] / 20) * 100}%`
-                                }}
-                            />
-                        </div>
-                        {score.recommendations[dim.key] && (
-                            <p className="text-xs text-yellow-500/70 mt-1">
-                                ↗ {score.recommendations[dim.key]}
-                            </p>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
+    # Process in background — Twilio needs 200 response within 15s
+    # but agent processing can take longer
+    asyncio.create_task(
+        process_whatsapp_message(from_number, message_body)
     )
-}
-```
 
----
+    # Return empty 200 immediately — reply sent async
+    return Response(content="", media_type="text/xml")
 
-### Day 3-4: Outcome Tracking (your funding pitch numbers)
 
-This is what UPCST actually funds — **evidence of impact**. Even with 5 test users, having real tracking in place is more credible than promising it.
-
-```python
-# Add to models.py
-class OutcomeTracking(Base):
-    __tablename__ = "outcome_tracking"
-
-    id              = Column(UUID, primary_key=True, default=uuid.uuid4)
-    clerk_user_id   = Column(String, ForeignKey("users.clerk_user_id"))
-    scheme_id       = Column(Integer, ForeignKey("schemes.id"))
-    draft_generated = Column(Boolean, default=False)
-    draft_date      = Column(DateTime)
-    submitted       = Column(Boolean, default=False)
-    submit_date     = Column(DateTime)
-    approved        = Column(Boolean)
-    amount_approved = Column(Integer)   # in rupees
-    reported_at     = Column(DateTime, default=datetime.utcnow)
-```
-
-Add a simple follow-up prompt in chat — 30 days after draft generation:
-
-```python
-# In scheme_agent_node — check for pending follow-ups
-async def check_pending_followups(clerk_user_id: str, db: AsyncSession):
+async def process_whatsapp_message(from_number: str, message_body: str):
     """
-    If user generated a draft 30+ days ago with no outcome reported,
-    add a follow-up prompt to the top of their chat response.
+    Background task — runs the full MAYA agent pipeline.
+    Sends WhatsApp reply when done.
+    Decoupled from the webhook response so Twilio doesn't timeout.
     """
-    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-    result = await db.execute(
-        select(UserSchemeInteraction).where(
-            UserSchemeInteraction.clerk_user_id == clerk_user_id,
-            UserSchemeInteraction.application_status == "draft_generated",
-            UserSchemeInteraction.updated_at <= thirty_days_ago
-        )
-    )
-    pending = result.scalars().all()
-    return pending  # frontend shows a "Did you submit?" banner
-```
+    try:
+        # Use phone number as the user identifier for WhatsApp users
+        # Strip "whatsapp:" prefix and use number as clerk_user_id proxy
+        phone = from_number.replace("whatsapp:", "")
+        wa_user_id = f"wa_{phone}"  # prefix to distinguish from Clerk users
 
-**Impact dashboard — add to your admin/settings view:**
+        async with AsyncSessionLocal() as db:
+            # Get or create a WhatsApp user
+            await get_or_create_whatsapp_user(db, wa_user_id, phone)
 
-```tsx
-// Simple numbers display — this is your UPCST slide
-const ImpactNumbers = () => (
-    <div className="grid grid-cols-2 gap-4">
-        {[
-            { label: "Drafts Generated",    value: stats.drafts,   color: "emerald" },
-            { label: "Applications Submitted", value: stats.submitted, color: "blue" },
-            { label: "Schemes Accessed",    value: stats.schemes,  color: "purple" },
-            { label: "Est. Funding Unlocked", value: `₹${stats.funding_cr}Cr`, color: "yellow" },
-        ].map(stat => (
-            <div key={stat.label}
-                 className="bg-black/40 border border-white/10 
-                           rounded-xl p-4 text-center">
-                <p className={`text-2xl font-bold text-${stat.color}-400`}>
-                    {stat.value}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">{stat.label}</p>
-            </div>
-        ))}
-    </div>
-)
-```
+            # Get or create conversation for this phone number
+            # Each phone number gets one persistent conversation
+            conversation = await get_or_create_wa_conversation(
+                db, wa_user_id
+            )
+            conversation_id = str(conversation.id)
 
----
+            # Save user message
+            await save_message(
+                db=db,
+                conversation_id=uuid.UUID(conversation_id),
+                role="user",
+                content_type="text",
+                content={"text": message_body},
+                agent_used=None
+            )
 
-### Day 5: Apply for WhatsApp Access (parallel, not building)
-
-Don't build WhatsApp yet. **Apply for access today** so approval comes during Week 2:
-
-1. Go to developers.facebook.com
-2. Create Meta Business App → WhatsApp → Cloud API
-3. Submit business verification with your college/project details
-4. Add phone number for testing
-
-This runs in background while you build other things. If approved before submission — great, mention it. If not — still mention it as "in verification" in your grant proposal.
-
----
-
-## Week 2 — Polish + Grant Submission
-
-### Day 6-7: Demo Flow Polish
-
-Your demo video is worth more than any feature. Script it exactly:
-
-```
-0:00 - 0:20  Problem statement (text overlay)
-             "90 lakh MSMEs. ₹12,000Cr in schemes. 8% access rate."
-
-0:20 - 0:50  Signup + Onboarding
-             Show the 3-step onboarding, data being collected
-
-0:50 - 1:30  Scheme Discovery
-             Type: "I want funding for my textile business in Lucknow"
-             Show scheme cards appearing with match scores
-             Click a scheme → eligibility check shows
-
-1:30 - 2:00  Draft Generation
-             Click Generate Draft → modal pre-filled from profile
-             Fill 2-3 remaining fields → draft appears
-             Download button → show the PDF
-
-2:00 - 2:20  Health Score
-             Show the score dashboard updating
-             Show one recommendation linking to a scheme
-
-2:20 - 2:30  Impact numbers
-             Show the outcome tracking dashboard
-             "X drafts generated, ₹X lakh in scheme access unlocked"
-```
-
----
-
-### Day 8-9: UPCST Proposal Writing
-
-Your proposal needs these exact sections for UPCST:
-
-```
-1. Problem Statement with UP-specific data
-   → 90L MSMEs in UP, ₹3,200Cr annual scheme budget,
-     less than 8% utilization rate, cite MSME ministry data
-
-2. Solution Architecture (one diagram)
-   → Signup → Onboard → Chat → Scheme Match → 
-     Eligibility Check → Draft Generate → Submit
-
-3. Social Impact Metrics (your actual numbers)
-   → Even 10 test users with drafts generated is real data
-   → Project: 2,000 UP MSMEs in year 1
-
-4. UP-Specific Alignment
-   → ODOP scheme support (UP's flagship)
-   → Vishwakarma Shram Samman coverage
-   → Focus on Lucknow, Kanpur, Varanasi districts
-   → Hindi language roadmap (even if not built yet)
-
-5. Budget Breakdown
-   → Server costs: ₹1,200/month × 12 = ₹14,400
-   → API costs: ₹1,500/month × 12 = ₹18,000
-   → Development: your time (no cost)
-   → Total ask: ₹50,000-75,000 for year 1 infrastructure
-
-6. Team + Institution
-   → Your name, GITM affiliation, supervisor name
-   → GitHub link showing active development
-   → Live demo URL
-```
-
----
-
-### Day 10-12: Hindi Voice Input (minimal viable)
-
-This is achievable in 2-3 days and is a massive grant differentiator:
-
-```python
-# routers/voice.py — minimal implementation
-from fastapi import APIRouter, UploadFile, File, Depends
-import httpx
-
-router = APIRouter(prefix="/api/voice")
-
-@router.post("/transcribe")
-async def transcribe_hindi(
-    audio: UploadFile = File(...),
-    clerk_user_id: str = Depends(get_current_user_id)
-):
-    """
-    Send audio to OpenAI Whisper API.
-    Returns Hindi transcription + English translation.
-    Cost: ~₹0.50 per minute of audio.
-    """
-    audio_bytes = await audio.read()
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://api.openai.com/v1/audio/transcriptions",
-            headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
-            files={"file": ("audio.webm", audio_bytes, "audio/webm")},
-            data={
-                "model": "whisper-1",
-                "language": "hi",        # Hindi
-                "response_format": "json"
-            }
-        )
-
-    transcript = response.json()["text"]
-    return {
-        "transcript": transcript,
-        "language": "hi"
-    }
-```
-
-Frontend mic button — add to chat input:
-
-```tsx
-// In your chat input component
-const [recording, setRecording] = useState(false)
-const mediaRecorder = useRef<MediaRecorder | null>(null)
-
-const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    mediaRecorder.current = new MediaRecorder(stream)
-    const chunks: Blob[] = []
-
-    mediaRecorder.current.ondataavailable = e => chunks.push(e.data)
-    mediaRecorder.current.onstop = async () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' })
-        const formData = new FormData()
-        formData.append('audio', blob, 'voice.webm')
-
-        const token = await getToken()
-        const res = await fetch('/api/voice/transcribe', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
+        # Run MAYA agent graph — same as web chat
+        result = await app_graph.ainvoke({
+            "messages": [HumanMessage(content=message_body)],
+            "schemes": [],
+            "current_agent": "",
+            "conversation_id": conversation_id,
+            "clerk_user_id": wa_user_id
         })
-        const data = await res.json()
-        setInputText(data.transcript)  // fills chat input with Hindi text
-    }
 
-    mediaRecorder.current.start()
-    setRecording(true)
-}
+        # Extract response
+        agent_used  = result.get("current_agent", "general")
+        schemes     = result.get("schemes", [])
+        raw_message = result["messages"][-1].content
 
-const stopRecording = () => {
-    mediaRecorder.current?.stop()
-    setRecording(false)
-}
+        # Format response based on agent type
+        if agent_used == "scheme" and schemes:
+            reply = format_schemes_for_whatsapp(schemes, raw_message)
+        else:
+            reply = format_agent_response_for_whatsapp(raw_message)
 
-// In your input bar JSX:
-<button
-    onMouseDown={startRecording}
-    onMouseUp={stopRecording}
-    className={`p-2 rounded-lg transition-colors ${
-        recording
-            ? 'bg-red-500 text-white animate-pulse'
-            : 'text-gray-400 hover:text-emerald-400'
-    }`}
->
-    <Mic size={18} />
-</button>
+        # Send WhatsApp reply
+        send_whatsapp_reply(from_number, reply)
+
+    except Exception as e:
+        logger.error(f"WhatsApp processing error: {e}", exc_info=True)
+        send_whatsapp_reply(
+            from_number,
+            "Sorry, something went wrong. Please try again in a moment."
+        )
+
+
+async def get_or_create_wa_conversation(
+    db: AsyncSession, wa_user_id: str
+) -> Conversation:
+    """
+    WhatsApp users get one persistent conversation per phone number.
+    Unlike web users who can have multiple conversations.
+    """
+    from sqlalchemy import select
+
+    result = await db.execute(
+        select(Conversation).where(
+            Conversation.clerk_user_id == wa_user_id
+        ).order_by(Conversation.created_at.desc())
+    )
+    conversation = result.scalar_one_or_none()
+
+    if conversation:
+        return conversation
+
+    conversation = Conversation(
+        clerk_user_id=wa_user_id,
+        title="WhatsApp Chat"
+    )
+    db.add(conversation)
+    await db.commit()
+    await db.refresh(conversation)
+    return conversation
 ```
 
 ---
 
-## Complete 2-Week Checklist
+## Step 4 — Add WhatsApp User Helper
+
+Add to `services/user_service.py`:
+
+```python
+async def get_or_create_whatsapp_user(
+    db: AsyncSession,
+    wa_user_id: str,
+    phone: str
+) -> User:
+    """
+    WhatsApp users are identified by phone number.
+    Created with wa_ prefix to distinguish from Clerk users.
+    No password, no email — phone is their identity.
+    """
+    result = await db.execute(
+        select(User).where(User.clerk_user_id == wa_user_id)
+    )
+    user = result.scalar_one_or_none()
+
+    if user:
+        return user
+
+    user = User(
+        clerk_user_id=wa_user_id,
+        email=f"{phone}@whatsapp.maya",  # placeholder
+        name=phone
+    )
+    db.add(user)
+    await db.flush()
+
+    # Empty profile — WhatsApp onboarding handled conversationally
+    profile = UserProfile(
+        clerk_user_id=wa_user_id,
+        onboarding_complete=False
+    )
+    db.add(profile)
+    await db.commit()
+    await db.refresh(user)
+    return user
+```
+
+---
+
+## Step 5 — Register Router in `main.py`
+
+```python
+# main.py
+from routers.whatsapp import router as whatsapp_router
+app.include_router(whatsapp_router)
+```
+
+---
+
+## Step 6 — Configure Twilio Sandbox Webhook
+
+1. Go to [console.twilio.com](https://console.twilio.com)
+2. Navigate to **Messaging → Try it out → Send a WhatsApp message**
+3. You'll see the Sandbox configuration page
+4. Find **"When a message comes in"** field
+5. Enter your ngrok URL:
+```
+https://abc123.ngrok-free.app/webhook/whatsapp
+```
+6. Set method to **HTTP POST**
+7. Click **Save**
+
+---
+
+## Step 7 — Join the Sandbox
+
+Before testing, you and anyone testing must join the sandbox:
+
+1. From Twilio console, note the sandbox join code — something like `join xyz-abc`
+2. Send that exact message to `+1 415 523 8886` on WhatsApp
+3. You'll get a confirmation — now you're connected
+
+---
+
+## Step 8 — Test the Flow
+
+Start your FastAPI server and ngrok, then send these test messages:
 
 ```
-WEEK 1
-□ Day 1-2: Business Health Score
-  □ health_score_service.py with rule-based calculation
-  □ GET /api/user/health-score endpoint
-  □ HealthScoreCard component with circular gauge
-  □ Dimension bars with recommendations
-  □ Score shown on dashboard/chat sidebar
+# Test basic routing
+"hi"
+→ Should get MAYA greeting
 
-□ Day 3-4: Outcome Tracking
-  □ outcome_tracking table in DB + Alembic migration
-  □ Auto-bookmark when draft generated
-  □ Impact numbers dashboard (drafts, submissions, funding)
-  □ 30-day follow-up detection in chat
+# Test scheme agent  
+"I want a loan to start a textile business"
+→ Should get 2-3 scheme cards formatted for WhatsApp
 
-□ Day 5: WhatsApp access application submitted to Meta
+# Test off-topic guard
+"who is Virat Kohli"
+→ Should get polite redirect
 
-WEEK 2
-□ Day 6-7: Demo video recorded (2:30 minutes, script above)
-□ Day 8-9: UPCST proposal written (6 sections above)
-□ Day 10-12: Hindi voice input (Whisper API + mic button)
-□ Day 13-14: Final testing, submission
-
-GRANT SUBMISSION PACKAGE
-□ Live demo URL (deploy to Koyeb + Vercel if not already)
-□ GitHub repo with clean README and demo GIF
-□ 2:30 demo video uploaded to YouTube (unlisted)
-□ Proposal PDF with impact metrics
-□ Budget breakdown document
+# Test general agent
+"how should I price my handmade soap"
+→ Should get business advice
 ```
 
-The single most important thing you can do today is record even a rough demo video and deploy a live URL. Judges who can click a link and try MAYA themselves will fund it over a polished PDF proposal with no working demo every single time.
+---
+
+## Step 9 — Handle the Rate Limit Correctly
+
+Twilio Sandbox allows only 1 message per second. Add a small delay for multi-part responses:
+
+```python
+def send_whatsapp_reply(to: str, message: str):
+    import time
+
+    chunks = [message[i:i+1500] for i in range(0, len(message), 1500)]
+
+    for i, chunk in enumerate(chunks):
+        twilio_client.messages.create(
+            from_=settings.TWILIO_WHATSAPP_NUMBER,
+            to=to,
+            body=chunk
+        )
+        if i < len(chunks) - 1:
+            time.sleep(1)  # Sandbox rate limit
+```
+
+---
+
+## Final Checklist
+
+```
+□ ngrok installed and running on port 8000
+□ ngrok HTTPS URL copied
+□ TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
+  TWILIO_WHATSAPP_NUMBER added to .env
+□ pip install twilio done
+□ routers/whatsapp.py created
+□ get_or_create_whatsapp_user() added to user_service.py
+□ whatsapp_router registered in main.py
+□ Twilio sandbox webhook URL updated to ngrok URL
+□ Your phone joined the sandbox (sent join code)
+□ Tested: greeting works ✅
+□ Tested: scheme search returns formatted cards ✅
+□ Tested: off-topic gets redirected ✅
+
+WHEN READY TO DEPLOY
+□ Deploy backend to Koyeb
+□ Replace ngrok URL with Koyeb URL in Twilio console
+□ ngrok no longer needed
+```
+
+Once this is working on sandbox, the transition to production WhatsApp is just a Meta Business verification — the code stays identical.

@@ -1,8 +1,8 @@
 import { memo, useState } from 'react';
-import { X, Settings, HelpCircle, Sparkles, Zap, PanelLeftClose, SquarePen, MoreHorizontal, Edit2, Trash2, Check, LogOut } from 'lucide-react';
+import { Settings, HelpCircle, Sparkles, PanelLeftClose, SquarePen, MoreHorizontal, Edit2, Trash2, Check } from 'lucide-react';
 import { clsx } from 'clsx';
-import { Link, useNavigate } from 'react-router-dom';
-import { UserButton, useClerk } from '@clerk/clerk-react';
+import { Link } from 'react-router-dom';
+import { UserButton } from '@clerk/clerk-react';
 import { Brand } from './Brand';
 
 interface SidebarProps {
@@ -84,10 +84,10 @@ const SidebarSessionItem = ({
                     if (!showMenu) onSelectSession?.(session.id);
                 }}
                 className={clsx(
-                    "w-full text-left py-2 px-3 rounded-lg text-[14px] transition-colors flex items-center justify-between",
+                    "w-full text-left py-2 px-3 rounded-lg text-[13px] transition-all flex items-center justify-between group/item",
                     isCurrent || showMenu
-                        ? "bg-white/10 text-white font-medium shadow-sm border border-white/5" 
-                        : "text-[#a3a3a3] hover:bg-white/5 hover:text-white border border-transparent"
+                        ? "bg-white/[0.08] text-white font-medium border-l-2 border-l-white/30 pl-2.5 shadow-sm" 
+                        : "text-text-secondary hover:bg-white/[0.03] hover:text-white border-l-2 border-l-transparent"
                 )}
                 title={session.title}
             >
@@ -135,8 +135,6 @@ export function Sidebar({
     onSelectSession, onNewChat, onRenameSession, onDeleteSession,
     userProfile, clerkUser
 }: SidebarProps) {
-  const { signOut } = useClerk();
-  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Resolve display name: prefer onboarding full_name → Clerk name → fallback
@@ -146,20 +144,11 @@ export function Sidebar({
     || clerkUser?.firstName 
     || 'Business Owner';
 
-  const email = userProfile?.email 
-    || clerkUser?.primaryEmailAddress?.emailAddress 
-    || '';
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/');
-  };
-
   return (
     <div 
       className={clsx(
-        "fixed md:relative z-20 h-full bg-black/50 backdrop-blur-xl border-r border-white/10 transition-all duration-300 ease-in-out overflow-hidden",
-        isOpen ? "w-80 opacity-100" : "w-0 opacity-0 -translate-x-full md:translate-x-0"
+        "fixed md:relative z-20 h-full bg-[#0D0D0D] border-r border-white/5 transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0",
+        isOpen ? "w-[240px] opacity-100" : "w-0 opacity-0 -translate-x-full md:translate-x-0"
       )}
     >
       <div className="flex flex-col h-full p-4 relative">
@@ -174,12 +163,10 @@ export function Sidebar({
 
         <button 
             onClick={onNewChat}
-            className="w-full flex items-center justify-between px-3 py-2.5 mb-6 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg transition-all duration-200 group"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-[#1A1A1A] hover:bg-white/[0.04] border border-white/5 hover:border-primary/20 hover:shadow-[0_0_12px_rgba(16,185,129,0.1)] rounded-xl transition-all duration-200 group active:scale-95 text-white"
         >
-            <div className="flex items-center gap-2.5 text-white">
-                <SquarePen size={18} className="text-text-secondary group-hover:text-primary transition-colors" />
-                <span className="text-sm font-medium">New chat</span>
-            </div>
+            <SquarePen size={16} className="text-text-secondary group-hover:text-primary transition-colors" />
+            <span className="text-[13px] font-medium">New chat</span>
         </button>
 
         <div className="flex-1 overflow-y-auto space-y-1 pr-2">
@@ -202,82 +189,56 @@ export function Sidebar({
         
         {/* User menu popover */}
         {isMenuOpen && (
-          <div className="absolute bottom-20 left-4 right-4 bg-[#1a1a1a] border border-white/10 rounded-2xl p-2 shadow-2xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-200">
-             <div className="p-2 border-b border-white/5 mb-1">
-                <div className="flex items-center gap-3">
-                  {/* Clerk UserButton — handles avatar, account management */}
-                  <UserButton
-                    afterSignOutUrl="/"
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8",
-                      }
-                    }}
-                  />
-                  <div>
-                    <div className="text-sm text-white font-medium">{displayName}</div>
-                    <div className="text-[10px] text-text-secondary truncate max-w-[160px]">{email}</div>
-                  </div>
-                </div>
-             </div>
-             
-             <button className="w-full flex items-center gap-3 p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors">
-                <Sparkles size={16} className="text-primary" />
+          <div className="absolute bottom-16 left-4 right-4 bg-[#141414] border border-white/10 rounded-[14px] p-2 shadow-2xl z-30 animate-in fade-in zoom-in-95 duration-200">
+             <button className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group">
+                <Sparkles size={15} className="text-text-secondary group-hover:text-primary transition-colors" />
                 <span>Upgrade plan</span>
              </button>
-             <button className="w-full flex items-center gap-3 p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors">
-                <Zap size={16} />
-                <span>Personalization</span>
+             <button className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group">
+                <HelpCircle size={15} className="text-text-secondary group-hover:text-white transition-colors" />
+                <span>About Us</span>
+             </button>
+             <button className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group">
+                <span className="text-text-secondary w-[15px] flex justify-center text-[12px] group-hover:text-white transition-colors">A/文</span>
+                <span>Language</span>
+             </button>
+             <button className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group">
+                <MoreHorizontal size={15} className="text-text-secondary group-hover:text-white transition-colors" />
+                <span>User Feedback</span>
              </button>
              <Link 
                 to="/settings"
                 onClick={() => setIsMenuOpen(false)}
-                className="w-full flex items-center gap-3 p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors"
+                className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group"
              >
-                <Settings size={16} />
+                <Settings size={15} className="text-text-secondary group-hover:text-white transition-colors" />
                 <span>Settings</span>
              </Link>
-             <div className="h-px bg-white/5 my-1" />
-             <button className="w-full flex items-center justify-between p-2.5 text-sm text-white hover:bg-white/5 rounded-xl transition-colors">
-                <div className="flex items-center gap-3">
-                  <HelpCircle size={16} />
-                  <span>Help</span>
-                </div>
-                <X size={14} className="rotate-45 text-text-secondary" />
-             </button>
-             <button 
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 p-2.5 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
-             >
-                <LogOut size={16} />
-                <span>Log out</span>
-             </button>
           </div>
         )}
 
-        {/* User avatar + name trigger */}
-        <div className="mt-auto pt-4 border-t border-white/10">
+        {/* Minimal User avatar + name trigger */}
+        <div className="mt-auto px-1 pb-2 pt-3 border-t border-white/[0.05]">
            <div 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={clsx(
-              "flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors",
-              isMenuOpen ? "bg-white/10" : "hover:bg-white/5"
+              "flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 group",
+              isMenuOpen ? "bg-[#1A1A1A] shadow-inner" : "hover:bg-white/[0.04]"
             )}
            >
               {/* Clerk UserButton as avatar */}
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8",
-                    // Hide the default dropdown — we use our own menu
-                    userButtonPopoverCard: "hidden",
-                  }
-                }}
-              />
-              <div className="text-sm flex-1 min-w-0">
-                  <div className="text-white font-medium truncate">{displayName}</div>
-                  <div className="text-text-secondary text-xs">Free Plan</div>
+              <div className="pointer-events-none">
+                  <UserButton 
+                      appearance={{
+                        elements: {
+                          avatarBox: "w-6 h-6",
+                          userButtonPopoverCard: "hidden",
+                        }
+                      }}
+                  />
+              </div>
+              <div className="text-[13px] flex-1 min-w-0">
+                  <div className="text-text-primary font-medium truncate group-hover:text-white transition-colors">{displayName}</div>
               </div>
            </div>
         </div>

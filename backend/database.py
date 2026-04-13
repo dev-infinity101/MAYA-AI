@@ -18,8 +18,8 @@ if DATABASE_URL:
     import urllib.parse as urlparse
     from urllib.parse import urlencode
     
-    # Strip any trailing quotes that might have been accidentally added
-    DATABASE_URL = DATABASE_URL.strip("'").strip('"')
+    # Strip any trailing whitespace, quotes, and hidden carriage returns (\r)
+    DATABASE_URL = DATABASE_URL.strip("'").strip('"').strip().replace('\r', '').replace('\n', '')
     
     url = urlparse.urlparse(DATABASE_URL)
     query = urlparse.parse_qs(url.query)

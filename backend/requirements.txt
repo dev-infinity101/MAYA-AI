@@ -33,3 +33,5 @@ python-multipart==0.0.9
 
 # Auth
 clerk-backend-api>=5.0.0
+# WhatsApp Integration
+twilio==9.3.2

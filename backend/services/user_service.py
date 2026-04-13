@@ -53,3 +53,40 @@ async def get_or_create_user(
     await db.commit()
     await db.refresh(user)
     return user
+async def get_or_create_whatsapp_user(
+    db: AsyncSession,
+    wa_user_id: str,
+    phone: str
+) -> User:
+    """
+    WhatsApp users are identified by phone number.
+    Created with wa_ prefix to distinguish from Clerk users.
+    No password, no email — phone is their identity.
+    """
+    result = await db.execute(
+        select(User).where(User.clerk_user_id == wa_user_id)
+    )
+    user = result.scalar_one_or_none()
+
+    if user:
+        return user
+
+    logger.info(f"🆕 First WhatsApp visit for {phone} – creating DB record")
+
+    user = User(
+        clerk_user_id=wa_user_id,
+        email=f"{phone}@whatsapp.maya",  # placeholder
+        name=phone
+    )
+    db.add(user)
+    await db.flush()
+
+    # Empty profile — WhatsApp onboarding handled conversationally
+    profile = UserProfile(
+        clerk_user_id=wa_user_id,
+        onboarding_complete=False
+    )
+    db.add(profile)
+    await db.commit()
+    await db.refresh(user)
+    return user
