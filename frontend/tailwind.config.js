@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0B0F0C',
-        surface: '#121A14',
+        background: '#09090B', // Clean, soft black background
+        surface: '#121214', // Neutral dark soft surface
         primary: '#10B981', // Slightly muted green
         secondary: '#06B6D4', // Refined cyan/blue
         text: {
@@ -26,9 +26,9 @@ export default {
         duration: '2s'
       },
       fontFamily: {
-        sans: ['__esbuild_6b67ff', '__esbuild_Fallback_6b67ff', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
-        mono: ['__esbuild_6b67ff', '__esbuild_Fallback_6b67ff', 'ui-sans-serif', 'system-ui', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
-        display: ['__esbuild_6b67ff', '__esbuild_Fallback_6b67ff', 'ui-sans-serif', 'system-ui', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+        sans: ['cursorSans', '"cursorSans Fallback"', 'system-ui', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['cursorSans', '"cursorSans Fallback"', 'system-ui', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        display: ['cursorSans', '"cursorSans Fallback"', 'system-ui', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

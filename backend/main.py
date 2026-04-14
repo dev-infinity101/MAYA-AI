@@ -422,13 +422,21 @@ async def chat_stream(
 # ──────────────────────────────────────────────────────────────────────────────
 
 @app.get("/api/history/sessions", tags=["History"])
-async def get_sessions(db: AsyncSession = Depends(get_db)):
-    """Returns a list of conversation IDs (most recent first)."""
+async def get_sessions(
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str | None = Depends(get_optional_user_id),
+):
+    """Returns a list of conversation IDs for the authenticated user (most recent first)."""
     try:
         from sqlalchemy import select, desc
         stmt = select(Conversation.id, Conversation.title, Conversation.updated_at)\
             .order_by(desc(Conversation.updated_at))\
             .limit(50)
+
+        # ── Scope to authenticated user when a token is present ───────────────
+        if clerk_user_id:
+            stmt = stmt.where(Conversation.clerk_user_id == clerk_user_id)
+
         result = await db.execute(stmt)
         rows = result.all()
         sessions = [{"id": str(r.id), "title": r.title or f"Chat {str(r.id)[:8]}"} for r in rows]
@@ -439,11 +447,29 @@ async def get_sessions(db: AsyncSession = Depends(get_db)):
 
 
 @app.get("/api/history/{conversation_id}", tags=["History"])
-async def get_conversation_history(conversation_id: str, db: AsyncSession = Depends(get_db)):
-    """Returns all messages for a conversation, ordered oldest first."""
+async def get_conversation_history(
+    conversation_id: str,
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str | None = Depends(get_optional_user_id),
+):
+    """Returns all messages for a conversation, ordered oldest first.
+    
+    Enforces ownership: authenticated users can only fetch their own conversations.
+    """
     try:
         from sqlalchemy import select
         from models import Message
+
+        # ── Ownership check: ensure the conversation belongs to this user ──────
+        if clerk_user_id:
+            conv_stmt = select(Conversation.clerk_user_id).where(
+                Conversation.id == uuid.UUID(conversation_id)
+            )
+            conv_result = await db.execute(conv_stmt)
+            owner_id = conv_result.scalar_one_or_none()
+            if owner_id and owner_id != clerk_user_id:
+                raise HTTPException(status_code=403, detail="Access denied")
+
         stmt = select(Message)\
             .where(Message.conversation_id == uuid.UUID(conversation_id))\
             .order_by(Message.created_at.asc())
@@ -460,6 +486,8 @@ async def get_conversation_history(conversation_id: str, db: AsyncSession = Depe
                 "timestamp": msg.created_at.isoformat() if msg.created_at else None,
             })
         return {"conversation_id": conversation_id, "history": history}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error fetching history for {conversation_id}: {e}")
         return {"conversation_id": conversation_id, "history": []}

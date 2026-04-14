@@ -24,6 +24,8 @@ interface ChatInputProps {
   handleStop: () => void;
   isCentered?: boolean;
   onNewChat?: () => void;
+  selectedAgent: string | null;
+  onSelectAgent: (agent: string | null) => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -67,10 +69,14 @@ const ChatInputBox = ({
   isLoading,
   handleStop,
   isCentered = false,
+  selectedAgent,
+  onSelectAgent,
 }: ChatInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const agentButtonRef = useRef<HTMLButtonElement>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<'top' | 'bottom'>('bottom');
 
   // Auto-resize logic whenever input changes
   useEffect(() => {
@@ -93,10 +99,31 @@ const ChatInputBox = ({
     }
   };
 
-  const selectAgent = (agentPrompt: string) => {
-    setInput(agentPrompt);
+  const selectAgent = (agentId: string) => {
+    onSelectAgent(agentId === selectedAgent ? null : agentId);
     setShowAgentMenu(false);
     textareaRef.current?.focus();
+  };
+
+  const toggleAgentMenu = () => {
+    if (!showAgentMenu && agentButtonRef.current) {
+      const rect = agentButtonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      // Calculate remaining space, need ~260px for the dropdown
+      if (spaceBelow < 260) {
+        setMenuPosition('top');
+      } else {
+        setMenuPosition('bottom');
+      }
+    }
+    setShowAgentMenu(!showAgentMenu);
+  };
+
+  const AGENT_LABELS: Record<string, string> = {
+    marketing: 'Marketing',
+    market: 'Market Research',
+    finance: 'Finance',
+    brand: 'Branding',
   };
 
   return (
@@ -110,10 +137,10 @@ const ChatInputBox = ({
         accept=".txt,.doc,.docx,.xls,.xlsx,.csv,.pdf,.eml,image/jpeg,image/png,image/gif,image/webp" 
       />
 
-      {/* Glow Animation */}
-      <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/40 rounded-[28px] blur transition duration-500 ${isCentered ? 'opacity-10 group-focus-within:opacity-30' : 'opacity-0 group-focus-within:opacity-40'}`} />
+      {/* Glow Animation using primary green */}
+      <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-primary/10 rounded-[28px] blur-md transition duration-500 ${isCentered ? 'opacity-15 group-focus-within:opacity-40' : 'opacity-0 group-focus-within:opacity-50'}`} />
 
-      <div className="relative bg-[#1A1A1A] rounded-[24px] border border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.4)] flex flex-col transition-all hover:bg-[#1A1A1A] focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/10">
+      <div className="relative bg-[#2A2A2A] rounded-[24px] border border-[#2F2F2F] focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 shadow-lg flex flex-col transition-all">
         {/* Top Row: Input */}
         <div className="flex items-start px-3 pt-3">
           <textarea
@@ -122,7 +149,7 @@ const ChatInputBox = ({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={isCentered ? "Ask anything" : "Message MAYA..."}
-            className="flex-1 bg-transparent border-none outline-none text-white placeholder-text-secondary/50 px-2 py-2 resize-none max-h-[200px] custom-scrollbar text-[15px] leading-relaxed block overflow-hidden"
+            className="flex-1 bg-transparent border-none outline-none text-white placeholder-[#A0A0A0] px-2 py-2 resize-none max-h-[200px] custom-scrollbar text-[15px] leading-relaxed block overflow-hidden"
             rows={1}
             style={{ height: '40px' }}
           />
@@ -134,16 +161,33 @@ const ChatInputBox = ({
           <div className="flex items-center gap-2 pl-1 relative">
             <button
               onClick={handleAttachmentClick}
-              className="p-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5 active:scale-95 flex-shrink-0"
+              className="p-2 text-[#A0A0A0] hover:text-white transition-colors rounded-full hover:bg-white/5 active:scale-95 flex-shrink-0"
               title="Upload attachment (Docs, Images, Text)"
             >
               <Paperclip size={20} strokeWidth={2} className="-rotate-30" />
             </button>
             <button 
-              onClick={() => setShowAgentMenu(!showAgentMenu)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.05] hover:bg-white/[0.03] hover:border-white/[0.1] transition-colors text-text-secondary hover:text-white text-[13px] font-medium"
+              ref={agentButtonRef}
+              onClick={toggleAgentMenu}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-[13px] font-medium ${
+                selectedAgent
+                  ? 'border-transparent bg-[#1E1E1E] text-white'
+                  : 'border-transparent hover:bg-white/5 text-[#A0A0A0] hover:text-white'
+              }`}
             >
-              <span className="text-lg leading-none mb-0.5">+</span> Agent
+              {selectedAgent ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+                  {selectedAgent === 'marketing' ? 'Marketing' : selectedAgent === 'market' ? 'Market Research' : selectedAgent === 'finance' ? 'Finance' : 'Branding'}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onSelectAgent(null); }}
+                    className="ml-1 opacity-60 hover:opacity-100 text-primary leading-none"
+                    title="Clear agent selection"
+                  >&times;</button>
+                </>
+              ) : (
+                <><span className="text-lg leading-none mb-0.5">+</span> Agent</>
+              )}
             </button>
 
             {/* Agent Dropdown Menu */}
@@ -153,22 +197,31 @@ const ChatInputBox = ({
                   className="fixed inset-0 z-40" 
                   onClick={() => setShowAgentMenu(false)}
                 />
-                <div className="absolute top-12 left-10 w-56 bg-[#1A1A1A] border border-white/[0.08] shadow-2xl rounded-2xl p-1.5 py-2 z-50 flex flex-col gap-1 min-w-max animate-in fade-in zoom-in-95 duration-200">
-                  <button onClick={() => selectAgent("Analyze the marketing strategy for...")} className="flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] text-text-secondary hover:text-white group">
-                    <Megaphone size={16} className="text-primary/70 group-hover:text-primary transition-colors" />
+                <div className={`absolute left-0 sm:left-10 w-56 bg-[#1A1A1A] border border-white/[0.08] shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-2xl p-1.5 py-2 z-50 flex flex-col gap-1 min-w-max animate-in fade-in zoom-in-95 duration-200 ${
+                  menuPosition === 'top' 
+                    ? 'bottom-full mb-3 origin-bottom-left' 
+                    : 'top-full mt-3 origin-top-left'
+                }`}>
+                  <p className="px-3 py-1 text-[11px] text-text-secondary uppercase tracking-wider font-medium">Route directly to agent</p>
+                  <button onClick={() => selectAgent('marketing')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'marketing' ? 'text-primary bg-primary/5' : 'text-text-secondary hover:text-white'}`}>
+                    <Megaphone size={16} className={`transition-colors ${selectedAgent === 'marketing' ? 'text-primary' : 'text-primary/70 group-hover:text-primary'}`} />
                     Marketing Agent
+                    {selectedAgent === 'marketing' && <span className="ml-auto text-[10px] text-primary">&#10003;</span>}
                   </button>
-                  <button onClick={() => selectAgent("Research the market trend for...")} className="flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] text-text-secondary hover:text-white group">
-                    <LineChart size={16} className="text-blue-400/70 group-hover:text-blue-400 transition-colors" />
+                  <button onClick={() => selectAgent('market')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'market' ? 'text-blue-400 bg-blue-400/5' : 'text-text-secondary hover:text-white'}`}>
+                    <LineChart size={16} className={`transition-colors ${selectedAgent === 'market' ? 'text-blue-400' : 'text-blue-400/70 group-hover:text-blue-400'}`} />
                     Market Research Agent
+                    {selectedAgent === 'market' && <span className="ml-auto text-[10px] text-blue-400">&#10003;</span>}
                   </button>
-                  <button onClick={() => selectAgent("Assess the financial viability of...")} className="flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] text-text-secondary hover:text-white group">
-                    <Landmark size={16} className="text-amber-400/70 group-hover:text-amber-400 transition-colors" />
+                  <button onClick={() => selectAgent('finance')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'finance' ? 'text-amber-400 bg-amber-400/5' : 'text-text-secondary hover:text-white'}`}>
+                    <Landmark size={16} className={`transition-colors ${selectedAgent === 'finance' ? 'text-amber-400' : 'text-amber-400/70 group-hover:text-amber-400'}`} />
                     Finance Agent
+                    {selectedAgent === 'finance' && <span className="ml-auto text-[10px] text-amber-400">&#10003;</span>}
                   </button>
-                  <button onClick={() => selectAgent("Create a branding identity for...")} className="flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] text-text-secondary hover:text-white group">
-                    <Briefcase size={16} className="text-purple-400/70 group-hover:text-purple-400 transition-colors" />
+                  <button onClick={() => selectAgent('brand')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'brand' ? 'text-purple-400 bg-purple-400/5' : 'text-text-secondary hover:text-white'}`}>
+                    <Briefcase size={16} className={`transition-colors ${selectedAgent === 'brand' ? 'text-purple-400' : 'text-purple-400/70 group-hover:text-purple-400'}`} />
                     Branding Agent
+                    {selectedAgent === 'brand' && <span className="ml-auto text-[10px] text-purple-400">&#10003;</span>}
                   </button>
                 </div>
               </>
@@ -178,7 +231,7 @@ const ChatInputBox = ({
           {/* Right side actions */}
           <div className="flex items-center gap-2">
             {/* Model Selector Dropdown Trigger */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-transparent hover:bg-white/[0.03] hover:text-white cursor-pointer transition-colors text-text-secondary text-[13px] font-medium">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-transparent hover:bg-white/5 hover:text-white cursor-pointer transition-colors text-[#A0A0A0] text-[13px] font-medium">
               MAYA v2 Flash
               <ChevronDown size={14} />
             </div>
@@ -197,7 +250,7 @@ const ChatInputBox = ({
                 disabled={!input.trim()}
                 className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center transform active:scale-90 ${
                   input.trim()
-                    ? 'bg-primary text-black hover:bg-primary/90 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                    ? 'bg-white text-black hover:bg-white/90'
                     : 'bg-white/5 text-white/30 cursor-not-allowed'
                 }`}
               >
@@ -234,9 +287,10 @@ export function ChatInterface() {
   const { user: clerkUser } = useUser();
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
-  useEffect(() => { loadSessions(); }, []);
+  useEffect(() => { loadSessions(); }, [userId]);
   
   // Wait until Clerk loads the userId before checking onboarding
   useEffect(() => {
@@ -271,7 +325,8 @@ export function ChatInterface() {
 
   const loadSessions = async () => {
     try {
-      const fetchedSessions = await chatService.getSessions();
+      const token = await getToken().catch(() => null);
+      const fetchedSessions = await chatService.getSessions(token);
       setSessions(fetchedSessions);
       
       // Auto-load most recent chat history on mount if no active conversation is set
@@ -291,7 +346,8 @@ export function ChatInterface() {
   const loadSessionHistory = async (sessionId: string) => {
     try {
       setIsHistoryLoading(true);
-      const history = await chatService.getSessionHistory(sessionId);
+      const token = await getToken().catch(() => null);
+      const history = await chatService.getSessionHistory(sessionId, token);
 
       // V2: history items have content_type + content (JSONB)
       const formattedMessages: Message[] = history.map((msg: any) => {
@@ -409,7 +465,12 @@ export function ChatInterface() {
     setThinkingMode('thinking');
 
     try {
-      if (isSchemeQuery(textToSend)) {
+      // ── ROUTING DECISION ─────────────────────────────────────────────────
+      // If user manually selected an agent from the dropdown, skip ALL routing
+      // and send directly to that agent via the streaming path.
+      const manualAgent = selectedAgent; // snapshot before any state changes
+
+      if (!manualAgent && isSchemeQuery(textToSend)) {
         // ── SCHEME PATH: JSON, renders cards ─────────────────────────────
         // Switch to db-search mode while vector DB query runs
         setThinkingMode('db-search');
@@ -445,7 +506,8 @@ export function ChatInterface() {
 
       } else {
         // ── STREAMING PATH: SSE, text streams word by word ────────────────
-        const detectedAgent = detectTextAgent(textToSend);
+        // If agent was manually selected, use it; otherwise auto-detect from text.
+        const detectedAgent = manualAgent || detectTextAgent(textToSend);
 
         // Switch mode based on agent type immediately (before API call)
         if (detectedAgent === 'market') {
@@ -568,7 +630,7 @@ export function ChatInterface() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden font-sans text-text-primary">
+    <div className="flex h-screen bg-[#161616] overflow-hidden font-sans text-white">
       {/* Onboarding Modal overlays everything */}
       {showOnboarding && <OnboardingModal onComplete={() => {
         setShowOnboarding(false);
@@ -590,9 +652,9 @@ export function ChatInterface() {
       />
 
       {/* Main Chat Area */}
-      <div className={`flex-1 flex flex-col relative w-full h-full bg-background ${styles.sidebarBorder}`}>
+      <div className={`flex-1 flex flex-col relative w-full h-full bg-[#161616] ${styles.sidebarBorder}`}>
         {/* Header */}
-        <div className="h-14 flex items-center justify-between px-4 bg-background/80 backdrop-blur-md z-10 border-b border-white/[0.02]">
+        <div className="h-14 flex items-center justify-between px-4 bg-[#161616]/80 backdrop-blur-md z-10 border-none">
           <div className="flex items-center gap-3">
             {!isSidebarOpen && (
               <button
@@ -603,10 +665,10 @@ export function ChatInterface() {
               >
                 <PanelLeftOpen size={20} className="group-hover:scale-110 transition-transform" />
               </button>
-            )}
+            )} 
             <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-text-secondary">
               <span className={`text-lg font-small text-grey truncate max-w-[200px] md:max-w-[400px] ${styles.heading}`}>
-                {conversationId ? sessions.find(s => s.id === conversationId)?.title || "Chat" : "New Chat"}
+                {conversationId ? sessions.find(s => s.id === conversationId)?.title || "Chat" : "Maya MSME"}
               </span>
             </div>
           </div>
@@ -634,6 +696,8 @@ export function ChatInterface() {
                 isLoading={isLoading || isStreaming}
                 handleStop={handleStop}
                 isCentered={true}
+                selectedAgent={selectedAgent}
+                onSelectAgent={setSelectedAgent}
               />
             </div>
           ) : (
@@ -679,6 +743,8 @@ export function ChatInterface() {
                 isLoading={isLoading || isStreaming}
                 handleStop={handleStop}
                 isCentered={false}
+                selectedAgent={selectedAgent}
+                onSelectAgent={setSelectedAgent}
               />
             </div>
             <p className="text-center text-[11px] text-text-secondary mt-3">

@@ -82,11 +82,14 @@ export const chatService = {
         }
     },
 
-    /** Returns list of conversations (most recent first) */
-    getSessions: async (): Promise<{ id: string; title: string }[]> => {
+    /** Returns list of conversations for the authenticated user (most recent first) */
+    getSessions: async (token?: string | null): Promise<{ id: string; title: string }[]> => {
         try {
+            const headers: Record<string, string> = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await api.get<{ sessions: { id: string; title: string }[] }>(
-                '/api/history/sessions'
+                '/api/history/sessions',
+                { headers }
             );
             return response.data.sessions || [];
         } catch (error) {
@@ -95,9 +98,11 @@ export const chatService = {
         }
     },
 
-    getSessionHistory: async (conversation_id: string) => {
+    getSessionHistory: async (conversation_id: string, token?: string | null) => {
         try {
-            const response = await api.get(`/api/history/${conversation_id}`);
+            const headers: Record<string, string> = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const response = await api.get(`/api/history/${conversation_id}`, { headers });
             return response.data.history || response.data;
         } catch (error) {
             console.error('Error fetching history:', error);

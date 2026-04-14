@@ -84,10 +84,10 @@ const SidebarSessionItem = ({
                     if (!showMenu) onSelectSession?.(session.id);
                 }}
                 className={clsx(
-                    "w-full text-left py-2 px-3 rounded-lg text-[13px] transition-all flex items-center justify-between group/item",
+                    "w-full text-left py-2 px-3 rounded-xl text-[13px] transition-all flex items-center justify-between group/item",
                     isCurrent || showMenu
-                        ? "bg-white/[0.08] text-white font-medium border-l-2 border-l-white/30 pl-2.5 shadow-sm" 
-                        : "text-text-secondary hover:bg-white/[0.03] hover:text-white border-l-2 border-l-transparent"
+                        ? "bg-white/[0.08] text-white font-medium shadow-sm" 
+                        : "text-white hover:bg-white/[0.03]"
                 )}
                 title={session.title}
             >
@@ -163,16 +163,16 @@ export function Sidebar({
 
         <button 
             onClick={onNewChat}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-[#1A1A1A] hover:bg-white/[0.04] border border-white/5 hover:border-primary/20 hover:shadow-[0_0_12px_rgba(16,185,129,0.1)] rounded-xl transition-all duration-200 group active:scale-95 text-white"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-white/[0.03] hover:bg-white/[0.06] rounded-xl transition-all duration-200 group active:scale-95 text-white"
         >
-            <SquarePen size={16} className="text-text-secondary group-hover:text-primary transition-colors" />
-            <span className="text-[13px] font-medium">New chat</span>
+            <SquarePen size={16} className="text-white group-hover:text-primary transition-colors" />
+            <span className="text-[13px] font-medium text-white">New chat</span>
         </button>
 
         <div className="flex-1 overflow-y-auto space-y-1 pr-2">
-          <div className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider mb-2 mt-4 px-2">Recents</div>
+          <div className="text-[11px] font-semibold text-white uppercase tracking-wider mb-2 mt-4 px-2">Recents</div>
           {sessions.length === 0 ? (
-              <div className="text-xs text-text-secondary/50 italic px-2">No recent chats</div>
+              <div className="text-xs text-white/50 italic px-2">No recent chats</div>
           ) : (
               sessions.map((session) => (
                   <SidebarSessionItem 
@@ -199,7 +199,7 @@ export function Sidebar({
                 <span>About Us</span>
              </button>
              <button className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group">
-                <span className="text-text-secondary w-[15px] flex justify-center text-[12px] group-hover:text-white transition-colors">A/文</span>
+                <span className="text-text-secondary w-[15px] flex justify-center text-[13px] font-medium group-hover:text-white transition-colors">अ/A</span>
                 <span>Language</span>
              </button>
              <button className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group">
