@@ -39,7 +39,15 @@ if DATABASE_URL:
     url = url._replace(query=new_query)
     DATABASE_URL = urlparse.urlunparse(url)
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(
+    DATABASE_URL,
+    pool_size=5,           # keep 5 connections permanently warm
+    max_overflow=10,       # allow up to 10 extra under burst load
+    pool_pre_ping=True,    # verify connection alive before using (catches stale connections)
+    pool_recycle=300,      # recycle every 5 min — prevents Neon auto-suspend of idle connections
+    pool_timeout=30,
+    echo=False             # stop logging every SQL query in production
+)
 
 AsyncSessionLocal = sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False

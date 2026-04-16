@@ -1,12 +1,13 @@
 import asyncio
 import json
 import logging
+import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import List, Optional, Dict, Any, AsyncGenerator
 
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, status, Body
+from fastapi import FastAPI, Depends, HTTPException, Request, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -113,6 +114,20 @@ app.include_router(whatsapp_router)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# TIMING MIDDLEWARE — logs every request duration for latency diagnosis
+# Remove individual log lines once latency targets are met.
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.middleware("http")
+async def timing_middleware(request: Request, call_next):
+    t0 = time.time()
+    response = await call_next(request)
+    duration = time.time() - t0
+    logger.info(f"⏱️  {request.method} {request.url.path} → {duration:.2f}s")
+    return response
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # HEALTH
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -209,7 +224,11 @@ async def chat_agent(
             "user_profile": request.user_profile or {"location": "Uttar Pradesh"},
             "schemes": [],
             "conversation_id": conversation_id,         # V2: flows through all nodes
-            "clerk_user_id": request.clerk_user_id or ""
+            "clerk_user_id": request.clerk_user_id or "",
+            # New routing metadata fields (populated by router node)
+            "routing_confidence": None,
+            "intent": None,
+            "query_embedding": None,
         }
 
         # ── Invoke LangGraph ──────────────────────────────────────────────────

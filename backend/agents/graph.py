@@ -177,11 +177,15 @@ JSON only:
     t_rank_start = time.time()
 
     try:
-        # Hard 8s timeout — scheme agent must never hang more than ~9s total
-        ai_response = await asyncio.wait_for(
-            gemini_service.rank_schemes(ranking_prompt),
-            timeout=8.0
+        # Fire ranking immediately as a background task — don't block here.
+        # Any CPU-bound prep work that runs before `await ranking_task` below
+        # runs in parallel with Gemini's round-trip, saving up to 200-800ms.
+        ranking_task = asyncio.create_task(
+            asyncio.wait_for(gemini_service.rank_schemes(ranking_prompt), timeout=8.0)
         )
+
+        # Await the task (Gemini may already be done by the time we hit this)
+        ai_response = await ranking_task
     except asyncio.TimeoutError:
         # Timeout fallback — vector cosine order is already semantically ranked,
         # so assign descending scores and skip Gemini entirely
@@ -308,16 +312,12 @@ async def general_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
-    message_lower = last_message.lower().strip()
 
-    # Still hardcode identity — LLM identity leakage is too risky
-    IDENTITY_TRIGGERS = [
-        "who are you", "what are you", "are you gemini", "are you ai",
-        "are you chatgpt", "who made you", "who created you",
-        "introduce yourself", "what is maya", "are you a bot",
-        "are you human", "what model", "which ai", "your name"
-    ]
-    if any(t in message_lower for t in IDENTITY_TRIGGERS):
+    # ── Router already classified identity / greeting via hardcoded intercept ──
+    # Read the intent flag set by router.py instead of re-running string checks.
+    intent = state.get("intent")
+
+    if intent == "identity":
         response = ("I'm MAYA — your AI Business Assistant for Indian MSMEs. "
                    "I help small businesses discover government schemes, plan "
                    "finances, build their brand, and grow their market. "
@@ -325,9 +325,7 @@ async def general_agent_node(state: AgentState):
         await _save_agent_response(conversation_id, "general", response)
         return {"messages": [AIMessage(content=response)], "current_agent": "general"}
 
-    # Still hardcode greetings — faster, no token cost
-    GREETINGS = ["hey", "hi", "hello", "namaste", "namaskar", "hii", "helo"]
-    if message_lower.rstrip('!? ') in GREETINGS:
+    if intent == "greeting":
         response = ("Hey! I'm MAYA, your MSME Business Assistant. "
                    "I can help you find government schemes, research your "
                    "market, plan finances, or build your brand. "
@@ -483,12 +481,13 @@ def create_graph():
         "router",
         lambda x: x["current_agent"],
         {
-            "scheme": "scheme",
-            "market": "market",
-            "brand": "brand",
-            "finance": "finance",
+            "scheme":    "scheme",
+            "market":    "market",
+            "brand":     "brand",
+            "finance":   "finance",
             "marketing": "marketing",
-            "general": "general"
+            "general":   "general",
+            "off_topic": "general",  # off_topic → general; system_instruction handles refusal
         }
     )
 

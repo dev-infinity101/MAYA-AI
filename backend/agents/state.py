@@ -36,3 +36,13 @@ class AgentState(TypedDict):
     conversation_id: Optional[str]
     # Clerk user ID — identifies the user across graph nodes
     clerk_user_id: Optional[str]
+
+    # --- OPTIMIZATION: Routing metadata (ready for semantic router) ---
+    # Confidence score from the router (0.0–1.0); used for logging and fallback logic
+    routing_confidence: Optional[float]
+    # Pre-classified intent shortcut: "identity" | "greeting" | None
+    # Lets general_agent_node skip LLM call for these cheap hardcoded responses
+    intent: Optional[str]
+    # Query embedding computed during routing — reused by scheme_agent_node
+    # to avoid paying a second embedding API call on the scheme search path
+    query_embedding: Optional[list]
