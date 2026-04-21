@@ -88,14 +88,32 @@ async def scheme_agent_node(state: AgentState):
     conversation_id = state.get("conversation_id")
     t0 = time.time()
 
-    # 1. Number extraction (e.g., "top 3")
+    # 1. Intent Detection (Specific Scheme Check)
+    # Fast regex-style check for direct scheme inquiries to skip the LLM ranking and save 5s
+    SPECIFIC_SCHEME_KEYWORDS = [
+        "pmegp", "mudra", "cgtmse", "stand-up india", "standup india", "startup india",
+        "zed scheme", "msme innovative", "sfurti", "aspire"
+    ]
+    
+    query_lower = last_message.lower()
+    is_specific_scheme = any(kw in query_lower for kw in SPECIFIC_SCHEME_KEYWORDS)
+
+    # 2. Number extraction (e.g., "top 3")
     match = re.search(r'\b\d+\b', last_message)
     requested_count = int(match.group()) if match else None
+
+    # Determine dynamic limit
+    if is_specific_scheme:
+        search_limit = 1
+    elif requested_count:
+        search_limit = requested_count
+    else:
+        search_limit = 5
 
     schemes = []
     try:
         async with AsyncSessionLocal() as db:
-            schemes = await scheme_service.search_schemes(db, last_message, limit=5)
+            schemes = await scheme_service.search_schemes(db, last_message, limit=search_limit)
         t1 = time.time()
         logger.info(f"⏱️  Embedding + vector search: {t1 - t0:.2f}s")
     except Exception as e:
@@ -157,151 +175,116 @@ async def scheme_agent_node(state: AgentState):
         }
         schemes_data.append(sd)
 
-    # 3. AI ANALYSIS — send only what Gemini needs to rank (~60% fewer tokens)
-    analysis_input = [
-        {
-            "id": x["id"],
-            "name": x["name"],
-            "desc": (x["description"] or "")[:200],   # trim — enough for ranking
-            "benefits": (x["benefits"] or [])[:3],      # top 3 only
-            "tags": (x["tags"] or [])[:5],
-        }
-        for x in schemes_data
-    ]
+    # 3. AI ANALYSIS OR INTENT BYPASS
+    if is_specific_scheme and len(schemes_data) > 0:
+        # BYPASS LLM ENTIRELY for specific scheme intents (Latency Drop ~50%)
+        logger.info("⚡ Intent: Specific Scheme — Bypassing Gemini ranking")
+        chat_text = f"Here is the detailed information you requested about the {schemes_data[0]['name']}."
+        final_schemes = schemes_data
+        final_schemes[0].update({
+            "relevance_score": 98,
+            "explanation": "Exact match for the requested scheme.",
+            "key_benefit": final_schemes[0].get("benefits")[0] if final_schemes[0].get("benefits") else "See details."
+        })
+    else:
+        # Send heavily minimized tokens to Gemini for fast generic ranking
+        analysis_input = [
+            {
+                "id": x["id"],
+                "name": x["name"],
+                "desc": (x["description"] or "")[:100],   # aggressively trim for speed
+                "benefit": x["benefits"][0] if x.get("benefits") else ""
+            }
+            for x in schemes_data
+        ]
 
-    ranking_prompt = f"""Rate these schemes for: \"{last_message}\"
+        ranking_prompt = f"""Rate these schemes for: \"{last_message}\"
 {json.dumps(analysis_input)}
 JSON only:
-{{"chat_summary":"2-3 friendly sentences","schemes_metadata":[{{"id":"","relevance_score":0,"explanation":"","key_benefit":""}}]}}"""
+{{"chat_summary":"2 sentence pitch","schemes_metadata":[{{"id":"","relevance_score":0,"explanation":"","key_benefit":""}}]}}"""
 
-    t_rank_start = time.time()
-
-    try:
-        # Fire ranking immediately as a background task — don't block here.
-        # Any CPU-bound prep work that runs before `await ranking_task` below
-        # runs in parallel with Gemini's round-trip, saving up to 200-800ms.
-        ranking_task = asyncio.create_task(
-            asyncio.wait_for(gemini_service.rank_schemes(ranking_prompt), timeout=8.0)
-        )
-
-        # Await the task (Gemini may already be done by the time we hit this)
-        ai_response = await ranking_task
-    except asyncio.TimeoutError:
-        # Timeout fallback — vector cosine order is already semantically ranked,
-        # so assign descending scores and skip Gemini entirely
-        logger.warning("⚠️  Gemini ranking timed out — using vector-order fallback")
-        for i, sd in enumerate(schemes_data):
-            sd.update({
-                "relevance_score": 90 - (i * 15),
-                "explanation": "Matched based on semantic similarity to your query.",
-                "key_benefit": (sd["benefits"][0] if sd.get("benefits") else "See scheme details."),
-            })
-        if conversation_id:
-            try:
-                async with AsyncSessionLocal() as db:
-                    await save_message(
-                        db=db, conversation_id=uuid.UUID(conversation_id),
-                        role="assistant", content_type="scheme_results",
-                        content={"query": last_message, "summary": "Here are the most relevant schemes I found:", "schemes": schemes_data[:3]},
-                        agent_used="scheme"
-                    )
-            except Exception as save_err:
-                logger.warning(f"Could not save timeout fallback: {save_err}")
-        return {
-            "messages": [AIMessage(content="Here are the most relevant schemes I found:")],
-            "schemes": schemes_data[:3],
-            "current_agent": "scheme"
-        }
-
-    t_end = time.time()
-    logger.info(f"⏱️  Gemini ranking: {t_end - t_rank_start:.2f}s")
-    logger.info(f"⏱️  Total scheme agent: {t_end - t0:.2f}s")
-
-    try:
-        # AI JSON Parse
-        cleaned_json = ai_response.replace('```json', '').replace('```', '').strip()
-        parsed = json.loads(cleaned_json)
-        chat_text = parsed.get("chat_summary", "I found these relevant schemes for you:")
-
-        # Metadata mapping
-        metadata_map = {str(item.get('id')).strip(): item for item in parsed.get("schemes_metadata", [])}
-
-        # 4. FINAL MERGE & SORT
-        final_schemes = []
-        for sd in schemes_data:
-            sid = sd['id']
-            if sid in metadata_map:
-                meta = metadata_map[sid]
+        t_rank_start = time.time()
+        try:
+            ranking_task = asyncio.create_task(
+                asyncio.wait_for(gemini_service.rank_schemes(ranking_prompt), timeout=6.0)
+            )
+            ai_response = await ranking_task
+        except asyncio.TimeoutError:
+            logger.warning("⚠️  Gemini ranking timed out — using vector logic")
+            for i, sd in enumerate(schemes_data):
                 sd.update({
-                    "relevance_score": meta.get("relevance_score", 75),
-                    "explanation": meta.get("explanation", ""),
-                    "key_benefit": meta.get("key_benefit", "")
+                    "relevance_score": 90 - (i * 15),
+                    "explanation": "Vector matched relevance.",
+                    "key_benefit": sd["benefits"][0] if sd.get("benefits") else "",
                 })
-            else:
-                sd.update({
-                    "relevance_score": 50,
-                    "explanation": "Matching record found in database.",
-                    "key_benefit": "See details for benefits."
-                })
-            final_schemes.append(sd)
+            ai_response = '{"chat_summary": "Here are the most relevant matches I found:", "schemes_metadata": []}'
 
-        # Highest score first
-        final_schemes.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+        t_end = time.time()
+        logger.info(f"⏱️  Gemini ranking: {t_end - t_rank_start:.2f}s")
+        logger.info(f"⏱️  Total scheme agent: {t_end - t0:.2f}s")
 
-        # Filter top N
-        limit = requested_count if requested_count else 3
-        display_schemes = final_schemes[:limit]
+        try:
+            # AI JSON Parse
+            cleaned_json = ai_response.replace('```json', '').replace('```', '').strip()
+            parsed = json.loads(cleaned_json)
+            chat_text = parsed.get("chat_summary", "Here are the best schemes:")
 
-        # 5. PERSIST FULL PAYLOAD TO DB (so cards survive page reload)
-        if conversation_id:
-            try:
-                async with AsyncSessionLocal() as db:
-                    await save_message(
-                        db=db,
-                        conversation_id=uuid.UUID(conversation_id),
-                        role="assistant",
-                        content_type="scheme_results",   # tells frontend to render cards
-                        content={
-                            "query": last_message,        # original query for context
-                            "summary": chat_text,         # conversational text
-                            "schemes": display_schemes    # full structured scheme data
-                        },
-                        agent_used="scheme"
-                    )
-            except Exception as save_err:
-                logger.warning(f"Could not save scheme results to DB: {save_err}")
+            metadata_map = {str(item.get('id')).strip(): item for item in parsed.get("schemes_metadata", [])}
 
-        return {
-            "messages": [AIMessage(content=chat_text)],
-            "schemes": display_schemes,
-            "current_agent": "scheme"
-        }
+            # 4. FINAL MERGE & SORT
+            final_schemes = []
+            for sd in schemes_data:
+                sid = sd['id']
+                if sid in metadata_map:
+                    meta = metadata_map[sid]
+                    sd.update({
+                        "relevance_score": meta.get("relevance_score", 75),
+                        "explanation": meta.get("explanation", ""),
+                        "key_benefit": meta.get("key_benefit", "")
+                    })
+                else:
+                    sd.update({
+                        "relevance_score": 50,
+                        "explanation": "Matching record found.",
+                        "key_benefit": sd.get("benefits")[0] if sd.get("benefits") else ""
+                    })
+                final_schemes.append(sd)
 
-    except Exception as e:
-        logger.error(f"Analysis Error: {e}")
-        fallback = schemes_data[:requested_count] if requested_count else schemes_data[:3]
-        fallback_text = "I found these schemes in our database:"
+            final_schemes.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+            
+        except Exception as e:
+            logger.error(f"Analysis Error: {e}")
+            chat_text = "Here are the relevant schemes:"
+            final_schemes = schemes_data
 
-        # Also persist fallback
-        if conversation_id:
-            try:
-                async with AsyncSessionLocal() as db:
-                    await save_message(
-                        db=db,
-                        conversation_id=uuid.UUID(conversation_id),
-                        role="assistant",
-                        content_type="scheme_results",
-                        content={"query": last_message, "summary": fallback_text, "schemes": fallback},
-                        agent_used="scheme"
-                    )
-            except Exception as save_err:
-                logger.warning(f"Could not save fallback scheme results: {save_err}")
+    # Filter top N (only applies if we didn't override to 1 due to strict scheme match)
+    limit = search_limit if is_specific_scheme else (requested_count if requested_count else 3)
+    display_schemes = final_schemes[:limit]
 
-        return {
-            "messages": [AIMessage(content=fallback_text)],
-            "schemes": fallback,
-            "current_agent": "scheme"
-        }
+    # 5. PERSIST FULL PAYLOAD TO DB (so cards survive page reload)
+    if conversation_id:
+        try:
+            async with AsyncSessionLocal() as db:
+                await save_message(
+                    db=db,
+                    conversation_id=uuid.UUID(conversation_id),
+                    role="assistant",
+                    content_type="scheme_results",
+                    content={
+                        "query": last_message,
+                        "summary": chat_text,
+                        "schemes": display_schemes
+                    },
+                    agent_used="scheme"
+                )
+        except Exception as save_err:
+            logger.warning(f"Could not save scheme results to DB: {save_err}")
+
+    return {
+        "messages": [AIMessage(content=chat_text)],
+        "schemes": display_schemes,
+        "current_agent": "scheme"
+    }
 
 
 # ──────────────────────────────────────────────────────────────────────────────

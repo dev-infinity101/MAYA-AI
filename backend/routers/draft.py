@@ -80,7 +80,7 @@ async def generate_draft(
             UserProfile.clerk_user_id == clerk_user_id
         )
     )
-    profile = profile_result.scalar_one_or_none()
+    profile = profile_result.scalars().first()
 
     # Build pre-filled answers from profile
     profile_data = {}
@@ -151,7 +151,7 @@ async def _save_draft(db: AsyncSession, clerk_user_id: str, scheme_name: str, dr
     """Upsert draft into user_scheme_interactions for later retrieval."""
     try:
         result = await db.execute(select(Scheme).where(Scheme.name.ilike(f"%{scheme_name}%")))
-        scheme = result.scalar_one_or_none()
+        scheme = result.scalars().first()
         if not scheme:
             return
 
@@ -161,7 +161,7 @@ async def _save_draft(db: AsyncSession, clerk_user_id: str, scheme_name: str, dr
                 UserSchemeInteraction.scheme_id == scheme.id
             )
         )
-        interaction = existing.scalar_one_or_none()
+        interaction = existing.scalars().first()
 
         if interaction:
             interaction.draft_letter = draft_letter
@@ -185,7 +185,7 @@ async def _save_draft(db: AsyncSession, clerk_user_id: str, scheme_name: str, dr
                 OutcomeTracking.scheme_id == scheme.id,
             )
         )
-        ot = ot_result.scalar_one_or_none()
+        ot = ot_result.scalars().first()
         if not ot:
             ot = OutcomeTracking(
                 clerk_user_id=clerk_user_id,
@@ -208,14 +208,14 @@ async def check_eligibility(
     """Dynamically calculates scheme eligibility using Gemini based on User Profile."""
     # fetching scheme directly or fallback to template aliases
     result = await db.execute(select(Scheme).where(Scheme.name.ilike(f"%{scheme_name[-10:]}%")))
-    scheme = result.scalar_one_or_none()
+    scheme = result.scalars().first()
     
     if not scheme:
         # We need something to test against.
         raise HTTPException(404, f"Scheme '{scheme_name}' not found in database to evaluate.")
         
     profile_result = await db.execute(select(UserProfile).where(UserProfile.clerk_user_id == clerk_user_id))
-    profile = profile_result.scalar_one_or_none()
+    profile = profile_result.scalars().first()
     
     if not profile:
         profile_data = "No user profile details found (guest or incomplete setup)."

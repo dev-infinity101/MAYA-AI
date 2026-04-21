@@ -65,12 +65,12 @@ async def get_profile(
     profile_result = await db.execute(
         select(UserProfile).where(UserProfile.clerk_user_id == clerk_user_id)
     )
-    profile = profile_result.scalar_one_or_none()
+    profile = profile_result.scalars().first()
 
     user_result = await db.execute(
         select(User).where(User.clerk_user_id == clerk_user_id)
     )
-    user = user_result.scalar_one_or_none()
+    user = user_result.scalars().first()
 
     if not profile:
         return {
@@ -93,7 +93,7 @@ async def update_profile(
     profile_result = await db.execute(
         select(UserProfile).where(UserProfile.clerk_user_id == clerk_user_id)
     )
-    profile = profile_result.scalar_one_or_none()
+    profile = profile_result.scalars().first()
 
     if not profile:
         profile = UserProfile(clerk_user_id=clerk_user_id)
@@ -109,7 +109,7 @@ async def update_profile(
     user_result = await db.execute(
         select(User).where(User.clerk_user_id == clerk_user_id)
     )
-    user = user_result.scalar_one_or_none()
+    user = user_result.scalars().first()
 
     return {"status": "saved", "profile": _profile_to_dict(profile, user)}
 
@@ -125,7 +125,7 @@ async def get_health_score(
     profile_result = await db.execute(
         select(UserProfile).where(UserProfile.clerk_user_id == clerk_user_id)
     )
-    profile = profile_result.scalar_one_or_none()
+    profile = profile_result.scalars().first()
 
     # Count scheme interactions (bookmarks / drafts generated)
     count_result = await db.execute(
@@ -224,7 +224,7 @@ async def get_pending_followups(
                 OutcomeTracking.scheme_id == interaction.scheme_id,
             )
         )
-        outcome = outcome_result.scalar_one_or_none()
+        outcome = outcome_result.scalars().first()
         if not outcome or not outcome.submitted:
             followups.append({
                 "scheme_id": interaction.scheme_id,
@@ -250,7 +250,7 @@ async def update_outcome(
             OutcomeTracking.scheme_id == data.scheme_id,
         )
     )
-    outcome = result.scalar_one_or_none()
+    outcome = result.scalars().first()
 
     if not outcome:
         outcome = OutcomeTracking(

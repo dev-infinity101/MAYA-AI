@@ -55,7 +55,7 @@ export interface Message {
   /** V2: JSONB content. May be null during streaming (filling in live). */
   content: string | TextContent | SchemeResultsContent | AgentResponseContent;
   /** content_type mirrors the DB field */
-  content_type?: 'text' | 'scheme_results' | 'agent_response';
+  content_type?: 'text' | 'scheme_results' | 'agent_response' | 'business_report' | 'report_progress';
   timestamp: Date;
   /** Legacy UI type — kept for backwards compat with MessageComponent */
   type: 'text' | 'scheme-list';
@@ -63,6 +63,8 @@ export interface Message {
   agent?: string;
   /** True while the message is being streamed — shows cursor */
   isStreaming?: boolean;
+  /** Business context extracted by the report pipeline */
+  reportContext?: Record<string, any>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

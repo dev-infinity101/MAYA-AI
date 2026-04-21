@@ -26,6 +26,9 @@ from agents.graph import app_graph
 from routers.draft import router as draft_router
 from routers.user import router as user_router
 from routers.whatsapp import router as whatsapp_router
+from routers.schemes import router as schemes_router
+from routers.analytics import router as analytics_router
+from agents.report_pipeline import detect_report_intent, run_report_pipeline
 import schemas
 
 # Configure structured logging
@@ -111,6 +114,8 @@ app.add_middleware(
 app.include_router(draft_router)
 app.include_router(user_router)
 app.include_router(whatsapp_router)
+app.include_router(schemes_router)
+app.include_router(analytics_router)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -569,6 +574,75 @@ async def admin_migrate():
             ON outcome_tracking(clerk_user_id);
         """))
     return {"status": "table created successfully"}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ENDPOINT: Multi-Agent Business Report (SSE streaming)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.post("/api/chat/report", tags=["Chat"])
+async def generate_business_report(
+    request: schemas.ChatRequest,
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str | None = Depends(get_optional_user_id),
+):
+    """
+    SSE endpoint: orchestrates 5 agents sequentially to produce a full business report.
+    Streams progress events then delivers the final markdown report.
+    """
+    effective_user_id = clerk_user_id or request.clerk_user_id
+    if effective_user_id:
+        try:
+            await get_or_create_user(db, effective_user_id)
+        except Exception as e:
+            logger.warning(f"User upsert failed (non-fatal): {e}")
+
+    conversation_id = request.conversation_id or request.session_id
+    if not conversation_id:
+        try:
+            conversation = Conversation(
+                clerk_user_id=effective_user_id,
+                title=request.message[:50]
+            )
+            db.add(conversation)
+            await db.commit()
+            await db.refresh(conversation)
+            conversation_id = str(conversation.id)
+        except Exception as e:
+            logger.warning(f"Could not create Conversation for report: {e}")
+            conversation_id = str(uuid.uuid4())
+
+    # Save user message
+    try:
+        await save_message(
+            db=db,
+            conversation_id=uuid.UUID(conversation_id),
+            role="user",
+            content_type="text",
+            content={"text": request.message},
+            agent_used=None
+        )
+    except Exception as e:
+        logger.warning(f"Could not save report request message: {e}")
+
+    async def stream_with_conv_id():
+        import json as _json
+        # Send conversation_id first so frontend can store it
+        yield f"data: {_json.dumps({'type': 'init', 'conversation_id': conversation_id})}\n\n"
+        async for chunk in run_report_pipeline(
+            request.message, conversation_id, effective_user_id
+        ):
+            yield chunk
+
+    return StreamingResponse(
+        stream_with_conv_id(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

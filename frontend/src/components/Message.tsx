@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
-import { Copy, Check, Download, FileSpreadsheet, Clock, ClipboardCopy } from 'lucide-react';
+import { Copy, Check, Download, FileSpreadsheet, Clock, ClipboardCopy, ChevronDown, FileText } from 'lucide-react';
 import { Message as MessageType } from '../types';
 import { SchemeCard } from './SchemeCard';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { exportMarkdownTableToExcel } from '../utils/exportToExcel';
+import { exportMarkdownTableToExcel, exportMarkdownTableToCSV } from '../utils/exportToExcel';
 
 interface MessageProps {
   message: MessageType;
@@ -128,6 +128,57 @@ function CopyButton({ text, isUser }: { text: string; isUser: boolean }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// EXPORT MENU COMPONENT — "Export" dropdown with Excel + CSV options
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ExportMenu({ onExcel, onCSV }: { onExcel: () => void; onCSV: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors duration-200"
+        title="Export table data"
+      >
+        <FileSpreadsheet size={13} />
+        Export
+        <ChevronDown size={11} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-30 bg-[#1A1A1A] border border-white/10 rounded-xl py-1 shadow-2xl min-w-[148px] animate-in fade-in zoom-in-95 duration-150 origin-top-left">
+          <button
+            onClick={() => { onExcel(); setOpen(false); }}
+            className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-white/80 hover:text-white hover:bg-white/5 w-full transition-colors"
+          >
+            <FileSpreadsheet size={13} className="text-green-400" />
+            Export to Excel
+          </button>
+          <button
+            onClick={() => { onCSV(); setOpen(false); }}
+            className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-white/80 hover:text-white hover:bg-white/5 w-full transition-colors"
+          >
+            <FileText size={13} className="text-blue-400" />
+            Export to CSV
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN MESSAGE COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -176,7 +227,7 @@ export function Message({ message }: MessageProps) {
               <div className={clsx(
                 'relative group',
                 isUser
-                  ? 'bg-[#1E1E1E] text-white rounded-[24px] px-6 py-3'
+                  ? 'bg-[#00692a] text-white rounded-[24px] px-6 py-3'
                   : 'bg-transparent text-[#EAEAEA] rounded-none border-none py-1',
               )}>
                 {/* Copy button — floats over the message bubble on hover */}
@@ -207,17 +258,16 @@ export function Message({ message }: MessageProps) {
                             <table className="w-full border-collapse text-sm" {...props} />
                           </div>
                           {!isUser && !message.isStreaming && (
-                            <button
-                              onClick={() => exportMarkdownTableToExcel(
+                            <ExportMenu
+                              onExcel={() => exportMarkdownTableToExcel(
                                 contentText,
                                 message.agent ? `maya_${message.agent}` : 'maya_export',
                               )}
-                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors duration-200"
-                              title="Export table data to Excel"
-                            >
-                              <FileSpreadsheet size={14} />
-                              Export to Excel
-                            </button>
+                              onCSV={() => exportMarkdownTableToCSV(
+                                contentText,
+                                message.agent ? `maya_${message.agent}` : 'maya_export',
+                              )}
+                            />
                           )}
                         </div>
                       ),

@@ -8,6 +8,7 @@ import { AboutPage } from './pages/About';
 import SignInPage from './pages/SignIn';
 import SignUpPage from './pages/SignUp';
 import SettingsPage from './pages/SettingsPage';
+import Dashboard from './pages/Dashboard';
 
 /** Redirects unauthenticated users to /sign-in, preserving the intended destination. */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
@@ -22,10 +23,11 @@ function App() {
         <Router>
             <Routes>
                 {/* Public routes */}
-                <Route path="/"         element={<LandingPage />} />
-                <Route path="/features" element={<FeaturesPage />} />
-                <Route path="/pricing"  element={<PricingPage />} />
-                <Route path="/about"    element={<AboutPage />} />
+                <Route path="/"          element={<LandingPage />} />
+                <Route path="/features"  element={<FeaturesPage />} />
+                <Route path="/pricing"   element={<PricingPage />} />
+                <Route path="/about"     element={<AboutPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
 
                 {/* Auth routes — Clerk hosted UI in our theme */}
                 <Route path="/sign-in/*" element={<SignInPage />} />

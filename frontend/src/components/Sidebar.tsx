@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { Settings, HelpCircle, Sparkles, PanelLeftClose, SquarePen, MoreHorizontal, Edit2, Trash2, Check } from 'lucide-react';
+import { Settings, HelpCircle, Sparkles, PanelLeftClose, SquarePen, MoreHorizontal, Edit2, Trash2, Check, BarChart2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
 import { UserButton } from '@clerk/clerk-react';
@@ -161,13 +161,21 @@ export function Sidebar({
           </div>
         </div>
 
-        <button 
+        <button
             onClick={onNewChat}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-white/[0.03] hover:bg-white/[0.06] rounded-xl transition-all duration-200 group active:scale-95 text-white"
         >
             <SquarePen size={16} className="text-white group-hover:text-primary transition-colors" />
             <span className="text-[13px] font-medium text-white">New chat</span>
         </button>
+
+        <Link
+            to="/dashboard"
+            className="w-full flex items-center gap-2.5 px-3 py-2 mb-3 hover:bg-white/[0.04] rounded-xl transition-all duration-200 group text-text-secondary hover:text-white"
+        >
+            <BarChart2 size={15} className="group-hover:text-primary transition-colors" />
+            <span className="text-[13px]">Impact Dashboard</span>
+        </Link>
 
         <div className="flex-1 overflow-y-auto space-y-1 pr-2">
           <div className="text-[11px] font-semibold text-white uppercase tracking-wider mb-2 mt-4 px-2">Recents</div>

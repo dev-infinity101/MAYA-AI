@@ -4,12 +4,55 @@ import { useAuth, useUser } from '@clerk/clerk-react';
 import { Message } from '../types';
 import { Message as MessageComponent } from '../components/Message';
 import { Sidebar } from '../components/Sidebar';
-import { chatService, chatStream } from '../services/api';
+import { chatService, chatStream, reportStream } from '../services/api';
 import { ThinkingWithText, ThinkingMode } from '../components/ThinkingIndicator';
 import { OnboardingModal } from '../components/OnboardingModal';
+import { ReportProgress, BusinessReport } from '../components/BusinessReport';
 import styles from './ChatInterface.module.css';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HISTORY CACHE — sessionStorage, tab-scoped
+// Prevents redundant GET /api/history/:id calls on every /chat reload.
+// Cache is auto-synced after each response and cleared on delete.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const hKey = (id: string) => `maya_h_${id}`;
+
+function getCachedHistory(convId: string): import('../types').Message[] | null {
+  try {
+    const raw = sessionStorage.getItem(hKey(convId));
+    if (!raw) return null;
+    return (JSON.parse(raw) as any[]).map(m => ({
+      ...m,
+      timestamp: new Date(m.timestamp),
+      isStreaming: false,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+function setCachedHistory(convId: string, msgs: import('../types').Message[]) {
+  try {
+    sessionStorage.setItem(
+      hKey(convId),
+      JSON.stringify(
+        msgs
+          .filter(m => !m.isStreaming)
+          .map(m => ({
+            ...m,
+            timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp,
+          }))
+      )
+    );
+  } catch { /* quota exceeded — silently skip */ }
+}
+
+function removeCachedHistory(convId: string) {
+  try { sessionStorage.removeItem(hKey(convId)); } catch {}
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -31,6 +74,21 @@ interface ChatInputProps {
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
+
+const REPORT_PATTERNS = [
+  /(start|launch|begin|open|shuru|kholna).*(business|shop|store|dukan|karobar|vyapar)/i,
+  /(business|vyapar).*(plan|report|idea|analysis)/i,
+  /(complete|full|pura|detailed).*(analysis|plan|guide|report)/i,
+  /(naya|new).*(business|kaam|dhandha|startup)/i,
+  /(₹|rs\.?|rupee|budget|lakh|crore).*(business|start|launch|invest|kholna)/i,
+  /(mujhe|chahiye|batao).*(business|kholna|shuru|dhandha)/i,
+  /how to start|how do i start|i want to start|i want to open/i,
+  /business launch|launch.*business|open.*shop|start.*store/i,
+];
+
+function isReportQuery(message: string): boolean {
+  return REPORT_PATTERNS.some(p => p.test(message));
+}
 
 /** Detects whether the query is a scheme/government search */
 function isSchemeQuery(message: string): boolean {
@@ -283,6 +341,8 @@ export function ChatInterface() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userProfile, setUserProfile] = useState<Record<string, any> | null>(null);
 
+  const [reportProgress, setReportProgress] = useState<{ stage: string; message: string } | null>(null);
+
   const { userId, getToken } = useAuth();
   const { user: clerkUser } = useUser();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -291,13 +351,20 @@ export function ChatInterface() {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   useEffect(() => { loadSessions(); }, [userId]);
-  
+
   // Wait until Clerk loads the userId before checking onboarding
   useEffect(() => {
     if (userId) checkOnboarding();
   }, [userId]);
-  
+
   useEffect(() => { scrollToBottom(); }, [messages, isLoading, isStreaming, thinkingMode]);
+
+  // Sync settled messages to sessionStorage so next reload skips the API call
+  useEffect(() => {
+    if (conversationId && messages.length > 0 && !messages.some(m => m.isStreaming)) {
+      setCachedHistory(conversationId, messages);
+    }
+  }, [messages, conversationId]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -344,6 +411,14 @@ export function ChatInterface() {
   };
 
   const loadSessionHistory = async (sessionId: string) => {
+    // Serve from cache on reload — zero API call, zero loading spinner
+    const cached = getCachedHistory(sessionId);
+    if (cached) {
+      setMessages(cached);
+      setConversationId(sessionId);
+      return;
+    }
+
     try {
       setIsHistoryLoading(true);
       const token = await getToken().catch(() => null);
@@ -353,6 +428,19 @@ export function ChatInterface() {
       const formattedMessages: Message[] = history.map((msg: any) => {
         const contentType = msg.content_type || 'text';
         const content = msg.content || {};
+
+        // Reconstruct business report from stored JSONB
+        if (contentType === 'business_report') {
+          return {
+            id: msg.id.toString(),
+            role: msg.role,
+            content: content.report || '',
+            content_type: 'business_report' as const,
+            timestamp: new Date(msg.timestamp),
+            type: 'text' as const,
+            reportContext: content.business_context || {},
+          };
+        }
 
         // Reconstruct scheme cards from stored JSONB
         if (contentType === 'scheme_results') {
@@ -387,6 +475,7 @@ export function ChatInterface() {
 
       setMessages(formattedMessages);
       setConversationId(sessionId);
+      setCachedHistory(sessionId, formattedMessages);
     } catch (error) {
       console.error('Failed to load history', error);
     } finally {
@@ -470,7 +559,50 @@ export function ChatInterface() {
       // and send directly to that agent via the streaming path.
       const manualAgent = selectedAgent; // snapshot before any state changes
 
-      if (!manualAgent && isSchemeQuery(textToSend)) {
+      if (!manualAgent && isReportQuery(textToSend)) {
+        // ── REPORT PATH: 5-agent pipeline, SSE progress + markdown report ──
+        setThinkingMode(null);
+        setIsLoading(false);
+
+        const reportPlaceholderId = (Date.now() + 1).toString();
+        const reportPlaceholder: Message = {
+          id: reportPlaceholderId,
+          role: 'assistant',
+          content: '',
+          content_type: 'report_progress',
+          timestamp: new Date(),
+          type: 'text',
+          isStreaming: true,
+        };
+        setMessages(prev => [...prev, reportPlaceholder]);
+        setIsStreaming(true);
+        setReportProgress({ stage: 'analyzing', message: 'Understanding your business…' });
+
+        const reportToken = await getToken().catch(() => null);
+        await reportStream(
+          { message: textToSend, conversation_id: conversationId, clerk_user_id: userId },
+          (stage, message) => setReportProgress({ stage, message }),
+          (convId) => {
+            if (!conversationId) {
+              setConversationId(convId);
+              loadSessions();
+            }
+          },
+          (content, businessContext) => {
+            setMessages(prev => prev.map(m =>
+              m.id === reportPlaceholderId
+                ? { ...m, content, content_type: 'business_report', reportContext: businessContext, isStreaming: false }
+                : m
+            ));
+            setReportProgress(null);
+          },
+          () => { setIsStreaming(false); loadSessions(); },
+          (err) => { setIsStreaming(false); setReportProgress(null); console.error('Report error:', err); },
+          controller.signal,
+          reportToken,
+        );
+
+      } else if (!manualAgent && isSchemeQuery(textToSend)) {
         // ── SCHEME PATH: JSON, renders cards ─────────────────────────────
         // Switch to db-search mode while vector DB query runs
         setThinkingMode('db-search');
@@ -618,6 +750,7 @@ export function ChatInterface() {
   const handleDeleteSession = async (id: string) => {
     const success = await chatService.deleteSession(id);
     if (success) {
+      removeCachedHistory(id);
       setSessions(prev => prev.filter(s => s.id !== id));
       if (conversationId === id) {
         handleNewChat();
@@ -706,13 +839,20 @@ export function ChatInterface() {
               <div className={`flex-1 w-full max-w-[800px] mx-auto flex flex-col gap-6 ${styles.messageList}`}>
                 {messages.map((msg) => (
                   <div key={msg.id} className="w-full">
-                    <MessageComponent message={msg} />
-                    {/* Streaming cursor removed — ThinkingWithText handles pre-chunk state */}
+                    {msg.content_type === 'report_progress' && msg.isStreaming && reportProgress ? (
+                      <div className="pl-4">
+                        <ReportProgress currentStage={reportProgress.stage} message={reportProgress.message} />
+                      </div>
+                    ) : msg.content_type === 'business_report' ? (
+                      <BusinessReport markdown={msg.content as string} businessContext={msg.reportContext} />
+                    ) : (
+                      <MessageComponent message={msg} />
+                    )}
                   </div>
                 ))}
-                {/* ThinkingWithText — visible only while thinkingMode is non-null
-                    and NOT while streaming text is already showing */}
-                {thinkingMode && !messages.some(m => m.isStreaming && (m.content as string)?.length > 0) && (
+                {/* ThinkingWithText — visible only while thinkingMode is non-null,
+                    NOT while streaming text is already showing, and NOT during report pipeline */}
+                {thinkingMode && !reportProgress && !messages.some(m => m.isStreaming && (m.content as string)?.length > 0) && (
                   <div className="w-full pl-4 py-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <ThinkingWithText
                       mode={thinkingMode}

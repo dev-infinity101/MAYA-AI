@@ -43,6 +43,45 @@ export const exportMarkdownTableToExcel = (markdownContent: string, filename: st
 
     if (!hasTables) return;
 
-    // Generate output and auto-download it as an XLSX file natively instead of CSV
     XLSX.writeFile(wb, `${filename}_${Date.now()}.xlsx`);
+};
+
+export const exportMarkdownTableToCSV = (markdownContent: string, filename: string = "maya_export") => {
+    const tableRegex = /\|(.+)\|[\r\n]+\|[-| :]+\|[\r\n]+((?:\|.+\|[\r\n]*)+)/g;
+    let match;
+    const allRows: string[][] = [];
+    let hasData = false;
+
+    while ((match = tableRegex.exec(markdownContent)) !== null) {
+        hasData = true;
+        const rows = match[0]
+            .split('\n')
+            .filter(row => row.trim() && !row.match(/^\|[-| :]+\|$/))
+            .map(row =>
+                row.split('|')
+                   .filter((_, i, arr) => i > 0 && i < arr.length - 1)
+                   .map(cell => {
+                       let text = cell.trim()
+                           .replace(/\*\*(.*?)\*\*/g, '$1')
+                           .replace(/__(.*?)__/g, '$1');
+                       // Wrap in quotes if the cell contains commas, quotes, or newlines
+                       if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+                           text = `"${text.replace(/"/g, '""')}"`;
+                       }
+                       return text;
+                   })
+            );
+        allRows.push(...rows, []); // blank separator between tables
+    }
+
+    if (!hasData) return;
+
+    const csv = allRows.map(row => row.join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel UTF-8
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 };

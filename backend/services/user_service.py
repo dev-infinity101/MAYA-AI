@@ -26,7 +26,7 @@ async def get_or_create_user(
     result = await db.execute(
         select(User).where(User.clerk_user_id == clerk_user_id)
     )
-    user = result.scalar_one_or_none()
+    user = result.scalars().first()
 
     if user:
         return user
@@ -66,7 +66,7 @@ async def get_or_create_whatsapp_user(
     result = await db.execute(
         select(User).where(User.clerk_user_id == wa_user_id)
     )
-    user = result.scalar_one_or_none()
+    user = result.scalars().first()
 
     if user:
         return user

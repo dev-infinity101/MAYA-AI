@@ -145,6 +145,69 @@ export const chatService = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// reportStream — 5-agent business report via SSE (/api/chat/report)
+// Events: init | progress {stage, message} | report {content, business_context} | done | error
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const reportStream = async (
+    payload: ChatPayload,
+    onProgress: (stage: string, message: string) => void,
+    onInit: (conversationId: string) => void,
+    onReport: (content: string, businessContext: Record<string, any>) => void,
+    onDone: () => void,
+    onError: (msg: string) => void,
+    signal?: AbortSignal,
+    token?: string | null,
+): Promise<void> => {
+    try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(`${API_BASE}/api/chat/report`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+            signal,
+        });
+
+        if (!response.ok) {
+            onError(`Server error: ${response.status}`);
+            return;
+        }
+
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split('\n\n');
+            buffer = parts.pop() ?? '';
+
+            for (const part of parts) {
+                const line = part.trim();
+                if (!line.startsWith('data: ')) continue;
+                try {
+                    const event = JSON.parse(line.slice(6));
+                    if (event.type === 'init')     onInit(event.conversation_id);
+                    if (event.type === 'progress') onProgress(event.stage, event.message);
+                    if (event.type === 'report')   onReport(event.content, event.business_context || {});
+                    if (event.type === 'done')     onDone();
+                    if (event.type === 'error')    onError(event.message);
+                } catch { /* malformed frame */ }
+            }
+        }
+    } catch (err: any) {
+        if (err?.name === 'AbortError') return;
+        console.error('reportStream error:', err);
+        onError('Connection error. Please try again.');
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // chatStream — text agents via SSE (Step 3.3)
 // Now accepts an optional Clerk JWT token to pass as Authorization header.
 // ─────────────────────────────────────────────────────────────────────────────

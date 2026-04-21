@@ -7,6 +7,16 @@
     --glow-color-primary: rgba(4, 161, 109, 0.5);
     --glow-blur: 20px;
     --glow-spread: 0px;
+    /* Surface / border / text tokens used by report card */
+    --surface-primary:   #1a1a1a;
+    --surface-elevated:  #242424;
+    --surface-secondary: #2a2a2a;
+    --surface-hover:     #303030;
+    --border-default:    rgba(255,255,255,0.08);
+    --border-subtle:     rgba(255,255,255,0.05);
+    --text-secondary:    rgba(255,255,255,0.6);
+    --text-tertiary:     rgba(255,255,255,0.35);
+    --color-accent:      #04a16d;
   }
   body {
     @apply bg-background text-text-primary font-sans antialiased overflow-x-hidden;
@@ -162,6 +172,139 @@
     display: none;
   }
 }
+
+/* ─── Business Report Card ─── */
+.business-report-card {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  width: 100%;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--surface-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.report-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-icon { font-size: 28px; }
+
+.report-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: #fff;
+}
+
+.report-meta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 2px 0 0;
+}
+
+.report-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-report-action {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: rgba(255,255,255,0.75);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.btn-report-action:hover {
+  background: var(--surface-hover);
+  color: #fff;
+}
+
+.report-body {
+  padding: 24px;
+  max-height: 600px;
+  overflow-y: auto;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.9rem;
+}
+
+.report-body h1 { font-size: 22px; margin-top: 0; color: #fff; font-weight: 700; }
+.report-body h2 { font-size: 18px; margin-top: 24px; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle); color: #fff; font-weight: 600; }
+.report-body h3 { font-size: 15px; color: rgba(255,255,255,0.9); font-weight: 600; margin-top: 16px; }
+.report-body p  { margin: 8px 0; }
+.report-body ul, .report-body ol { padding-left: 1.25rem; margin: 8px 0; }
+.report-body li { margin: 3px 0; }
+.report-body strong { color: #fff; font-weight: 600; }
+.report-body table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+.report-body th { background: var(--surface-elevated); font-weight: 600; padding: 8px 12px; border: 1px solid var(--border-subtle); text-align: left; color: #fff; }
+.report-body td { padding: 8px 12px; border: 1px solid var(--border-subtle); color: rgba(255,255,255,0.75); }
+.report-body tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+.report-body blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 16px;
+  color: var(--text-secondary);
+  margin: 16px 0;
+  background: rgba(4,161,109,0.05);
+  border-radius: 0 6px 6px 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.report-body hr { border: none; border-top: 1px solid var(--border-subtle); margin: 20px 0; }
+.report-body a  { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.report-body code { background: rgba(255,255,255,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.85em; color: #04fa93; }
+
+.report-footer {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-elevated);
+}
+
+.report-badge {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* ─── Business Report — dark markdown prose (legacy, used outside cards) ─── */
+.prose-report {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.prose-report h1 { font-size: 1.3rem; font-weight: 700; color: #fff; margin: 1.5rem 0 0.5rem; }
+.prose-report h2 { font-size: 1.05rem; font-weight: 600; color: #fff; margin: 1.4rem 0 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.25rem; }
+.prose-report h3 { font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); margin: 1rem 0 0.3rem; }
+.prose-report p  { margin: 0.55rem 0; }
+.prose-report ul, .prose-report ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+.prose-report li { margin: 0.2rem 0; }
+.prose-report strong { color: #fff; font-weight: 600; }
+.prose-report blockquote { border-left: 3px solid rgba(4,161,109,0.5); padding: 0.5rem 1rem; margin: 0.75rem 0; background: rgba(4,161,109,0.05); border-radius: 0 6px 6px 0; color: rgba(255,255,255,0.7); }
+.prose-report table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+.prose-report th { background: rgba(255,255,255,0.06); color: #fff; font-weight: 600; padding: 0.4rem 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.08); }
+.prose-report td { padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
+.prose-report tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+.prose-report a  { color: #04a16d; text-decoration: underline; text-underline-offset: 2px; }
+.prose-report a:hover { color: #04fa93; }
+.prose-report hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 1.25rem 0; }
+.prose-report code { background: rgba(255,255,255,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.85em; color: #04fa93; }
+.prose-report pre code { background: transparent; color: rgba(255,255,255,0.85); }
+.prose-report pre { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 0.75rem 1rem; overflow-x: auto; margin: 0.75rem 0; }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
