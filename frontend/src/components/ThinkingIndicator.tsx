@@ -1,6 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export type ThinkingMode = 'thinking' | 'web-search' | 'db-search' | 'agent-active';
+
+// Default rotating status sets per agent
+const DEFAULT_STATUS_SETS: Record<string, string[]> = {
+  scheme: ['Scanning vectors', 'Querying database', 'Analyzing matches', 'Cross-referencing', 'Ranking relevance', 'Validating eligibility', 'Compiling results'],
+  market: ['Gathering market data', 'Analyzing trends', 'Processing insights', 'Researching competitors', 'Synthesizing findings', 'Building report', 'Finalizing'],
+  brand: ['Brainstorming concepts', 'Generating ideas', 'Refining identity', 'Testing narratives', 'Validating brand voice', 'Polishing messaging', 'Ready'],
+  financial: ['Processing numbers', 'Analyzing financials', 'Building models', 'Forecasting scenarios', 'Calculating metrics', 'Validating assumptions', 'Generating insights'],
+  default: ['Thinking', 'Analyzing query', 'Processing information', 'Consulting knowledge', 'Preparing insights', 'Refining response', 'Almost there']
+};
+
+const useRotatingStatus = (
+  statuses: string[] | undefined,
+  interval: number = 1500,
+  isActive: boolean = true
+) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isActive || !statuses || statuses.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex(i => (i + 1) % statuses.length);
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [statuses, interval, isActive]);
+
+  // Reset index when statuses change or inactive
+  useEffect(() => {
+    if (!isActive) {
+      setCurrentIndex(0);
+    }
+  }, [isActive]);
+
+  return statuses?.[currentIndex] ?? '';
+};
 
 interface ThinkingIndicatorProps {
     className?: string;
@@ -165,29 +201,96 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
 export const ThinkingWithText: React.FC<{
     text?: string;
     mode?: ThinkingMode;
-}> = ({ text = 'Thinking', mode = 'thinking' }) => (
-    <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '10px 18px',
-        borderRadius: '14px',
-        border: '1px solid rgba(16,185,129,0.25)',
-        boxShadow: '0 0 18px rgba(16,185,129,0.08)',
-        backdropFilter: 'blur(10px)',
-    }}>
-        <ThinkingIndicator mode={mode} />
-        <span style={{
-            fontSize: '13px',
-            background: 'linear-gradient(135deg, #e2e8f0, #10b981)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontWeight: 600,
-            letterSpacing: '0.02em'
+    rotatingStatuses?: string[];
+    statusInterval?: number;
+    isActive?: boolean;
+    agent?: keyof typeof DEFAULT_STATUS_SETS;
+}> = ({
+    text = 'Thinking',
+    mode = 'thinking',
+    rotatingStatuses,
+    statusInterval = 1500,
+    isActive = true,
+    agent
+}) => {
+    // Use provided statuses, or fall back to agent-specific defaults, or use default set
+    const statusSet = rotatingStatuses ?? DEFAULT_STATUS_SETS[agent ?? 'default'];
+    const displayText = useRotatingStatus(statusSet, statusInterval, isActive);
+    const finalText = displayText || text;
+
+    return (
+        <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '10px 18px',
+            borderRadius: '14px',
+            border: '1px solid rgba(16,185,129,0.25)',
+            boxShadow: '0 0 18px rgba(16,185,129,0.08)',
+            backdropFilter: 'blur(10px)',
         }}>
-            {text}
-        </span>
-    </div>
-);
+            <ThinkingIndicator mode={mode} />
+            <span style={{
+                fontSize: '13px',
+                background: 'linear-gradient(135deg, #e2e8f0, #10b981)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 600,
+                letterSpacing: '0.02em',
+                transition: 'opacity 0.15s ease-out',
+                opacity: isActive ? 1 : 0.6,
+                minWidth: '80px' // Prevents layout shift during rotation
+            }}>
+                {finalText}
+            </span>
+        </div>
+    );
+};
+
+/**
+ * Hook for managing rotating status text independently
+ * Useful for tying rotation to async operations/request lifecycle
+ */
+export const useStatusRotation = (
+  agentType?: keyof typeof DEFAULT_STATUS_SETS,
+  customStatuses?: string[],
+  interval: number = 1500,
+  isActive: boolean = true
+) => {
+  const statuses = customStatuses ?? DEFAULT_STATUS_SETS[agentType ?? 'default'];
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isActive || statuses.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setIndex(i => (i + 1) % statuses.length);
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [isActive, statuses.length, interval]);
+
+  useEffect(() => {
+    if (!isActive) setIndex(0);
+  }, [isActive]);
+
+  return {
+    status: statuses[index],
+    index,
+    total: statuses.length,
+    statuses
+  };
+};
+
+/**
+ * Configuration builder for agent-specific status rotation
+ */
+export const createAgentStatusConfig = (
+  agentType: keyof typeof DEFAULT_STATUS_SETS,
+  customStatuses?: string[]
+) => ({
+  agent: agentType,
+  rotatingStatuses: customStatuses ?? DEFAULT_STATUS_SETS[agentType]
+});
 
 export default ThinkingIndicator;

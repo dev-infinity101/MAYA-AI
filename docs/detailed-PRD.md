@@ -8,7 +8,7 @@
 **What:** AI chatbot helping Indian MSMEs discover government schemes and receive business consultancy  
 **Tech Stack:** React + FastAPI + Gemini API + PostgreSQL + LangGraph  
 **Architecture:** 3-Tier Serverless (zero local ML models, API-only)  
-**Deployment:** Vercel (Frontend) + Koyeb (Backend) + Neon.tech (Database)  
+**Deployment:** Vercel (Frontend) + GCP Cloud Run (Backend) + Neon.tech (Database)  
 **Timeline:** 16 weeks  
 
 ---
@@ -35,7 +35,7 @@
 │                                                           │
 │  ┌────────────────────────────────────────────────┐    │
 │  │   FastAPI (Stateless Docker Container)         │    │
-│  │   Hosted: Koyeb (Serverless Containers)        │    │
+│  │   Hosted: GCP Cloud Run (Serverless)           │    │
 │  │   RAM: 512MB-1GB (no local models!)            │    │
 │  │                                                 │    │
 │  │   Components:                                   │    │
@@ -106,9 +106,12 @@ alembic==1.13.1                     # Database migrations
 tavily-python==0.3.3                # Live market research data
 
 # Authentication & Security
-python-jose[cryptography]==3.3.0    # JWT tokens
-passlib[bcrypt]==1.7.4              # Password hashing
+clerk-backend-api>=5.0.0            # Clerk authentication
 python-multipart==0.0.9             # File upload support
+
+# Integrations & Storage
+twilio==9.3.2                       # WhatsApp integration
+boto3==1.34.0                       # Storage & Brand Kit
 
 # Utilities
 python-dotenv==1.0.0                # Environment variables
@@ -131,16 +134,18 @@ sentry-sdk[fastapi]==1.40.0         # Error tracking
 ```json
 {
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.4",
+    "axios": "^1.6.7",
+    "clsx": "^2.1.0",
+    "date-fns": "^3.3.1",
+    "lucide-react": "^0.323.0",
+    "mx-icons": "^1.0.31",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.0",
-    "axios": "^1.6.7",
-    "zustand": "^4.5.0",
-    "lucide-react": "^0.323.0",
     "react-markdown": "^9.0.1",
-    "date-fns": "^3.3.1",
-    "clsx": "^2.1.0",
-    "tailwind-merge": "^2.2.1"
+    "react-router-dom": "^6.22.0",
+    "tailwind-merge": "^2.2.1",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.55",
@@ -809,7 +814,7 @@ async def get_agent_response(
 
 ## 4. DEPLOYMENT CONFIGURATION
 
-### 4.1 Koyeb Deployment (Backend)
+### 4.1 GCP Cloud Run Deployment (Backend)
 
 ```dockerfile
 # Dockerfile
@@ -855,14 +860,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES=10080
 CORS_ORIGINS=["https://maya-msme.vercel.app"]
 ```
 
-**Koyeb Configuration:**
-- Service Type: Web
-- Builder: Dockerfile
-- Instance: Nano (512MB RAM) ✅
-- Region: Frankfurt (closest to Neon.tech)
-- Auto-scaling: Min 1, Max 2
-- Port: 8000
-- Health check: `/health`
+**GCP Cloud Run Configuration:**
+- Service Type: Serverless Container
+- Image Registry: GCP Artifact Registry
+- Instance: 512MB RAM ✅
+- Auto-scaling: Min 0, Max 2 (scale to zero supported)
+- Port: 8000 (Set via ENV PORT)
+- Timeout: 75s with Uvicorn keep-alive
 
 ### 4.2 Neon.tech Setup
 
@@ -911,7 +915,7 @@ WITH (lists = 100);
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "env": {
-    "VITE_API_URL": "https://maya-api.koyeb.app"
+    "VITE_API_URL": "https://maya-api.your-cloud-run.app"
   }
 }
 ```
@@ -924,7 +928,7 @@ WITH (lists = 100);
 
 | Service | Tier | Cost |
 |---------|------|------|
-| **Koyeb** | Nano instance (512MB) | $5.50/month |
+| **GCP Cloud Run** | 512MB RAM, scale to 0 | ~$1.00/month (pay per use) |
 | **Neon.tech** | Free tier (3GB, 10GB storage) | $0 |
 | **Vercel** | Free tier (hobby) | $0 |
 | **Gemini API** | Text generation (30M tokens) | $2.25 |
@@ -941,7 +945,7 @@ WITH (lists = 100);
 ## 6. DEVELOPMENT ROADMAP (16 Weeks)
 
 ### Weeks 1-4: Foundation
-- Setup Koyeb + Neon.tech + Vercel
+- Setup GCP Cloud Run + Neon.tech + Vercel
 - Implement authentication
 - Build database schema
 - Configure Gemini API integration
@@ -988,7 +992,21 @@ WITH (lists = 100);
 
 ## 8. KEY TECHNICAL DECISIONS SUMMARY
 
-### ✅ What Changed from Original PRD
+### ✅ Recent System Updates & Optimizations
+
+1. **Frontend UI Redesign & Aesthetics**
+   - Transitioned to a minimalist design system.
+   - Upgraded typography to Satoshi font.
+   - Removed distracting background patterns in favor of solid colors and subtle transitions.
+   - Replaced basic "thinking" animations with a dynamic, mouse-interactive neon connection effect for a premium feel.
+
+2. **Backend Latency & Performance Optimization**
+   - Disabled the verbose "thinking" mode in Gemini models, significantly reducing response latency.
+   - Implemented database connection pooling and optimized intent-based routing.
+   - Parallelized embedding generation and summarization processes to maximize throughput.
+   - Standardized RAG embeddings to exactly 768 dimensions.
+
+### ✅ What Changed from Original PRD Architecture
 
 1. **Removed local EmbeddingGemma model**
    - Reason: 300MB RAM not feasible for free tier
@@ -1000,10 +1018,10 @@ WITH (lists = 100);
    - `fastapi==0.109.2`
    - All tested to work together
 
-3. **Switched hosting to Koyeb**
-   - Reason: Better Docker support than Render
+3. **Switched hosting to GCP Cloud Run**
+   - Reason: Unmatched scalability and pay-per-use efficiency
    - 512MB RAM sufficient (no local models)
-   - Better cold start performance
+   - Robust Docker/Artifact Registry support
 
 4. **Simplified architecture**
    - 3-tier serverless (client → API → database + external AI)
@@ -1017,6 +1035,7 @@ WITH (lists = 100);
 - FastAPI for backend
 - React for frontend
 - Core features: Scheme Navigator + 4 Business Agents
+- Integrations: Clerk (Auth) + Twilio (WhatsApp) + Boto3 (Brand Kit)
 
 ### ✅ Why This Architecture Works
 
@@ -1156,7 +1175,7 @@ asyncio.run(test())
 
 ### Pre-deployment
 
-- [ ] Environment variables configured in Koyeb
+- [ ] Environment variables configured in GCP Cloud Run
 - [ ] Neon.tech database created and pgvector enabled
 - [ ] 30-50 schemes inserted with embeddings
 - [ ] Gemini API key tested and working
@@ -1165,11 +1184,11 @@ asyncio.run(test())
 
 ### Deployment
 
-- [ ] Push Docker image to Koyeb
+- [ ] Push Docker image to GCP Artifact Registry, Deploy to Cloud Run
 - [ ] Configure health check endpoint
 - [ ] Set up custom domain (optional)
 - [ ] Deploy frontend to Vercel
-- [ ] Update CORS origins in backend
+- [ ] Update CORS origins in backend via GCP Cloud Run env variables
 - [ ] Test end-to-end in production
 
 ### Post-deployment
@@ -1200,7 +1219,7 @@ asyncio.run(test())
 
 **Issue 4: "CORS errors in production"**
 - Cause: Frontend URL not in CORS_ORIGINS
-- Solution: Update environment variable in Koyeb
+- Solution: Update environment variable in GCP Cloud Run
 
 ---
 

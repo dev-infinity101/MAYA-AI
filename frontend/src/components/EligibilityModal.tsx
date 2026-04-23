@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CheckCircle, XCircle, Loader2, IndianRupee, AlertTriangle, Target, Info } from 'lucide-react';
+import { X, CheckCircle, XCircle, AlertTriangle, Target, Info, IndianRupee } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000';
@@ -58,124 +58,132 @@ export function EligibilityModal({ schemeName, onClose }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-[#1A1A1A] border border-white/5 rounded-[32px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col relative animate-in fade-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/5">
+                <div className="flex items-center justify-between p-6 pb-5 border-b border-white/5 bg-[#1A1A1A]">
                     <div>
-                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                            <Target size={20} className="text-emerald-400" /> 
-                            Eligibility Check
-                        </h2>
-                        <p className="text-xs text-gray-400 mt-1 truncate max-w-[300px]">{schemeName}</p>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] text-white text-[12px] font-medium mb-3 border border-white/10">
+                            <Target size={14} className="text-[#067a44]" /> Eligibility Check
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight">{schemeName}</h2>
                     </div>
                     <button 
                         onClick={onClose} 
-                        className="text-gray-400 hover:text-white p-2 hover:bg-white/10 rounded-xl transition-all"
+                        className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#A0A0A0] hover:bg-white/10 hover:text-white transition-colors shrink-0"
                     >
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-6 bg-[#161616] max-h-[60vh] overflow-y-auto custom-scrollbar">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-10 gap-4">
-                            <Loader2 size={32} className="text-emerald-500 animate-spin" />
+                        <div className="flex flex-col items-center justify-center py-16 gap-6">
+                            <div className="w-12 h-12 border-[3px] border-[#067a44]/30 border-t-[#067a44] rounded-full animate-spin" />
                             <div className="text-center">
-                                <p className="text-sm font-medium text-white">Calculating Eligibility...</p>
-                                <p className="text-xs text-gray-500 mt-1">AI is evaluating your business profile against government rules</p>
+                                <p className="text-lg font-bold text-white mb-2">Calculating Eligibility</p>
+                                <p className="text-[14px] text-[#A0A0A0]">Evaluating your business profile against government criteria...</p>
                             </div>
                         </div>
                     ) : error ? (
-                        <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
-                            <AlertTriangle size={32} className="text-amber-500 mb-2" />
-                            <p className="text-sm font-medium text-white">{error}</p>
-                            <p className="text-xs text-gray-500">Please make sure your profile is updated in Settings.</p>
+                        <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+                            <AlertTriangle size={40} className="text-amber-500 mb-4" />
+                            <p className="text-xl font-bold text-white mb-1">{error}</p>
+                            <p className="text-[14px] text-[#A0A0A0]">Please make sure your profile is updated in Settings.</p>
                         </div>
                     ) : data ? (
-                        <div className="space-y-6">
-                            {/* Hero Status */}
-                            <div className={`p-4 rounded-xl border flex items-start gap-4 ${
-                                data.is_eligible 
-                                    ? 'bg-emerald-500/10 border-emerald-500/30' 
-                                    : 'bg-amber-500/10 border-amber-500/30'
-                            }`}>
-                                <div className={`pt-1 ${data.is_eligible ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                    {data.is_eligible ? <CheckCircle size={28} /> : <XCircle size={28} />}
+                        <div className="space-y-8">
+                            {/* Hero Status Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {/* Match Score */}
+                                <div className={`bg-white/[0.02] border ${data.is_eligible ? 'border-[#067a44]/20' : 'border-amber-500/20'} rounded-[24px] p-5 flex flex-col justify-between group`}>
+                                    <div className="flex justify-between items-start mb-6">
+                                        <span className="text-[#A0A0A0] font-medium text-[13px]">Match Score</span>
+                                        <div className={`w-8 h-8 rounded-full border border-white/10 flex shrink-0 items-center justify-center bg-white/[0.02]`}>
+                                            {data.is_eligible ? <CheckCircle size={14} className="text-[#067a44]" /> : <XCircle size={14} className="text-amber-500" />}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex items-end gap-1 mb-2">
+                                            <p className={`text-4xl font-bold ${data.is_eligible ? 'text-[#067a44]' : 'text-amber-500'} tracking-tight leading-none`}>
+                                                {data.match_score}
+                                            </p>
+                                            <span className="text-xl text-[#A0A0A0] font-bold mb-1">%</span>
+                                        </div>
+                                        <p className="text-[12px] text-[#A0A0A0] font-medium mt-2">
+                                            {data.is_eligible ? "Highly eligible profile" : "Missing key requirements"}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-base font-bold text-white mb-1">
-                                        {data.is_eligible 
-                                            ? "You appear highly eligible!" 
-                                            : "You might face some eligibility issues."}
-                                    </h3>
-                                    <p className="text-xs text-gray-300">
-                                        Based on your current profile, your match score is <strong className={data.match_score >= 80 ? 'text-emerald-400' : 'text-amber-400'}>{data.match_score}%</strong>.
-                                    </p>
+
+                                {/* Max Benefit Highlight */}
+                                <div className="bg-white/[0.02] border border-white/5 rounded-[24px] p-5 flex flex-col justify-between group hover:bg-white/[0.04] transition-colors">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <span className="text-[#A0A0A0] font-medium text-[13px]">Estimated Benefit</span>
+                                        <div className="w-8 h-8 rounded-full border border-white/10 flex shrink-0 items-center justify-center bg-white/[0.02]">
+                                            <IndianRupee size={14} className="text-white/60" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl md:text-3xl font-bold text-white mb-2 break-words tracking-tight">
+                                            {data.max_benefit}
+                                        </p>
+                                        <p className="text-[12px] text-[#A0A0A0] font-medium mt-3">Calculated maximum cap</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Max Benefit Highlight */}
-                            <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
-                                <div className="bg-blue-500/20 p-3 rounded-lg text-blue-400">
-                                    <IndianRupee size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Maximum Calculated Benefit</p>
-                                    <p className="text-sm font-semibold text-white">{data.max_benefit}</p>
-                                </div>
+                            {/* Detailed Reasons */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                {data.reasons.length > 0 && (
+                                    <div className="bg-white/[0.02] border border-white/5 rounded-[24px] p-5">
+                                        <h4 className="text-[13px] font-semibold text-white uppercase tracking-wider mb-5 flex items-center gap-2">
+                                            <CheckCircle size={16} className="text-[#067a44]" /> 
+                                            Why you match
+                                        </h4>
+                                        <ul className="space-y-4">
+                                            {data.reasons.map((reason, i) => (
+                                                <li key={i} className="text-[14px] text-[#A0A0A0] flex items-start gap-3">
+                                                    <span className="text-[#067a44] mt-1 shrink-0">•</span>
+                                                    <span className="leading-relaxed">{reason}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {data.missing_criteria.length > 0 && (
+                                    <div className="bg-amber-500/5 border border-amber-500/10 rounded-[24px] p-5">
+                                        <h4 className="text-[13px] font-semibold text-amber-500 uppercase tracking-wider mb-5 flex items-center gap-2">
+                                            <AlertTriangle size={16} /> 
+                                            Criteria to meet
+                                        </h4>
+                                        <ul className="space-y-4">
+                                            {data.missing_criteria.map((miss, i) => (
+                                                <li key={i} className="text-[14px] text-amber-500/80 flex items-start gap-3">
+                                                    <span className="text-amber-500/50 mt-1 shrink-0">•</span>
+                                                    <span className="leading-relaxed">{miss}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
-
-                            {/* Why? Reasons */}
-                            {data.reasons.length > 0 && (
-                                <div>
-                                    <h4 className="text-xs font-semibold text-gray-400 uppercase mb-3 flex items-center gap-2">
-                                        <CheckCircle size={14} className="text-emerald-500" /> 
-                                        Why you match
-                                    </h4>
-                                    <ul className="space-y-2">
-                                        {data.reasons.map((reason, i) => (
-                                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                                                <span className="text-emerald-500/50 mt-0.5">•</span>
-                                                <span className="leading-snug">{reason}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {/* Missing Criteria */}
-                            {data.missing_criteria.length > 0 && (
-                                <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
-                                    <h4 className="text-xs font-semibold text-red-400 uppercase mb-3 flex items-center gap-2">
-                                        <AlertTriangle size={14} /> 
-                                        Criteria to meet / Missing elements
-                                    </h4>
-                                    <ul className="space-y-2">
-                                        {data.missing_criteria.map((miss, i) => (
-                                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                                                <span className="text-red-500/50 mt-0.5">•</span>
-                                                <span className="leading-snug">{miss}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
                         </div>
                     ) : null}
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-white/5 bg-black/40 flex items-center justify-between">
-                    <p className="text-[10px] text-gray-500 flex items-center gap-1.5 flex-1">
-                        <Info size={12} />
-                        AI assessments are guide-only. Final eligibility is decided by the bank/nodal agency.
+                <div className="p-5 border-t border-white/5 bg-[#1A1A1A] flex flex-col md:flex-row md:items-center justify-between gap-5">
+                    <p className="text-[12px] text-[#A0A0A0] flex items-start md:items-center gap-2 flex-1 leading-relaxed">
+                        <Info size={16} className="shrink-0 mt-0.5 md:mt-0" />
+                        AI assessments are guide-only. Final eligibility is decided by the bank or nodal agency.
                     </p>
                     <button 
                         onClick={onClose}
-                        className="px-6 py-2 bg-white text-black font-semibold text-xs rounded-lg hover:bg-gray-200 transition-colors shrink-0"
+                        className="px-8 py-3 bg-[#067a44] text-white font-semibold text-[14px] rounded-full hover:bg-[#056337] transition-all shadow-lg shadow-[#067a44]/20 shrink-0 w-full md:w-auto"
                     >
-                        Got it
+                        Close
                     </button>
                 </div>
             </div>

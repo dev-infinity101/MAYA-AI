@@ -145,6 +145,33 @@ export const chatService = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// checkEligibility — rule-based, no LLM, fast
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface EligibilityResult {
+    is_eligible: boolean;
+    match_score: number;
+    max_benefit: string;
+    reasons: string[];
+    missing_criteria: string[];
+}
+
+export async function checkEligibility(
+    schemeName: string,
+    token: string | null | undefined,
+): Promise<EligibilityResult> {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const encoded = encodeURIComponent(schemeName);
+    const res = await fetch(`${API_BASE}/api/draft/eligibility/${encoded}`, { headers });
+    if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(detail?.detail || `Server error ${res.status}`);
+    }
+    return res.json();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // reportStream — 5-agent business report via SSE (/api/chat/report)
 // Events: init | progress {stage, message} | report {content, business_context} | done | error
 // ─────────────────────────────────────────────────────────────────────────────

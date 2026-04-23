@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
-import { Copy, Check, Download, FileSpreadsheet, Clock, ClipboardCopy, ChevronDown, FileText } from 'lucide-react';
+import { Check, Download, FileSpreadsheet, Clock, ClipboardCopy, ChevronDown, FileText, Copy } from 'lucide-react';
 import { Message as MessageType } from '../types';
 import { SchemeCard } from './SchemeCard';
 import ReactMarkdown from 'react-markdown';
@@ -95,7 +95,7 @@ function ContextMenu({ x, y, text, timestamp, onClose }: ContextMenuProps) {
 // COPY BUTTON COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 
-function CopyButton({ text, isUser }: { text: string; isUser: boolean }) {
+function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async (e: React.MouseEvent) => {
@@ -203,11 +203,6 @@ export function Message({ message }: MessageProps) {
     setContextMenu({ x: e.clientX, y: e.clientY });
   }, []);
 
-  // ── Timestamp helpers ──────────────────────────────────────────────────
-  const timeString = message.timestamp instanceof Date
-    ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : '';
-
   return (
     <>
       <div
@@ -227,7 +222,7 @@ export function Message({ message }: MessageProps) {
               <div className={clsx(
                 'relative group',
                 isUser
-                  ? 'bg-[#00692a] text-white rounded-[24px] px-6 py-3'
+                  ? 'bg-[#067a44] text-white rounded-[24px] px-6 py-3'
                   : 'bg-transparent text-[#EAEAEA] rounded-none border-none py-1',
               )}>
                 {/* Copy button — floats over the message bubble on hover */}
@@ -236,7 +231,7 @@ export function Message({ message }: MessageProps) {
                     'absolute -top-2 flex items-center gap-1',
                     isUser ? '-left-8' : '-right-8',
                   )}>
-                    <CopyButton text={contentText} isUser={isUser} />
+                    <CopyButton text={contentText} />
                   </div>
                 )}
 

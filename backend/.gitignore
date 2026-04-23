@@ -153,3 +153,11 @@ cython_debug/
 # IDE settings
 .vscode/
 .idea/
+
+/claude
+/docs
+/requirements.txt
+/README.md
+/demo-day.md
+/frontend/node_modules
+/backend/venv

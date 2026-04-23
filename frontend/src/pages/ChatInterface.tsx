@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDown, PanelLeftOpen, Square, Paperclip, ArrowUp, Megaphone, LineChart, Landmark, Briefcase } from 'lucide-react';
+import { ChevronDown, PanelLeftOpen, Square, ArrowUp, Megaphone, LineChart, Landmark, Briefcase, Paperclip, Box, Ghost } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Message } from '../types';
 import { Message as MessageComponent } from '../components/Message';
@@ -8,6 +8,8 @@ import { chatService, chatStream, reportStream } from '../services/api';
 import { ThinkingWithText, ThinkingMode } from '../components/ThinkingIndicator';
 import { OnboardingModal } from '../components/OnboardingModal';
 import { ReportProgress, BusinessReport } from '../components/BusinessReport';
+import Dashboard from './Dashboard';
+import SettingsPage from './SettingsPage';
 import styles from './ChatInterface.module.css';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000';
@@ -177,12 +179,6 @@ const ChatInputBox = ({
     setShowAgentMenu(!showAgentMenu);
   };
 
-  const AGENT_LABELS: Record<string, string> = {
-    marketing: 'Marketing',
-    market: 'Market Research',
-    finance: 'Finance',
-    brand: 'Branding',
-  };
 
   return (
     <div className={`w-full max-w-3xl relative group animate-in fade-in duration-500 flex flex-col ${isCentered ? 'slide-in-from-bottom-6' : ''}`}>
@@ -235,7 +231,7 @@ const ChatInputBox = ({
             >
               {selectedAgent ? (
                 <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+                  <Ghost size={16} className="text-primary" />
                   {selectedAgent === 'marketing' ? 'Marketing' : selectedAgent === 'market' ? 'Market Research' : selectedAgent === 'finance' ? 'Finance' : 'Branding'}
                   <button
                     onClick={(e) => { e.stopPropagation(); onSelectAgent(null); }}
@@ -244,7 +240,7 @@ const ChatInputBox = ({
                   >&times;</button>
                 </>
               ) : (
-                <><span className="text-lg leading-none mb-0.5">+</span> Agent</>
+                <><Box size={16} /> Agent</>
               )}
             </button>
 
@@ -330,6 +326,7 @@ export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [currentView, setCurrentView] = useState<'chat' | 'dashboard' | 'settings'>('chat');
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   // thinkingMode drives the ThinkingWithText indicator.
@@ -782,6 +779,7 @@ export function ChatInterface() {
         onDeleteSession={handleDeleteSession}
         userProfile={userProfile}
         clerkUser={clerkUser}
+        onNavigate={setCurrentView}
       />
 
       {/* Main Chat Area */}
@@ -799,17 +797,23 @@ export function ChatInterface() {
                 <PanelLeftOpen size={20} className="group-hover:scale-110 transition-transform" />
               </button>
             )} 
-            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-text-secondary">
-              <span className={`text-lg font-small text-grey truncate max-w-[200px] md:max-w-[400px] ${styles.heading}`}>
-                {conversationId ? sessions.find(s => s.id === conversationId)?.title || "Chat" : "Maya MSME"}
-              </span>
-            </div>
+            {currentView === 'chat' && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-text-secondary">
+                <span className={`text-lg font-small text-grey truncate max-w-[200px] md:max-w-[400px] ${styles.heading}`}>
+                  {conversationId ? sessions.find(s => s.id === conversationId)?.title || "Chat" : "Maya MSME"}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Content Area */}
         <div className={`flex-1 overflow-y-auto scroll-smooth relative custom-scrollbar ${styles.scrollArea}`}>
-          {isHistoryLoading ? (
+          {currentView === 'dashboard' ? (
+            <Dashboard />
+          ) : currentView === 'settings' ? (
+            <SettingsPage />
+          ) : isHistoryLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
             </div>
@@ -872,7 +876,7 @@ export function ChatInterface() {
         </div>
 
         {/* Floating Input Bar (Ongoing Chat) */}
-        {messages.length > 0 && (
+        {currentView === 'chat' && messages.length > 0 && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/95 to-transparent pt-32 pb-8 px-4 z-10 pointer-events-none">
             <div className="max-w-[800px] mx-auto flex justify-center pointer-events-auto">
               <ChatInputBox

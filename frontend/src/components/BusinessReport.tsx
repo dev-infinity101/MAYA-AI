@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Check, Copy, BarChart3, Download } from 'lucide-react';
 
 // ─── Stage pipeline for progress indicator ────────────────────────────────────
 
@@ -145,7 +146,7 @@ export function BusinessReport({ markdown, businessContext }: BusinessReportProp
       {/* Header */}
       <div className="report-header">
         <div className="report-header-left">
-          <span className="report-icon">📊</span>
+          <BarChart3 size={24} className="report-icon" style={{ color: '#f8fafc' }} />
           <div>
             <h3>{title}</h3>
             <p className="report-meta">{meta}</p>
@@ -153,10 +154,10 @@ export function BusinessReport({ markdown, businessContext }: BusinessReportProp
         </div>
         <div className="report-actions">
           <button onClick={handlePDF} className="btn-report-action" title="Save as PDF">
-            📄 PDF
+            <Download size={18} style={{ color: '#f8fafc' }} /> PDF
           </button>
           <button onClick={handleCopy} className="btn-report-action" title="Copy markdown">
-            {copied ? '✓ Copied' : '📋 Copy'}
+            {copied ? <><Check size={18} className="text-primary" /> Copied</> : <><Copy size={18} style={{ color: '#f8fafc' }} /> Copy</>}
           </button>
         </div>
       </div>

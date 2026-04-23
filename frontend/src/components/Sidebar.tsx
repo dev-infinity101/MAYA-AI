@@ -12,6 +12,7 @@ interface SidebarProps {
   currentSessionId?: string | null;
   onSelectSession?: (id: string) => void;
   onNewChat?: () => void;
+  onNavigate?: (view: 'chat' | 'dashboard' | 'settings') => void;
   onRenameSession?: (id: string, newTitle: string) => void;
   onDeleteSession?: (id: string) => void;
   userProfile?: Record<string, any> | null;
@@ -132,7 +133,7 @@ const SidebarSessionItem = ({
 
 export function Sidebar({ 
     isOpen, onClose, sessions = [], currentSessionId, 
-    onSelectSession, onNewChat, onRenameSession, onDeleteSession,
+    onSelectSession, onNewChat, onNavigate, onRenameSession, onDeleteSession,
     userProfile, clerkUser
 }: SidebarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -162,20 +163,23 @@ export function Sidebar({
         </div>
 
         <button
-            onClick={onNewChat}
+            onClick={() => {
+                onNewChat?.();
+                onNavigate?.('chat');
+            }}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 mb-2 bg-white/[0.03] hover:bg-white/[0.06] rounded-xl transition-all duration-200 group active:scale-95 text-white"
         >
             <SquarePen size={16} className="text-white group-hover:text-primary transition-colors" />
             <span className="text-[13px] font-medium text-white">New chat</span>
         </button>
 
-        <Link
-            to="/dashboard"
+        <button
+            onClick={() => onNavigate?.('dashboard')}
             className="w-full flex items-center gap-2.5 px-3 py-2 mb-3 hover:bg-white/[0.04] rounded-xl transition-all duration-200 group text-text-secondary hover:text-white"
         >
             <BarChart2 size={15} className="group-hover:text-primary transition-colors" />
             <span className="text-[13px]">Impact Dashboard</span>
-        </Link>
+        </button>
 
         <div className="flex-1 overflow-y-auto space-y-1 pr-2">
           <div className="text-[11px] font-semibold text-white uppercase tracking-wider mb-2 mt-4 px-2">Recents</div>
@@ -187,7 +191,10 @@ export function Sidebar({
                       key={session.id}
                       session={session}
                       currentSessionId={currentSessionId}
-                      onSelectSession={onSelectSession}
+                      onSelectSession={(id) => {
+                          onSelectSession?.(id);
+                          onNavigate?.('chat');
+                      }}
                       onRenameSession={onRenameSession}
                       onDeleteSession={onDeleteSession}
                   />
@@ -214,14 +221,16 @@ export function Sidebar({
                 <MoreHorizontal size={15} className="text-text-secondary group-hover:text-white transition-colors" />
                 <span>User Feedback</span>
              </button>
-             <Link 
-                to="/settings"
-                onClick={() => setIsMenuOpen(false)}
+             <button 
+                onClick={() => {
+                    setIsMenuOpen(false);
+                    onNavigate?.('settings');
+                }}
                 className="w-full flex items-center gap-3 p-2.5 text-[13px] text-white hover:bg-white/5 rounded-lg transition-colors group"
              >
                 <Settings size={15} className="text-text-secondary group-hover:text-white transition-colors" />
                 <span>Settings</span>
-             </Link>
+             </button>
           </div>
         )}
 

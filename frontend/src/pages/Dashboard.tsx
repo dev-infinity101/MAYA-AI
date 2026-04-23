@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, MessageSquare, FileText, Search, BarChart2, Banknote, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Brand } from '../components/Brand';
+import { Users, MessageSquare, FileText, Search, Activity, ArrowUpRight, CheckCircle, Ghost } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000';
 
@@ -27,9 +25,9 @@ function formatINR(n: number): string {
   return `₹${n}`;
 }
 
-function formatDate(iso: string): string {
+function formatDateShort(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('en-IN', { weekday: 'short' }).charAt(0);
 }
 
 const AGENT_COLORS: Record<string, string> = {
@@ -66,169 +64,204 @@ export default function Dashboard() {
 
   const overview = data?.overview;
   const agentEntries = Object.entries(data?.agent_breakdown ?? {}).sort((a, b) => b[1] - a[1]);
-  const agentTotal  = agentEntries.reduce((s, [, v]) => s + v, 0) || 1;
 
   const activity     = data?.daily_activity ?? [];
   const activityMax  = Math.max(...activity.map(a => a.count), 1);
-  const activityLast = activity.slice(-14); // last 14 days
+  const activityLast = activity.slice(-7);
 
   const topSchemes    = data?.top_schemes ?? [];
-  const schemesMax    = Math.max(...topSchemes.map(s => s.interactions), 1);
 
-  const statCards = [
-    { label: 'Total Users',        value: overview?.total_users ?? 0,         icon: Users,         color: 'text-primary' },
-    { label: 'Conversations',      value: overview?.total_conversations ?? 0,  icon: MessageSquare, color: 'text-blue-400' },
-    { label: 'Messages',           value: overview?.total_messages ?? 0,       icon: MessageSquare, color: 'text-blue-300' },
-    { label: 'Scheme Searches',    value: overview?.scheme_searches ?? 0,      icon: Search,        color: 'text-amber-400' },
-    { label: 'Drafts Generated',   value: overview?.drafts_generated ?? 0,     icon: FileText,      color: 'text-purple-400' },
-    { label: 'Reports Generated',  value: overview?.reports_generated ?? 0,    icon: BarChart2,     color: 'text-teal-400' },
-  ];
+  const conversionRate = overview && overview.total_conversations > 0
+    ? Math.min(Math.round((overview.reports_generated / overview.total_conversations) * 100), 100)
+    : 0;
+
+  if (loading) {
+      return (
+          <div className="flex items-center justify-center h-full min-h-[500px]">
+              <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+      );
+  }
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white">
-      {/* Top bar */}
-      <div className="border-b border-white/[0.05] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-white/40 hover:text-white transition-colors">
-            <ArrowLeft size={18} />
-          </Link>
-          <Brand showText />
-          <span className="text-white/20">|</span>
-          <span className="text-[13px] text-white/50 font-medium">Impact Dashboard</span>
-        </div>
-        <Link
-          to="/chat"
-          className="px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl text-primary text-[13px] font-medium transition-all"
-        >
-          Open MAYA →
-        </Link>
-      </div>
+    <div className="w-full text-white animate-in fade-in duration-500 pb-20">
+      <div className="max-w-7xl mx-auto px-8 py-10 space-y-8">
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-        {/* Title */}
-        <div>
-          <h1 className="text-2xl font-bold text-white">Platform Impact</h1>
-          <p className="text-sm text-white/40 mt-1">Real-time metrics from MAYA's multi-agent system</p>
-        </div>
-
-        {loading && (
-          <div className="flex items-center justify-center py-24">
-            <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
+            <p className="text-[#A0A0A0] mt-1">Plan, prioritize, and accomplish your tasks with ease.</p>
           </div>
-        )}
+        </div>
 
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm">
             {error}
           </div>
         )}
 
         {data && (
-          <>
-            {/* Value unlocked hero */}
-            <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-6 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-primary/80 font-medium mb-1">Estimated Value Unlocked</p>
-                <p className="text-4xl font-bold text-white">{formatINR(overview?.estimated_value_unlocked ?? 0)}</p>
-                <p className="text-xs text-white/40 mt-1">Based on ₹2L avg per application draft generated</p>
-              </div>
-              <Banknote size={48} className="text-primary/30" />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-            {/* Stat cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {statCards.map(({ label, value, icon: Icon, color }) => (
-                <div key={label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs text-white/40 font-medium uppercase tracking-wider">{label}</span>
-                    <Icon size={16} className={color} />
+            <div className="col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+              <div className="bg-primary rounded-[32px] p-6 shadow-lg shadow-primary/20 flex flex-col justify-between relative overflow-hidden group">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
+                <div className="flex justify-between items-start mb-6">
+                  <span className="text-white/90 font-medium text-sm">Value Unlocked</span>
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <ArrowUpRight size={18} className="text-white" />
                   </div>
-                  <p className="text-2xl font-bold text-white">{value.toLocaleString('en-IN')}</p>
+                </div>
+                <div className="relative z-10">
+                  <h2 className="text-4xl font-bold text-white mb-2">{formatINR(overview?.estimated_value_unlocked ?? 0)}</h2>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 text-white text-[11px] font-medium">
+                    <Activity size={12} /> Real-time estimate
+                  </div>
+                </div>
+              </div>
+
+              {[
+                { label: 'Total Users', value: overview?.total_users ?? 0, icon: Users },
+                { label: 'Conversations', value: overview?.total_conversations ?? 0, icon: MessageSquare },
+                { label: 'Reports Generated', value: overview?.reports_generated ?? 0, icon: FileText }
+              ].map((stat, i) => (
+                <div key={i} className="bg-[#1A1A1A] border border-white/5 rounded-[32px] p-6 flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-6">
+                    <span className="text-[#A0A0A0] font-medium text-sm">{stat.label}</span>
+                    <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                      <ArrowUpRight size={16} className="text-white/40" />
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-4xl font-bold text-white mb-2">{stat.value.toLocaleString('en-IN')}</h2>
+                    <p className="text-[12px] text-white/30 flex items-center gap-1">
+                       <CheckCircle size={12} className="text-primary" /> Active tracking
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Agent breakdown + Top schemes side by side */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Agent usage breakdown */}
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-white mb-4">Agent Usage Breakdown</h2>
-                {agentEntries.length === 0 ? (
-                  <p className="text-xs text-white/30 italic">No data yet</p>
-                ) : (
-                  <div className="space-y-3">
-                    {agentEntries.map(([agent, count]) => (
-                      <div key={agent}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[12px] text-white/60">{AGENT_LABELS[agent] ?? agent}</span>
-                          <span className="text-[12px] text-white/40">{count}</span>
-                        </div>
-                        <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-700 ${AGENT_COLORS[agent] ?? 'bg-white/30'}`}
-                            style={{ width: `${(count / agentTotal) * 100}%` }}
-                          />
-                        </div>
+            <div className="col-span-12 lg:col-span-7 bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8 flex flex-col">
+              <h2 className="text-[15px] font-medium text-white mb-8">Platform Analytics</h2>
+              <div className="flex-1 flex items-end justify-between gap-2 h-48 mt-auto">
+                {activityLast.map(({ date, count }, idx) => {
+                  const heightPercentage = Math.max((count / activityMax) * 100, 15);
+                  const isToday = idx === activityLast.length - 1;
+                  return (
+                    <div key={date} className="flex-1 flex flex-col items-center gap-4 group">
+                      <div className="relative w-full max-w-[48px] flex items-end h-full bg-white/[0.02] rounded-full overflow-hidden">
+                        <div
+                          className={`w-full rounded-full transition-all duration-700 ${isToday ? 'bg-primary' : 'bg-primary/40 group-hover:bg-primary/60'}`}
+                          style={{ height: `${heightPercentage}%` }}
+                        />
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <span className={`text-[12px] font-medium ${isToday ? 'text-primary' : 'text-[#A0A0A0]'}`}>
+                        {formatDateShort(date)}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Top schemes */}
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-white mb-4">Top Government Schemes</h2>
-                {topSchemes.length === 0 ? (
-                  <p className="text-xs text-white/30 italic">No scheme interactions yet</p>
-                ) : (
-                  <div className="space-y-3">
-                    {topSchemes.map(({ name, interactions }) => (
-                      <div key={name}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[12px] text-white/60 truncate pr-2 flex-1">{name}</span>
-                          <span className="text-[12px] text-white/40 flex-shrink-0">{interactions}</span>
-                        </div>
-                        <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-amber-500/70 rounded-full transition-all duration-700"
-                            style={{ width: `${(interactions / schemesMax) * 100}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
+            <div className="col-span-12 lg:col-span-5 bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-[15px] font-medium text-white">Agent Collaboration</h2>
+                <button className="px-3 py-1.5 rounded-full border border-primary/30 text-primary text-[11px] font-medium hover:bg-primary/10 transition-colors">
+                  + Add Agent
+                </button>
+              </div>
+              <div className="space-y-5">
+                {agentEntries.slice(0, 4).map(([agent, count]) => (
+                  <div key={agent} className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${AGENT_COLORS[agent] || 'bg-white/10'}`}>
+                      <Ghost size={18} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[13px] font-medium text-white truncate">{AGENT_LABELS[agent] ?? agent}</h3>
+                      <p className="text-[11px] text-[#A0A0A0] truncate">Handling user queries</p>
+                    </div>
+                    <div className={`px-2.5 py-1 rounded-full text-[10px] font-medium bg-white/5 border border-white/10`}>
+                      {count} calls
+                    </div>
                   </div>
+                ))}
+                {agentEntries.length === 0 && (
+                  <div className="text-center py-6 text-white/30 text-sm">No agent data yet</div>
                 )}
               </div>
             </div>
 
-            {/* Daily activity */}
-            {activityLast.length > 0 && (
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-white mb-5">Daily Activity (last 14 days)</h2>
-                <div className="flex items-end gap-1.5 h-24">
-                  {activityLast.map(({ date, count }) => (
-                    <div key={date} className="flex-1 flex flex-col items-center gap-1 group">
-                      <div className="relative flex-1 w-full flex items-end">
-                        <div
-                          className="w-full bg-primary/50 group-hover:bg-primary rounded-sm transition-all duration-200"
-                          style={{ height: `${Math.max((count / activityMax) * 100, 4)}%` }}
-                          title={`${formatDate(date)}: ${count} messages`}
-                        />
-                      </div>
-                      <span className="text-[9px] text-white/20 rotate-45 origin-left translate-x-1">
-                        {formatDate(date)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <div className="col-span-12 lg:col-span-4 bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+               <h2 className="text-[15px] font-medium text-white self-start w-full text-left mb-6">Conversion Progress</h2>
 
-            {/* Footer note */}
-            <p className="text-center text-[11px] text-white/20 pb-4">
-              MAYA — AI Business Assistant for Indian MSMEs · Data updates in real time
-            </p>
-          </>
+               <div className="relative w-48 h-24 overflow-hidden mt-4">
+                  <div className="absolute top-0 left-0 w-48 h-48 rounded-full border-[24px] border-white/5"></div>
+                  <div
+                    className="absolute top-0 left-0 w-48 h-48 rounded-full border-[24px] border-primary transition-transform duration-1000 origin-center"
+                    style={{
+                      clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)',
+                      transform: `rotate(${-180 + (conversionRate * 1.8)}deg)`
+                    }}
+                  ></div>
+               </div>
+               <div className="mt-2 -translate-y-6">
+                 <span className="text-5xl font-bold text-white block">{conversionRate}%</span>
+                 <span className="text-[11px] text-[#A0A0A0] mt-1">Chats to Reports</span>
+               </div>
+
+               <div className="w-full flex justify-between items-center mt-auto pt-6 px-4">
+                 <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary"></div><span className="text-[11px] text-[#A0A0A0]">Completed</span></div>
+                 <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-white/10"></div><span className="text-[11px] text-[#A0A0A0]">Pending</span></div>
+               </div>
+            </div>
+
+            <div className="col-span-12 lg:col-span-4 bg-gradient-to-br from-[#0c2a1a] to-[#161616] border border-primary/20 rounded-[32px] p-8 flex flex-col relative overflow-hidden">
+               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent"></div>
+               <h2 className="text-[15px] font-medium text-white mb-auto relative z-10">Time Tracker</h2>
+
+               <div className="relative z-10 flex flex-col items-center justify-center my-8">
+                 <div className="text-5xl font-bold text-white tracking-widest font-mono">01:24:08</div>
+               </div>
+
+               <div className="flex items-center justify-center gap-4 mt-auto relative z-10">
+                 <button className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform">
+                   <div className="w-4 h-4 bg-black rounded-sm"></div>
+                 </button>
+                 <button className="w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center hover:scale-105 transition-transform">
+                   <div className="w-4 h-4 rounded-full bg-white"></div>
+                 </button>
+               </div>
+            </div>
+
+            <div className="col-span-12 lg:col-span-4 bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-[15px] font-medium text-white">Top Schemes</h2>
+                <button className="px-3 py-1.5 rounded-full border border-white/10 text-white text-[11px] font-medium hover:bg-white/5 transition-colors">
+                  + New
+                </button>
+              </div>
+              <div className="space-y-4">
+                {topSchemes.slice(0, 4).map((scheme, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center flex-shrink-0 text-primary">
+                      <Search size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[13px] font-medium text-white truncate">{scheme.name}</h3>
+                      <p className="text-[11px] text-[#A0A0A0] truncate">Searched {scheme.interactions} times</p>
+                    </div>
+                  </div>
+                ))}
+                {topSchemes.length === 0 && (
+                  <div className="text-center py-6 text-white/30 text-sm">No schemes tracked yet</div>
+                )}
+              </div>
+            </div>
+
+          </div>
         )}
       </div>
     </div>

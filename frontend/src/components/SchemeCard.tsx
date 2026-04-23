@@ -3,6 +3,7 @@ import { ExternalLink, CheckCircle, Info, FileText } from 'lucide-react';
 import { Scheme } from '../types';
 import { SchemeDetailsModal } from './SchemeDetailsModal';
 import { DraftGeneratorModal } from './DraftGeneratorModal';
+import { EligibilityModal } from './EligibilityModal';
 
 interface SchemeCardProps {
   scheme: Scheme;
@@ -11,6 +12,7 @@ interface SchemeCardProps {
 export function SchemeCard({ scheme }: SchemeCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDraftOpen, setIsDraftOpen] = useState(false);
+  const [isEligibilityOpen, setIsEligibilityOpen] = useState(false);
 
   // Schemes for which we have letter templates
   const DRAFT_SUPPORTED = ['PMEGP', 'Mudra', 'Stand-Up India', 'ODOP', 'Vishwakarma'];
@@ -84,8 +86,11 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
             View Full Details
           </button>
 
-          {/* Button 2: Check Eligibility (Mock Action) */}
-          <button className="flex items-center justify-center gap-1 bg-primary/5 hover:bg-primary/10 text-primary text-[10px] font-bold py-2 rounded-lg border border-primary/20 transition-all">
+          {/* Button 2: Check Eligibility */}
+          <button
+            onClick={() => setIsEligibilityOpen(true)}
+            className="flex items-center justify-center gap-1 bg-primary/5 hover:bg-primary/10 text-primary text-[10px] font-bold py-2 rounded-lg border border-primary/20 transition-all"
+          >
             Check Eligibility
           </button>
 
@@ -129,6 +134,12 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
         <DraftGeneratorModal
           schemeName={scheme.name}
           onClose={() => setIsDraftOpen(false)}
+        />
+      )}
+      {isEligibilityOpen && (
+        <EligibilityModal
+          schemeName={scheme.name}
+          onClose={() => setIsEligibilityOpen(false)}
         />
       )}
     </>

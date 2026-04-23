@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from database import get_db
 from middleware.auth import get_current_user_id
 from services.gemini_service import gemini_service
+from services.eligibility_service import check_eligibility as rule_check_eligibility
 from data.scheme_templates import SCHEME_TEMPLATES, resolve_scheme_template
 from models import UserSchemeInteraction, Scheme, UserProfile, OutcomeTracking
 
@@ -205,70 +206,22 @@ async def check_eligibility(
     db: AsyncSession = Depends(get_db),
     clerk_user_id: str = Depends(get_current_user_id)
 ):
-    """Dynamically calculates scheme eligibility using Gemini based on User Profile."""
-    # fetching scheme directly or fallback to template aliases
+    """
+    Rule-based eligibility check — no LLM.
+    Matches user profile attributes (category, sector, state, udyam, loan)
+    against scheme's eligibility_criteria JSON from the database.
+    """
+    # Fetch scheme — try exact suffix match first, then broader
     result = await db.execute(select(Scheme).where(Scheme.name.ilike(f"%{scheme_name[-10:]}%")))
     scheme = result.scalars().first()
-    
     if not scheme:
-        # We need something to test against.
-        raise HTTPException(404, f"Scheme '{scheme_name}' not found in database to evaluate.")
-        
-    profile_result = await db.execute(select(UserProfile).where(UserProfile.clerk_user_id == clerk_user_id))
+        raise HTTPException(404, f"Scheme '{scheme_name}' not found in database.")
+
+    profile_result = await db.execute(
+        select(UserProfile).where(UserProfile.clerk_user_id == clerk_user_id)
+    )
     profile = profile_result.scalars().first()
-    
-    if not profile:
-        profile_data = "No user profile details found (guest or incomplete setup)."
-    else:
-        profile_data = json.dumps({
-            "category": profile.category or "General",
-            "business_type": profile.business_type or "Unknown",
-            "sector": profile.sector or "Unknown",
-            "turnover_range": profile.turnover_range or "Not started",
-            "udyam_registered": profile.udyam_registered,
-            "existing_loan": profile.existing_loan,
-            "state": profile.state or "Unknown",
-            "city": profile.city or "Unknown"
-        })
-        
-    prompt = f"""You are an expert Indian Government Scheme Advisor for MSMEs.
-User Profile Data: {profile_data}
 
-Scheme Name: {scheme.name}
-Scheme Category: {scheme.category}
-Scheme Benefits: {scheme.benefits}
-Scheme Description / Rules: {scheme.description} 
-
-Evaluate exactly how much benefit THIS specific user can get based on their profile data (e.g. higher subsidy if ST/SC/Women, or specific loan limits based on sector).
-Return ONLY valid JSON. Do NOT wrap in ```json markers. 
-
-Schema:
-{{
-    "is_eligible": true (or false if explicitly rejected by rules),
-    "match_score": integer between 0 and 100 representing profile fit,
-    "max_benefit": "Text summarizing their maximum possible amount/percent (e.g. 'Up to ₹50 Lakh loan with 35% subsidy')",
-    "reasons": ["List 2-3 specific reasons they match based on their profile (e.g. 'Your category ST gives higher subsidy')"],
-    "missing_criteria": ["List any missing criteria preventing full eligibility"]
-}}
-"""
-    try:
-        response = await gemini_service.generate_response(prompt)
-        raw = response.strip()
-        if raw.startswith("```json"):
-            raw = raw[7:-3].strip()
-        elif raw.startswith("```"):
-            raw = raw[3:-3].strip()
-            
-        data = json.loads(raw)
-        return EligibilityResponse(**data)
-    except Exception as e:
-        logger.error(f"Failed to parse eligibility: {e} -> Raw: {response}")
-        # fallback
-        return EligibilityResponse(
-            is_eligible=True,
-            match_score=85,
-            max_benefit="Depends on project cost and assessment",
-            reasons=["Your overall business profile aligns with the scheme objectives", "Detailed assessment required with bank"],
-            missing_criteria=[]
-        )
+    result_data = rule_check_eligibility(profile, scheme)
+    return EligibilityResponse(**result_data)
 

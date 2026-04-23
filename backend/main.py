@@ -55,16 +55,25 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"❌ Initialization Error: {e}")
 
-    # Pre-warm Gemini — eliminates the ~1.5s cold-start on first real call.
-    # create_task runs this in the background so the server starts accepting
-    # requests immediately — do NOT use await here.
+    # Pre-warm Gemini + populate scheme cache — both run in background so the
+    # server starts accepting requests immediately.
     async def _prewarm():
         try:
             await gemini_service.generate_response("hello")
             logger.info("✅ Gemini pre-warmed successfully.")
         except Exception as e:
             logger.warning(f"⚠️  Gemini pre-warm failed (non-critical): {e}")
+
+    async def _warm_scheme_cache():
+        try:
+            async with AsyncSessionLocal() as db:
+                from services.scheme_service import scheme_service as _ss
+                await _ss.warm_cache(db)
+        except Exception as e:
+            logger.warning(f"⚠️  Scheme cache warm failed (non-critical): {e}")
+
     asyncio.create_task(_prewarm())
+    asyncio.create_task(_warm_scheme_cache())
 
     async def _keep_db_alive():
         """
@@ -101,6 +110,7 @@ app = FastAPI(title="MAYA AI - Multi-Agent System", lifespan=lifespan)
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://maya-msme-works.vercel.app",
 ]
 
 app.add_middleware(
