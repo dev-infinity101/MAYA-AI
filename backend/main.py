@@ -480,6 +480,78 @@ async def get_sessions(
         return {"sessions": []}
 
 
+@app.get("/api/history/reports", tags=["History"])
+async def get_all_reports(
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str | None = Depends(get_optional_user_id),
+):
+    """Returns all business_report messages for the authenticated user, newest first."""
+    try:
+        from sqlalchemy import select, desc
+        conditions = [Message.content_type == "business_report"]
+        if clerk_user_id:
+            conditions.append(Conversation.clerk_user_id == clerk_user_id)
+        stmt = (
+            select(Message, Conversation)
+            .join(Conversation, Message.conversation_id == Conversation.id)
+            .where(*conditions)
+            .order_by(desc(Message.created_at))
+            .limit(50)
+        )
+        result = await db.execute(stmt)
+        reports = []
+        for msg, conv in result.all():
+            content = msg.content or {}
+            reports.append({
+                "id": str(msg.id),
+                "conversation_id": str(conv.id),
+                "title": conv.title or "Business Report",
+                "created_at": msg.created_at.isoformat() if msg.created_at else None,
+                "report": content.get("report", "") if isinstance(content, dict) else "",
+                "business_context": content.get("business_context", {}) if isinstance(content, dict) else {},
+            })
+        return {"reports": reports}
+    except Exception as e:
+        logger.error(f"Error fetching reports: {e}")
+        return {"reports": []}
+
+
+@app.get("/api/history/scheme-results", tags=["History"])
+async def get_all_scheme_results(
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str | None = Depends(get_optional_user_id),
+):
+    """Returns all scheme_results messages for the authenticated user, newest first."""
+    try:
+        from sqlalchemy import select, desc
+        conditions = [Message.content_type == "scheme_results"]
+        if clerk_user_id:
+            conditions.append(Conversation.clerk_user_id == clerk_user_id)
+        stmt = (
+            select(Message, Conversation)
+            .join(Conversation, Message.conversation_id == Conversation.id)
+            .where(*conditions)
+            .order_by(desc(Message.created_at))
+            .limit(100)
+        )
+        result = await db.execute(stmt)
+        scheme_results = []
+        for msg, conv in result.all():
+            content = msg.content or {}
+            scheme_results.append({
+                "id": str(msg.id),
+                "conversation_id": str(conv.id),
+                "title": conv.title or "Scheme Search",
+                "created_at": msg.created_at.isoformat() if msg.created_at else None,
+                "summary": content.get("summary", "") if isinstance(content, dict) else "",
+                "schemes": content.get("schemes", []) if isinstance(content, dict) else [],
+            })
+        return {"scheme_results": scheme_results}
+    except Exception as e:
+        logger.error(f"Error fetching scheme results: {e}")
+        return {"scheme_results": []}
+
+
 @app.get("/api/history/{conversation_id}", tags=["History"])
 async def get_conversation_history(
     conversation_id: str,

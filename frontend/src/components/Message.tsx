@@ -70,11 +70,11 @@ function ContextMenu({ x, y, text, timestamp, onClose }: ContextMenuProps) {
     <div
       ref={menuRef}
       style={style}
-      className="w-52 bg-[#1C1C1C] border border-white/[0.08] rounded-xl shadow-2xl py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      className="w-52 bg-white border border-[rgba(196,97,10,0.10)] rounded-xl shadow-[0_8px_24px_rgba(150,80,0,0.12)] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
     >
       <button
         onClick={handleCopy}
-        className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
+        className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-warm transition-colors"
       >
         {copied
           ? <Check size={14} className="text-primary" />
@@ -82,7 +82,7 @@ function ContextMenu({ x, y, text, timestamp, onClose }: ContextMenuProps) {
         }
         {copied ? 'Copied!' : 'Copy message'}
       </button>
-      <div className="h-px bg-white/[0.05] mx-2 my-1" />
+      <div className="h-px bg-[rgba(196,97,10,0.08)] mx-2 my-1" />
       <div className="flex items-start gap-2.5 px-3 py-2 text-[12px] text-text-secondary/60 cursor-default select-none">
         <Clock size={13} className="mt-0.5 flex-shrink-0" />
         <span>{formattedTime}</span>
@@ -116,7 +116,7 @@ function CopyButton({ text }: { text: string }) {
       className={clsx(
         'opacity-0 group-hover:opacity-100 transition-all duration-200',
         'p-1.5 rounded-lg hover:scale-110 active:scale-95',
-        'text-text-secondary hover:text-white hover:bg-white/10',
+        'text-text-muted hover:text-text-primary hover:bg-surface-warm',
       )}
     >
       {copied
@@ -148,7 +148,7 @@ function ExportMenu({ onExcel, onCSV }: { onExcel: () => void; onCSV: () => void
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors duration-200"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-secondary border border-[rgba(196,97,10,0.15)] rounded-lg hover:bg-surface-warm transition-colors duration-200"
         title="Export table data"
       >
         <FileSpreadsheet size={13} />
@@ -157,17 +157,17 @@ function ExportMenu({ onExcel, onCSV }: { onExcel: () => void; onCSV: () => void
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-30 bg-[#1A1A1A] border border-white/10 rounded-xl py-1 shadow-2xl min-w-[148px] animate-in fade-in zoom-in-95 duration-150 origin-top-left">
+        <div className="absolute top-full left-0 mt-1 z-30 bg-white border border-[rgba(196,97,10,0.10)] rounded-xl py-1 shadow-[0_4px_20px_rgba(150,80,0,0.10)] min-w-[148px] animate-in fade-in zoom-in-95 duration-150 origin-top-left">
           <button
             onClick={() => { onExcel(); setOpen(false); }}
-            className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-white/80 hover:text-white hover:bg-white/5 w-full transition-colors"
+            className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-warm w-full transition-colors"
           >
             <FileSpreadsheet size={13} className="text-green-400" />
             Export to Excel
           </button>
           <button
             onClick={() => { onCSV(); setOpen(false); }}
-            className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-white/80 hover:text-white hover:bg-white/5 w-full transition-colors"
+            className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-text-secondary hover:text-text-primary hover:bg-surface-warm w-full transition-colors"
           >
             <FileText size={13} className="text-blue-400" />
             Export to CSV
@@ -222,8 +222,8 @@ export function Message({ message }: MessageProps) {
               <div className={clsx(
                 'relative group',
                 isUser
-                  ? 'bg-[#067a44] text-white rounded-[24px] px-6 py-3'
-                  : 'bg-transparent text-[#EAEAEA] rounded-none border-none py-1',
+                  ? 'bg-[#FDE8C0] text-text-primary rounded-[20px] px-5 py-3 shadow-[0_2px_8px_rgba(196,97,10,0.12)] border border-[rgba(196,97,10,0.18)]'
+                  : 'bg-transparent text-text-primary rounded-none border-none py-1',
               )}>
                 {/* Copy button — floats over the message bubble on hover */}
                 {!message.isStreaming && contentText && (
@@ -237,19 +237,19 @@ export function Message({ message }: MessageProps) {
 
                 <div className={clsx(
                   'w-full leading-relaxed space-y-4 text-[15px]',
-                  isUser ? 'text-right font-medium text-white' : 'text-left text-[#EAEAEA]',
+                  isUser ? 'text-right font-medium text-text-primary' : 'text-left text-text-primary',
                 )}>
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold text-white mt-8 mb-4 first:mt-0" {...props} />,
-                      h2: ({ node, ...props }) => <h2 className="text-xl font-semibold text-white mt-8 mb-4 first:mt-0" {...props} />,
-                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-white mt-6 mb-3 first:mt-0" {...props} />,
+                      h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold text-text-primary mt-8 mb-4 first:mt-0" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-xl font-semibold text-text-primary mt-8 mb-4 first:mt-0" {...props} />,
+                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-text-primary mt-6 mb-3 first:mt-0" {...props} />,
                       ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
-                      hr: ({ node, ...props }) => <hr className="border-white/10 my-8" {...props} />,
+                      hr: ({ node, ...props }) => <hr className="border-[rgba(196,97,10,0.12)] my-8" {...props} />,
                       table: ({ node, ...props }) => (
                         <div className="my-6 flex flex-col items-start gap-2">
-                          <div className="overflow-x-auto w-full md:max-w-[70vw] rounded-lg border border-white/10 bg-black/20">
+                          <div className="overflow-x-auto w-full md:max-w-[70vw] rounded-lg border border-[rgba(196,97,10,0.12)] bg-[rgba(196,97,10,0.02)]">
                             <table className="w-full border-collapse text-sm" {...props} />
                           </div>
                           {!isUser && !message.isStreaming && (
@@ -267,34 +267,34 @@ export function Message({ message }: MessageProps) {
                         </div>
                       ),
                       thead: ({ node, ...props }) => (
-                        <thead className="bg-white/5 border-b border-white/10" {...props} />
+                        <thead className="bg-[rgba(196,97,10,0.06)] border-b border-[rgba(196,97,10,0.10)]" {...props} />
                       ),
                       th: ({ node, ...props }) => (
-                        <th className="px-4 py-3 text-left text-white font-bold text-xs uppercase tracking-wider whitespace-nowrap" {...props} />
+                        <th className="px-4 py-3 text-left text-text-primary font-bold text-xs uppercase tracking-wider whitespace-nowrap" {...props} />
                       ),
-                      tbody: ({ node, ...props }) => <tbody className="divide-y divide-white/5" {...props} />,
-                      tr: ({ node, ...props }) => <tr className="hover:bg-white/5 transition-colors" {...props} />,
-                      td: ({ node, ...props }) => <td className="px-4 py-3 text-gray-300 text-sm align-top" {...props} />,
+                      tbody: ({ node, ...props }) => <tbody className="divide-y divide-[rgba(196,97,10,0.06)]" {...props} />,
+                      tr: ({ node, ...props }) => <tr className="hover:bg-[rgba(196,97,10,0.03)] transition-colors" {...props} />,
+                      td: ({ node, ...props }) => <td className="px-4 py-3 text-text-secondary text-sm align-top" {...props} />,
                       code: ({ node, ...props }) => (
-                        <code className="bg-black/40 text-white px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
+                        <code className="bg-[rgba(196,97,10,0.08)] text-primary px-1.5 py-0.5 rounded text-xs font-mono" {...props} />
                       ),
                       blockquote: ({ node, ...props }) => (
-                        <blockquote className="border-l-2 border-white/30 pl-4 italic text-white/70 my-4" {...props} />
+                        <blockquote className="border-l-2 border-primary/40 pl-4 italic text-text-secondary my-4 bg-[rgba(196,97,10,0.04)] py-1 rounded-r" {...props} />
                       ),
                       ul: ({ node, ...props }) => (
                         <ul className="list-none space-y-2 my-4" {...props} />
                       ),
                       li: ({ node, ...props }) => (
-                        <li className="flex gap-2 text-[#EAEAEA] text-[15px] leading-7" {...props}>
+                        <li className="flex gap-2 text-text-primary text-[15px] leading-7" {...props}>
                           <span className="text-primary mt-0.5">•</span>
                           <span>{props.children}</span>
                         </li>
                       ),
                       p: ({ node, ...props }) => (
-                        <p className="text-[#EAEAEA] text-[15px] leading-7 mb-4 last:mb-0" {...props} />
+                        <p className="text-text-primary text-[15px] leading-7 mb-4 last:mb-0" {...props} />
                       ),
                       strong: ({ node, ...props }) => (
-                        <strong className="text-white font-semibold" {...props} />
+                        <strong className="text-text-primary font-semibold" {...props} />
                       ),
                       img: ({ node, ...props }) => (
                         <div className="relative group my-4 rounded-lg overflow-hidden border border-white/10 bg-black/20 max-w-md">

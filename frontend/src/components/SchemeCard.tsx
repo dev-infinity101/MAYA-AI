@@ -27,7 +27,7 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
 
   return (
     <>
-      <div className="glass-panel rounded-xl p-5 border border-white/10 hover:border-primary/30 transition-all group flex flex-col h-full bg-[#111] hover:bg-[#151515]">
+      <div className="rounded-xl p-5 border border-[rgba(196,97,10,0.12)] transition-all group flex flex-col h-full bg-white shadow-[0_2px_12px_rgba(150,80,0,0.06)] hover:shadow-[0_4px_20px_rgba(150,80,0,0.10)] border-l-[3px] border-l-primary">
 
         {/* Header Section: Category, Name & Match Score */}
         <div className="flex justify-between items-start mb-3">
@@ -35,7 +35,7 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
             <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20 uppercase tracking-wide">
               {scheme.category}
             </span>
-            <h3 className="text-base font-bold text-white mt-2 leading-tight group-hover:text-primary transition-colors">
+            <h3 className="text-base font-bold text-text-primary mt-2 leading-tight group-hover:text-primary transition-colors">
               {scheme.name}
             </h3>
           </div>
@@ -54,13 +54,13 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
 
         {/* Dynamic Benefits List (Compact) */}
         {benefitsList.length > 0 && (
-          <div className="bg-white/5 rounded-lg p-3 mb-4 border border-white/5">
+          <div className="bg-surface-warm rounded-lg p-3 mb-4 border border-[rgba(196,97,10,0.08)]">
             <div className="flex items-center gap-2 mb-2 text-[10px] text-primary font-bold uppercase tracking-wide">
               <CheckCircle size={10} /> Key Benefits
             </div>
             <ul className="space-y-1.5">
               {benefitsList.slice(0, 2).map((benefit, index) => (
-                <li key={index} className="text-xs text-white/90 flex gap-2 items-start">
+                <li key={index} className="text-xs text-text-primary flex gap-2 items-start">
                   <span className="text-primary mt-1">•</span>
                   <span className="line-clamp-1">{benefit}</span>
                 </li>
@@ -75,12 +75,12 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
         )}
 
         {/* Footer: 3-Button Action Grid */}
-        <div className="grid grid-cols-2 gap-2 mt-auto pt-4 border-t border-white/10">
+        <div className="grid grid-cols-2 gap-2 mt-auto pt-4 border-t border-[rgba(196,97,10,0.08)]">
 
           {/* Button 1: View Full Details (Triggers Modal) - Full Width */}
           <button
             onClick={() => setIsModalOpen(true)}
-            className="col-span-2 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-xs py-2.5 rounded-lg border border-white/10 transition-colors group/btn"
+            className="col-span-2 flex items-center justify-center gap-2 bg-[#F5F0EA] hover:bg-[#EDE5D8] text-text-primary text-xs py-2.5 rounded-lg border border-[rgba(196,97,10,0.10)] transition-colors group/btn"
           >
             <Info size={14} className="group-hover/btn:text-primary transition-colors" />
             View Full Details
@@ -100,12 +100,12 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
               href={scheme.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1 bg-primary text-black text-[10px] font-bold py-2 rounded-lg hover:bg-primary/90 transition-all"
+              className="flex items-center justify-center gap-1 bg-primary text-white text-[10px] font-bold py-2 rounded-lg hover:bg-primary-light transition-all"
             >
               Direct Link <ExternalLink size={10} />
             </a>
           ) : (
-            <button disabled className="bg-white/5 text-white/30 text-[10px] font-bold py-2 rounded-lg cursor-not-allowed">
+            <button disabled className="bg-surface-warm text-text-muted text-[10px] font-bold py-2 rounded-lg cursor-not-allowed border border-[rgba(196,97,10,0.08)]">
               No Link
             </button>
           )}
@@ -115,7 +115,7 @@ export function SchemeCard({ scheme }: SchemeCardProps) {
         {hasDraftSupport && (
           <button
             onClick={() => setIsDraftOpen(true)}
-            className="w-full mt-3 flex items-center justify-center gap-2 py-2 border border-emerald-500/30 text-emerald-400 text-xs font-semibold rounded-lg hover:bg-emerald-500/10 transition-all"
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2 border border-secondary/30 text-secondary text-xs font-semibold rounded-lg hover:bg-secondary/5 transition-all"
           >
             <FileText size={12} />
             Generate Application Draft

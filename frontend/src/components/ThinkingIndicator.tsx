@@ -96,8 +96,8 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
             display: block;
             width: 7px; height: 7px;
             border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 8px #10b981, 0 0 16px rgba(16,185,129,.5);
+            background: #C4610A;
+            box-shadow: 0 0 8px #C4610A, 0 0 16px rgba(196,97,10,.4);
             animation: dp-pulse 1.4s ease-in-out infinite;
         }
         .dp2 { animation-delay: .2s; }
@@ -113,61 +113,61 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
             position: relative;
             width: 20px; height: 20px;
             border-radius: 50%;
-            border: 2px solid rgba(16,185,129,.5);
-            box-shadow: 0 0 12px rgba(16,185,129,.4), 0 0 20px rgba(6,182,212,.3);
+            border: 2px solid rgba(196,97,10,.5);
+            box-shadow: 0 0 12px rgba(196,97,10,.4), 0 0 20px rgba(245,166,35,.3);
         }
         .orbit {
             position: absolute; top: 50%; left: 50%;
             width: 100%; height: 100%;
             border-radius: 50%;
             border: 1.5px solid transparent;
-            border-top-color: rgba(16,185,129,.9);
-            border-bottom-color: rgba(6,182,212,.9);
+            border-top-color: rgba(196,97,10,.9);
+            border-bottom-color: rgba(245,166,35,.9);
             transform: translate(-50%,-50%) rotate(45deg);
             animation: spin 1.5s linear infinite;
-            filter: drop-shadow(0 0 4px rgba(16,185,129,.6));
+            filter: drop-shadow(0 0 4px rgba(196,97,10,.6));
         }
         .orbit-2 {
             width: 70%; height: 70%;
-            border-top-color: rgba(6,182,212,.9);
-            border-bottom-color: rgba(20,184,166,.8);
+            border-top-color: rgba(245,166,35,.9);
+            border-bottom-color: rgba(245,166,35,.8);
             animation: spin-rev 2s linear infinite;
         }
         .center-dot {
             position: absolute; top: 50%; left: 50%;
             width: 4px; height: 4px;
-            background: linear-gradient(135deg,#10b981,#06b6d4);
+            background: linear-gradient(135deg,#C4610A,#F5A623);
             border-radius: 50%;
             transform: translate(-50%,-50%);
-            box-shadow: 0 0 8px rgba(16,185,129,.8), 0 0 12px rgba(6,182,212,.6);
+            box-shadow: 0 0 8px rgba(196,97,10,.8), 0 0 12px rgba(245,166,35,.6);
             animation: pd 2s infinite;
         }
         @keyframes spin     { to { transform: translate(-50%,-50%) rotate(360deg);  } }
         @keyframes spin-rev { to { transform: translate(-50%,-50%) rotate(-360deg); } }
         @keyframes pd {
-            0%,100% { box-shadow: 0 0 8px rgba(16,185,129,.8), 0 0 12px rgba(6,182,212,.6); }
-            50%      { box-shadow: 0 0 15px rgba(16,185,129,1),  0 0 20px rgba(6,182,212,.8); }
+            0%,100% { box-shadow: 0 0 8px rgba(196,97,10,.8), 0 0 12px rgba(245,166,35,.6); }
+            50%      { box-shadow: 0 0 15px rgba(196,97,10,1),  0 0 20px rgba(245,166,35,.8); }
         }
 
         /* ── AGENT ACTIVE / DIAMOND ── */
         .diamond-wrap { position: relative; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
         .diamond {
             width: 14px; height: 14px;
-            border: 2px solid rgba(16,185,129,.9);
+            border: 2px solid rgba(196,97,10,.9);
             transform: rotate(45deg);
-            box-shadow: 0 0 15px rgba(16,185,129,.5), 0 0 25px rgba(6,182,212,.3);
+            box-shadow: 0 0 15px rgba(196,97,10,.5), 0 0 25px rgba(245,166,35,.3);
             animation: pb 2s infinite;
         }
         .diamond-pulse {
             position: absolute; top: 50%; left: 50%;
             width: 22px; height: 22px;
-            border: 1.5px solid rgba(16,185,129,.5);
+            border: 1.5px solid rgba(196,97,10,.5);
             transform: translate(-50%,-50%) rotate(45deg);
             animation: ef 2s infinite;
         }
         @keyframes pb {
-            0%,100% { box-shadow: 0 0 15px rgba(16,185,129,.5), 0 0 25px rgba(6,182,212,.3); }
-            50%      { box-shadow: 0 0 22px rgba(16,185,129,.8), 0 0 35px rgba(6,182,212,.5); }
+            0%,100% { box-shadow: 0 0 15px rgba(196,97,10,.5), 0 0 25px rgba(245,166,35,.3); }
+            50%      { box-shadow: 0 0 22px rgba(196,97,10,.8), 0 0 35px rgba(245,166,35,.5); }
         }
         @keyframes ef {
             0%   { width: 14px; height: 14px; opacity: 1; }
@@ -181,15 +181,15 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
             display: block;
             width: 100%; height: 6px;
             border-radius: 50%;
-            border: 1.5px solid rgba(6,182,212,.7);
+            border: 1.5px solid rgba(245,166,35,.7);
             animation: sl 2s infinite;
         }
         .disk-1 { bottom: 0;    animation-delay: 0s; }
         .disk-2 { bottom: 5px;  animation-delay: .3s; }
         .disk-3 { bottom: 10px; animation-delay: .6s; }
         @keyframes sl {
-            0%,100% { border-color: rgba(6,182,212,.7); box-shadow: 0 0 6px rgba(6,182,212,.3); }
-            50%      { border-color: rgba(6,182,212,1);  box-shadow: 0 0 14px rgba(6,182,212,.7); }
+            0%,100% { border-color: rgba(245,166,35,.7); box-shadow: 0 0 6px rgba(245,166,35,.3); }
+            50%      { border-color: rgba(245,166,35,1);  box-shadow: 0 0 14px rgba(245,166,35,.7); }
         }
         `}</style>
     </div>
@@ -225,14 +225,14 @@ export const ThinkingWithText: React.FC<{
             gap: '12px',
             padding: '10px 18px',
             borderRadius: '14px',
-            border: '1px solid rgba(16,185,129,0.25)',
-            boxShadow: '0 0 18px rgba(16,185,129,0.08)',
+            border: '1px solid rgba(196,97,10,0.25)',
+            boxShadow: '0 0 18px rgba(196,97,10,0.08)',
             backdropFilter: 'blur(10px)',
         }}>
             <ThinkingIndicator mode={mode} />
             <span style={{
                 fontSize: '13px',
-                background: 'linear-gradient(135deg, #e2e8f0, #10b981)',
+                background: 'linear-gradient(135deg, #1C1007, #C4610A)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 fontWeight: 600,

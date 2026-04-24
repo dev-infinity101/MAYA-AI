@@ -38,7 +38,6 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
     const [errorMsg, setErrorMsg] = useState('');
     const [checkedDocs, setCheckedDocs] = useState<Set<number>>(new Set());
 
-    // Load questions and pre-fill data on mount
     useEffect(() => {
         const load = async () => {
             try {
@@ -47,22 +46,20 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
                     fetch(`${API_BASE}/api/draft/questions/${encodeURIComponent(schemeName)}`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${API_BASE}/api/user/profile`, { headers: { Authorization: `Bearer ${token}` } })
                 ]);
-                
+
                 if (!questionsRes.ok) throw new Error(await questionsRes.text());
                 const data = await questionsRes.json();
                 setQuestions(data.questions);
                 setSchemeMeta({ full_name: data.full_name, apply_url: data.apply_url });
 
-                // Handle pre-filling if profile loads successfully
                 if (profileRes.ok) {
                     const profileData = await profileRes.json();
                     const prefilled: Record<string, string> = {};
-                    if (profileData.category)      prefilled['category'] = profileData.category;
-                    if (profileData.business_name) prefilled['business_name'] = profileData.business_name;
-                    if (profileData.city)          prefilled['district'] = profileData.city;
-                    if (profileData.city)          prefilled['city'] = profileData.city;
+                    if (profileData.category)      prefilled['category']       = profileData.category;
+                    if (profileData.business_name) prefilled['business_name']  = profileData.business_name;
+                    if (profileData.city)          prefilled['district']       = profileData.city;
+                    if (profileData.city)          prefilled['city']           = profileData.city;
                     if (profileData.full_name)     prefilled['applicant_name'] = profileData.full_name;
-
                     setAnswers(prefilled);
                     setPrefilledFields(prefilled);
                 }
@@ -87,21 +84,14 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
             const token = await getToken();
             const res = await fetch(`${API_BASE}/api/draft/generate`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    scheme_name: schemeName,
-                    answers,
-                    conversation_id: conversationId,
-                }),
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ scheme_name: schemeName, answers, conversation_id: conversationId }),
             });
             if (!res.ok) throw new Error(await res.text());
             const data = await res.json();
             setDraft(data);
             setStep('preview');
-        } catch (e: any) {
+        } catch {
             setErrorMsg('Failed to generate draft. Please try again.');
             setStep('error');
         }
@@ -118,67 +108,62 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
         URL.revokeObjectURL(url);
     };
 
-    const setAnswer = (id: string, val: string) =>
-        setAnswers(prev => ({ ...prev, [id]: val }));
+    const setAnswer = (id: string, val: string) => setAnswers(prev => ({ ...prev, [id]: val }));
 
-    const inputClass = `w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 
-                        text-white text-sm focus:border-emerald-500/60 focus:outline-none 
-                        focus:ring-1 focus:ring-emerald-500/30 transition-colors placeholder-white/20`;
+    const inputBase = "w-full bg-[#FEF8EE] border border-[rgba(196,97,10,0.15)] rounded-xl px-3.5 py-2.5 text-text-primary text-sm focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-colors placeholder-text-muted";
+    const prefilledExtra = "border-primary/25 bg-primary/5";
 
     return (
         <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-[#1C1007]/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={e => { if (e.target === e.currentTarget) onClose(); }}
         >
-            <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="bg-white border border-[rgba(196,97,10,0.12)] rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(150,80,0,0.12)]">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
+                <div className="flex items-center justify-between p-5 border-b border-[rgba(196,97,10,0.08)] flex-shrink-0 bg-white">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                            <FileText size={16} className="text-emerald-400" />
+                        <div className="w-8 h-8 rounded-lg bg-primary/8 border border-primary/15 flex items-center justify-center">
+                            <FileText size={15} className="text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-white font-semibold text-sm">Generate Application Draft</h2>
-                            <p className="text-gray-500 text-xs mt-0.5">{schemeMeta?.full_name || schemeName}</p>
+                            <h2 className="text-text-primary font-semibold text-sm">Generate Application Draft</h2>
+                            <p className="text-text-muted text-xs mt-0.5">{schemeMeta?.full_name || schemeName}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                        <X size={18} />
+                    <button onClick={onClose} className="p-1.5 text-text-muted hover:text-text-primary hover:bg-surface-warm rounded-lg transition-colors">
+                        <X size={17} />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto bg-[#FEF8EE]">
 
-                    {/* Loading */}
                     {step === 'loading' && (
                         <div className="flex flex-col items-center justify-center py-16 gap-3">
-                            <Loader2 size={28} className="text-emerald-500 animate-spin" />
-                            <p className="text-gray-400 text-sm">Loading form...</p>
+                            <Loader2 size={26} className="text-primary animate-spin" />
+                            <p className="text-text-secondary text-sm">Loading form…</p>
                         </div>
                     )}
 
-                    {/* Error */}
                     {step === 'error' && (
-                        <div className="flex flex-col items-center justify-center py-16 gap-4 px-6">
-                            <div className="text-gray-300 text-center text-sm">{errorMsg}</div>
-                            <button onClick={onClose} className="px-4 py-2 bg-white/5 text-white text-sm rounded-lg hover:bg-white/10 transition-colors">Close</button>
+                        <div className="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center">
+                            <p className="text-text-secondary text-sm">{errorMsg}</p>
+                            <button onClick={onClose} className="px-4 py-2 bg-surface-warm text-text-primary text-sm rounded-xl hover:bg-[#FDE8C0] border border-[rgba(196,97,10,0.15)] transition-colors">Close</button>
                         </div>
                     )}
 
-                    {/* Questions */}
                     {step === 'questions' && (
                         <div className="p-5 space-y-4">
-                            <p className="text-gray-500 text-sm">
+                            <p className="text-text-secondary text-sm">
                                 Fill in the details below. MAYA will generate a ready-to-submit application letter instantly.
                             </p>
                             {questions.map(q => (
                                 <div key={q.id} className="space-y-1.5">
-                                    <label className="text-xs font-medium text-gray-300 flex items-center justify-between">
+                                    <label className="text-xs font-medium text-text-secondary flex items-center justify-between">
                                         <span>{q.label}</span>
                                         {prefilledFields[q.id] && (
-                                            <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md font-semibold tracking-wide">
+                                            <span className="text-[10px] text-primary bg-primary/8 px-1.5 py-0.5 rounded font-semibold tracking-wide">
                                                 Auto-filled
                                             </span>
                                         )}
@@ -186,14 +171,14 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
                                     <div className="relative">
                                         {q.type === 'textarea' ? (
                                             <textarea
-                                                className={`${inputClass} resize-none h-20 ${prefilledFields[q.id] ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-100' : ''}`}
-                                                placeholder="Type here..."
+                                                className={`${inputBase} ${prefilledFields[q.id] ? prefilledExtra : ''} resize-none h-20`}
+                                                placeholder="Type here…"
                                                 value={answers[q.id] || ''}
                                                 onChange={e => setAnswer(q.id, e.target.value)}
                                             />
                                         ) : q.type === 'select' ? (
                                             <PremiumSelect
-                                                className={prefilledFields[q.id] ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-100' : ''}
+                                                className={prefilledFields[q.id] ? prefilledExtra : ''}
                                                 value={answers[q.id] || ''}
                                                 onChange={(val: string) => setAnswer(q.id, val)}
                                                 options={q.options || []}
@@ -201,8 +186,8 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
                                         ) : (
                                             <input
                                                 type={q.type === 'number' ? 'number' : 'text'}
-                                                className={`${inputClass} ${prefilledFields[q.id] ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-100' : ''}`}
-                                                placeholder={q.type === 'number' ? '0' : 'Type here...'}
+                                                className={`${inputBase} ${prefilledFields[q.id] ? prefilledExtra : ''}`}
+                                                placeholder={q.type === 'number' ? '0' : 'Type here…'}
                                                 value={answers[q.id] || ''}
                                                 onChange={e => setAnswer(q.id, e.target.value)}
                                             />
@@ -213,33 +198,26 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
                         </div>
                     )}
 
-                    {/* Generating */}
                     {step === 'generating' && (
                         <div className="flex flex-col items-center justify-center py-16 gap-4">
-                            <div className="relative">
-                                <div className="w-12 h-12 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin" />
-                            </div>
+                            <div className="w-12 h-12 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
                             <div className="text-center">
-                                <p className="text-white text-sm font-medium">Generating your draft...</p>
-                                <p className="text-gray-500 text-xs mt-1">MAYA is preparing your application letter</p>
+                                <p className="text-text-primary text-sm font-medium">Generating your draft…</p>
+                                <p className="text-text-secondary text-xs mt-1">MAYA is preparing your application letter</p>
                             </div>
                         </div>
                     )}
 
-                    {/* Preview */}
                     {step === 'preview' && draft && (
                         <div className="p-5 space-y-5">
-                            {/* Letter preview */}
                             <div>
-                                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Application Letter</h3>
-                                <pre className="bg-black/40 border border-white/10 rounded-xl p-4 text-gray-300 text-xs whitespace-pre-wrap font-mono leading-relaxed max-h-56 overflow-y-auto custom-scrollbar">
+                                <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">Application Letter</h3>
+                                <pre className="bg-white border border-[rgba(196,97,10,0.10)] rounded-xl p-4 text-text-secondary text-xs whitespace-pre-wrap font-mono leading-relaxed max-h-56 overflow-y-auto custom-scrollbar">
                                     {draft.draft_letter}
                                 </pre>
                             </div>
-
-                            {/* Document checklist */}
                             <div>
-                                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Documents to Attach</h3>
+                                <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">Documents to Attach</h3>
                                 <div className="space-y-2">
                                     {draft.document_checklist.map((doc, i) => (
                                         <button
@@ -249,12 +227,12 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
                                                 next.has(i) ? next.delete(i) : next.add(i);
                                                 return next;
                                             })}
-                                            className="w-full flex items-center gap-3 text-left"
+                                            className="w-full flex items-center gap-3 text-left py-1"
                                         >
-                                            <div className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${checkedDocs.has(i) ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}`}>
-                                                {checkedDocs.has(i) && <div className="w-2 h-2 bg-black rounded-sm" />}
+                                            <div className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${checkedDocs.has(i) ? 'bg-primary border-primary' : 'border-[rgba(196,97,10,0.25)] bg-white'}`}>
+                                                {checkedDocs.has(i) && <div className="w-2 h-2 bg-white rounded-sm" />}
                                             </div>
-                                            <span className={`text-sm transition-colors ${checkedDocs.has(i) ? 'text-gray-500 line-through' : 'text-gray-300'}`}>{doc}</span>
+                                            <span className={`text-sm transition-colors ${checkedDocs.has(i) ? 'text-text-muted line-through' : 'text-text-secondary'}`}>{doc}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -264,11 +242,11 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
                 </div>
 
                 {/* Footer */}
-                <div className="p-5 border-t border-white/10 flex-shrink-0">
+                <div className="p-5 border-t border-[rgba(196,97,10,0.08)] flex-shrink-0 bg-white">
                     {step === 'questions' && (
                         <button
                             onClick={handleGenerate}
-                            className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(196,97,10,0.25)]"
                         >
                             Generate My Draft <ChevronRight size={16} />
                         </button>
@@ -277,17 +255,17 @@ export function DraftGeneratorModal({ schemeName, conversationId, onClose }: Pro
                         <div className="flex gap-3">
                             <button
                                 onClick={handleDownload}
-                                className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl transition-colors"
+                                className="flex-1 flex items-center justify-center gap-2 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-xl transition-colors shadow-[0_4px_16px_rgba(196,97,10,0.25)]"
                             >
-                                <Download size={16} /> Download Draft
+                                <Download size={15} /> Download Draft
                             </button>
                             <a
                                 href={draft.apply_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-2 py-3 border border-emerald-500/30 text-emerald-400 font-semibold rounded-xl hover:bg-emerald-500/10 transition-colors"
+                                className="flex-1 flex items-center justify-center gap-2 py-3 border border-primary/30 text-primary font-semibold rounded-xl hover:bg-primary/8 transition-colors"
                             >
-                                <ExternalLink size={16} /> Apply Online
+                                <ExternalLink size={15} /> Apply Online
                             </a>
                         </div>
                     )}

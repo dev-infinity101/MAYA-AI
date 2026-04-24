@@ -95,7 +95,7 @@ export const Logo: React.FC<LogoProps> = ({
                 <div
                     className="absolute inset-0 blur-xl opacity-50 pointer-events-none"
                     style={{
-                        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%)',
+                        background: 'radial-gradient(circle, rgba(196, 97, 10, 0.35) 0%, transparent 70%)',
                         transform: 'scale(1.5)'
                     }}
                 />
@@ -118,12 +118,12 @@ export const Logo: React.FC<LogoProps> = ({
                                 key={`${rowIndex}-${colIndex}`}
                                 className="transition-opacity duration-75"
                                 style={{
-                                    backgroundColor: pixel ? '#10b981' : 'transparent',
+                                    backgroundColor: pixel ? '#C4610A' : 'transparent',
                                     opacity: state.opacity,
                                     boxShadow: state.scanLine
-                                        ? '0 0 4px rgba(16, 185, 129, 0.8)'
+                                        ? '0 0 4px rgba(196, 97, 10, 0.7)'
                                         : state.glitch
-                                            ? '0 0 2px rgba(16, 185, 129, 1)'
+                                            ? '0 0 2px rgba(196, 97, 10, 0.9)'
                                             : 'none'
                                 }}
                             />
@@ -211,7 +211,7 @@ export const MayaLogo = () => {
                                 <div
                                     className="absolute inset-0 blur-xl opacity-50"
                                     style={{
-                                        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%)',
+                                        background: 'radial-gradient(circle, rgba(196, 97, 10, 0.30) 0%, transparent 70%)',
                                         transform: 'scale(1.5)'
                                     }}
                                 />
@@ -233,12 +233,12 @@ export const MayaLogo = () => {
                                                     key={`${rowIndex}-${colIndex}`}
                                                     className="transition-opacity duration-75"
                                                     style={{
-                                                        backgroundColor: pixel ? '#10b981' : 'transparent',
+                                                        backgroundColor: pixel ? '#C4610A' : 'transparent',
                                                         opacity: state.opacity,
                                                         boxShadow: state.scanLine
-                                                            ? '0 0 4px rgba(16, 185, 129, 0.8)'
+                                                            ? '0 0 4px rgba(196, 97, 10, 0.7)'
                                                             : state.glitch
-                                                                ? '0 0 2px rgba(16, 185, 129, 1)'
+                                                                ? '0 0 2px rgba(196, 97, 10, 0.9)'
                                                                 : 'none'
                                                     }}
                                                 />
@@ -274,7 +274,7 @@ export const MayaLogo = () => {
                                             <div
                                                 key={`${rowIndex}-${colIndex}`}
                                                 style={{
-                                                    backgroundColor: pixel ? '#10b981' : 'transparent',
+                                                    backgroundColor: pixel ? '#C4610A' : 'transparent',
                                                     opacity: state.opacity
                                                 }}
                                             />
@@ -328,7 +328,7 @@ export const MayaLogo = () => {
                                             <div
                                                 key={`${rowIndex}-${colIndex}`}
                                                 style={{
-                                                    backgroundColor: pixel ? '#10b981' : 'transparent',
+                                                    backgroundColor: pixel ? '#C4610A' : 'transparent',
                                                     opacity: state.opacity
                                                 }}
                                             />
@@ -353,7 +353,7 @@ export const MayaLogo = () => {
                                 <div
                                     className="absolute inset-0 blur-2xl opacity-60"
                                     style={{
-                                        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, transparent 70%)',
+                                        background: 'radial-gradient(circle, rgba(196, 97, 10, 0.35) 0%, transparent 70%)',
                                         transform: 'scale(1.8)'
                                     }}
                                 />
@@ -371,14 +371,14 @@ export const MayaLogo = () => {
                                                     key={`${rowIndex}-${colIndex}`}
                                                     className="transition-all duration-75"
                                                     style={{
-                                                        backgroundColor: pixel ? '#10b981' : 'transparent',
+                                                        backgroundColor: pixel ? '#C4610A' : 'transparent',
                                                         opacity: state.opacity,
                                                         boxShadow: state.scanLine
-                                                            ? '0 0 8px rgba(16, 185, 129, 0.8), inset 0 0 4px rgba(16, 185, 129, 0.5)'
+                                                            ? '0 0 8px rgba(196, 97, 10, 0.7), inset 0 0 4px rgba(196, 97, 10, 0.35)'
                                                             : state.glitch
-                                                                ? '0 0 4px rgba(16, 185, 129, 1)'
+                                                                ? '0 0 4px rgba(196, 97, 10, 0.9)'
                                                                 : 'none',
-                                                        border: pixel && state.glitch ? '1px solid rgba(16, 185, 129, 0.3)' : 'none'
+                                                        border: pixel && state.glitch ? '1px solid rgba(196, 97, 10, 0.25)' : 'none'
                                                     }}
                                                 />
                                             );

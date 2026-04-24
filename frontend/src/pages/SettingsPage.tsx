@@ -6,12 +6,12 @@ import { HealthScoreCard } from '../components/HealthScoreCard';
 import { ImpactNumbers } from '../components/ImpactNumbers';
 
 const INDIAN_STATES = [
-    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
-    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", 
-    "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", 
-    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", 
-    "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", 
-    "Andaman and Nicobar Islands", "Chandigarh", "Dadra & Nagar Haveli and Daman & Diu", 
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+    "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+    "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+    "Andaman and Nicobar Islands", "Chandigarh", "Dadra & Nagar Haveli and Daman & Diu",
     "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
 ];
 
@@ -64,13 +64,13 @@ export default function SettingsPage() {
             try {
                 const token = await getToken();
                 if (!token) return;
-                
+
                 const [profileRes, healthRes, impactRes] = await Promise.all([
                     fetch(`${API_BASE}/api/user/profile`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${API_BASE}/api/user/health-score`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${API_BASE}/api/user/impact-stats`, { headers: { Authorization: `Bearer ${token}` } })
                 ]);
-                
+
                 if (profileRes.ok) {
                     const data = await profileRes.json();
                     setProfile({
@@ -81,7 +81,7 @@ export default function SettingsPage() {
                 }
                 if (healthRes.ok) setHealthScore(await healthRes.json());
                 if (impactRes.ok) setImpactStats(await impactRes.json());
-                
+
             } catch (e) {
                 setError('Failed to load data');
             } finally {
@@ -121,21 +121,21 @@ export default function SettingsPage() {
         setProfile(prev => ({ ...prev, [id]: value }));
 
     return (
-        <div className="w-full text-white font-sans animate-in fade-in duration-500 pb-20">
+        <div className="w-full text-text-primary font-sans animate-in fade-in duration-500 pb-20">
             <div className="max-w-4xl mx-auto px-8 py-10 space-y-8">
-                
+
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                   <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Settings & Profile</h1>
-                    <p className="text-[#A0A0A0] mt-1">Manage your business profile and monitor health.</p>
+                    <h1 className="text-3xl font-display font-bold text-text-primary tracking-tight">Settings & Profile</h1>
+                    <p className="text-text-secondary mt-1">Manage your business profile and monitor health.</p>
                   </div>
                   <button
                       onClick={handleSave}
                       disabled={saving}
                       className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all shadow-lg
-                          ${saved 
-                              ? 'bg-[#067a44]/20 text-[#067a44] border border-[#067a44]/30' 
-                              : 'bg-[#067a44] hover:bg-[#056337] text-white shadow-[#067a44]/20'
+                          ${saved
+                              ? 'bg-primary/10 text-primary border border-primary/20'
+                              : 'bg-primary hover:bg-primary-light text-white shadow-primary/20'
                           } disabled:opacity-50`}
                   >
                       {saved ? (
@@ -145,12 +145,12 @@ export default function SettingsPage() {
                       )}
                   </button>
                 </div>
-                
-                <div className="flex items-center gap-2 bg-[#1A1A1A] p-1.5 rounded-full border border-white/5 w-fit mb-8">
+
+                <div className="flex items-center gap-2 bg-surface-warm p-1.5 rounded-full border border-[rgba(196,97,10,0.10)] w-fit mb-8">
                     <button
                         onClick={() => setActiveTab('health')}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-[13px] font-medium transition-all ${
-                            activeTab === 'health' ? 'bg-white/10 text-white shadow-sm' : 'text-[#A0A0A0] hover:text-white'
+                            activeTab === 'health' ? 'bg-white text-text-primary shadow-sm border border-[rgba(196,97,10,0.08)]' : 'text-text-secondary hover:text-text-primary'
                         }`}
                     >
                         <Activity size={16} /> Business Health
@@ -158,7 +158,7 @@ export default function SettingsPage() {
                     <button
                         onClick={() => setActiveTab('profile')}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-[13px] font-medium transition-all ${
-                            activeTab === 'profile' ? 'bg-white/10 text-white shadow-sm' : 'text-[#A0A0A0] hover:text-white'
+                            activeTab === 'profile' ? 'bg-white text-text-primary shadow-sm border border-[rgba(196,97,10,0.08)]' : 'text-text-secondary hover:text-text-primary'
                         }`}
                     >
                         <User size={16} /> Profile Info
@@ -166,7 +166,7 @@ export default function SettingsPage() {
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-red-400 text-sm">
+                    <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-600 text-sm">
                         {error}
                     </div>
                 )}
@@ -177,44 +177,45 @@ export default function SettingsPage() {
                     </div>
                 ) : activeTab === 'profile' ? (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        
-                        <div className="col-span-12 bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8 flex items-center justify-between group cursor-pointer hover:border-white/10 transition-colors">
+
+                        {/* Account card */}
+                        <div className="col-span-12 bg-white border border-[rgba(196,97,10,0.08)] rounded-[32px] p-8 flex items-center justify-between group cursor-pointer hover:border-primary/15 transition-colors shadow-[0_2px_12px_rgba(150,80,0,0.05)]">
                             <div className="flex items-center gap-6">
                                 <UserButton
                                     appearance={{
-                                        elements: { avatarBox: "w-16 h-16 shadow-lg shadow-black/50" }
+                                        elements: { avatarBox: "w-16 h-16 shadow-lg shadow-primary/10" }
                                     }}
                                 />
                                 <div>
-                                    <h2 className="text-xl font-semibold text-white mb-1">
+                                    <h2 className="text-xl font-semibold text-text-primary mb-1">
                                         {clerkUser?.fullName || clerkUser?.firstName || 'Business Owner'}
                                     </h2>
-                                    <div className="text-[#A0A0A0] text-sm flex items-center gap-2">
+                                    <div className="text-text-secondary text-sm flex items-center gap-2">
                                         {clerkUser?.primaryEmailAddress?.emailAddress}
-                                        <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                                        <span className="w-1 h-1 rounded-full bg-[rgba(196,97,10,0.20)]"></span>
                                         <span>Manage Clerk Account</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#A0A0A0] group-hover:bg-white/10 transition-colors">
+                            <div className="w-10 h-10 rounded-full bg-surface-warm flex items-center justify-center text-text-secondary group-hover:bg-[#FDE8C0] transition-colors">
                                 <ChevronRight size={20} />
                             </div>
                         </div>
 
                         {FIELD_CONFIG.map((section, idx) => (
-                            <div key={section.section} className="col-span-12 lg:col-span-6 bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8">
+                            <div key={section.section} className="col-span-12 lg:col-span-6 bg-white border border-[rgba(196,97,10,0.08)] rounded-[32px] p-8 shadow-[0_2px_12px_rgba(150,80,0,0.05)]">
                                 <div className="flex items-center gap-3 mb-8">
                                     <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
                                       {idx + 1}
                                     </div>
-                                    <h2 className="text-base font-semibold text-white">
+                                    <h2 className="text-base font-semibold text-text-primary">
                                         {section.section}
                                     </h2>
                                 </div>
                                 <div className="space-y-6">
                                     {section.fields.map(field => (
                                         <div key={field.id}>
-                                            <label className="text-[13px] text-[#A0A0A0] font-medium block mb-2 ml-1">
+                                            <label className="text-[13px] text-text-secondary font-medium block mb-2 ml-1">
                                                 {field.label}
                                             </label>
                                             {field.type === 'select' ? (
@@ -232,7 +233,7 @@ export default function SettingsPage() {
                                                     value={profile[field.id] || ''}
                                                     placeholder={field.placeholder}
                                                     onChange={e => setField(field.id, e.target.value)}
-                                                    className="w-full bg-[#2A2A2A] border border-[#2F2F2F] rounded-2xl px-4 py-3 text-white text-[14px] focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-[#606060]"
+                                                    className="w-full bg-surface-warm border border-[rgba(196,97,10,0.15)] rounded-2xl px-4 py-3 text-text-primary text-[14px] focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-text-muted"
                                                 />
                                             )}
                                         </div>
@@ -241,12 +242,13 @@ export default function SettingsPage() {
                             </div>
                         ))}
 
-                        <div className="col-span-12 bg-white/[0.02] border border-white/5 rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                        {/* Reset onboarding */}
+                        <div className="col-span-12 bg-surface-warm border border-[rgba(196,97,10,0.08)] rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-6">
                             <div>
-                                <h2 className="text-base font-semibold text-white mb-2">
+                                <h2 className="text-base font-semibold text-text-primary mb-2">
                                     Reset Onboarding
                                 </h2>
-                                <p className="text-[#A0A0A0] text-[13px]">
+                                <p className="text-text-secondary text-[13px]">
                                     Reset the onboarding flow so you can re-run it with updated information from scratch.
                                 </p>
                             </div>
@@ -260,7 +262,7 @@ export default function SettingsPage() {
                                     });
                                     window.location.href = '/chat';
                                 }}
-                                className="px-6 py-3 border border-white/10 text-white bg-white/5 rounded-full text-[13px] font-medium hover:bg-white/10 transition-colors whitespace-nowrap"
+                                className="px-6 py-3 border border-[rgba(196,97,10,0.15)] text-text-primary bg-white rounded-full text-[13px] font-medium hover:bg-[#FDE8C0] transition-colors whitespace-nowrap"
                             >
                                 Reset Flow
                             </button>
@@ -268,24 +270,24 @@ export default function SettingsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        <div className="col-span-12 lg:col-span-7 bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8">
-                            <h2 className="text-base font-semibold text-white flex items-center justify-between mb-8">
+                        <div className="col-span-12 lg:col-span-7 bg-white border border-[rgba(196,97,10,0.08)] rounded-[32px] p-8 shadow-[0_2px_12px_rgba(150,80,0,0.05)]">
+                            <h2 className="text-base font-semibold text-text-primary flex items-center justify-between mb-8">
                                 <span>Business Health Score</span>
-                                <span className="text-[10px] bg-primary/20 text-primary px-3 py-1 rounded-full font-bold tracking-wider">BETA</span>
+                                <span className="text-[10px] bg-primary/10 text-primary px-3 py-1 rounded-full font-bold tracking-wider">BETA</span>
                             </h2>
                             <HealthScoreCard score={healthScore} />
                         </div>
 
                         <div className="col-span-12 lg:col-span-5 space-y-6">
-                          <div className="bg-[#1A1A1A] border border-white/5 rounded-[32px] p-8">
-                              <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-8">
+                          <div className="bg-white border border-[rgba(196,97,10,0.08)] rounded-[32px] p-8 shadow-[0_2px_12px_rgba(150,80,0,0.05)]">
+                              <h2 className="text-base font-semibold text-text-primary flex items-center gap-2 mb-8">
                                   <Target size={18} className="text-primary" /> Impact Metrics
                               </h2>
                               <ImpactNumbers stats={impactStats} />
                           </div>
-                          
-                          <div className="bg-amber-500/10 border border-amber-500/20 rounded-[32px] p-8 text-[13px] text-amber-200/80 leading-relaxed">
-                              <strong className="text-amber-400 block mb-2 text-[14px]">How is this calculated?</strong>
+
+                          <div className="bg-amber-50 border border-amber-200 rounded-[32px] p-8 text-[13px] text-amber-800/80 leading-relaxed">
+                              <strong className="text-amber-700 block mb-2 text-[14px]">How is this calculated?</strong>
                               Your score is deterministically calculated without AI based on 5 dimensions: your scheme bookmarks/drafts, Udyam compliance, logged annual turnover, industry MSME weightings, and primary goals. Keep interacting with MAYA and applying to schemes to increase your score automatically.
                           </div>
                         </div>

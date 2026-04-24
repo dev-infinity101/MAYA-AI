@@ -1,47 +1,64 @@
-import footerImg from '../Assets/footer-m.png';
+import React from 'react';
+import { ArrowUpRight } from 'lucide-react';
 
 export function Footer() {
+  const links = {
+    Platform: ['Agents', 'Schemes', 'Dashboard', 'Compliance'],
+    Company: ['About', 'Careers', 'Privacy', 'Terms']
+  };
+
   return (
-    <footer className="w-full bg-black relative overflow-hidden">
-      {/* Glowing Section Divider */}
-      <div className="relative h-24 w-full overflow-visible flex items-center justify-center">
-        <div className="absolute w-full max-w-[1400px] h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-        <div className="absolute w-full max-w-[1000px] h-[40px] bg-emerald-500/10 blur-[50px] rounded-full" />
+    <footer className="pt-24 pb-8 relative overflow-hidden bg-background border-t border-[rgba(196,97,10,0.08)]">
+      {/* Watermark */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 font-display italic text-[clamp(140px,22vw,320px)] font-bold text-[rgba(196,97,10,0.03)] whitespace-nowrap pointer-events-none tracking-tighter select-none leading-none">
+        MAYA AI
       </div>
 
-      {/* Main Footer */}
-      <div className="relative z-10 container mx-auto px-6 py-12">
-        {/* Footer Image with M Logo Overlay */}
-        <div className="relative rounded-2xl overflow-hidden group">
-          {/* Image */}
-          <img
-            src={footerImg}
-            alt="Footer"
-            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40 pointer-events-none" />
-
-          {/* Minimal Footer Text - Bottom */}
-          <div className="absolute bottom-6 left-6 right-6 z-20">
-            <p className="text-white text-sm font-medium">MAYA © 2026 • AI for Indian MSMEs</p>
+      <div className="max-w-screen-2xl mx-auto px-8 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-12 mb-16">
+          
+          <div className="col-span-2 pr-8">
+            <h4 className="font-display italic text-lg font-bold text-primary mb-4">MAYA</h4>
+            <p className="text-xs text-text-secondary mb-6 leading-relaxed">
+              The autonomous system designed to unlock non-obvious government capital through intelligent multi-agent collaboration.
+            </p>
+            <div className="flex items-center gap-4">
+              <a href="#" className="w-8 h-8 rounded-full border border-[rgba(196,97,10,0.15)] flex items-center justify-center text-text-secondary hover:bg-primary hover:border-primary hover:text-white transition-all">
+                <ArrowUpRight size={14} />
+              </a>
+            </div>
           </div>
+
+          {Object.entries(links).map(([title, items]) => (
+            <div key={title}>
+              <h5 className="font-mono text-[0.6rem] tracking-[0.25em] uppercase text-text-muted mb-6 font-semibold">{title}</h5>
+              <div className="flex flex-col gap-3">
+                {items.map(item => (
+                  <a key={item} href="#" className="group relative overflow-hidden inline-block w-fit text-[0.62rem] tracking-[0.18em] uppercase text-text-secondary transition-colors duration-200">
+                    <span className="block transition-transform duration-300 group-hover:-translate-y-full">{item}</span>
+                    <span className="absolute top-full left-0 text-primary transition-transform duration-300 group-hover:-translate-y-full">{item}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+
         </div>
 
-        {/* Minimal Links Section */}
-        <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-8 text-sm">
-          <div className="flex gap-6">
-            <a href="#" className="text-emerald-100/60 hover:text-emerald-400 transition-colors duration-300">Privacy</a>
-            <a href="#" className="text-emerald-100/60 hover:text-emerald-400 transition-colors duration-300">Terms</a>
-            <a href="#" className="text-emerald-100/60 hover:text-emerald-400 transition-colors duration-300">Contact</a>
+        <div className="pt-8 border-t border-[rgba(196,97,10,0.12)] flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="font-mono text-[0.65rem] tracking-[0.25em] uppercase text-text-secondary">&copy; 2026 MAYA AI SYSTEMS.</div>
+          <div className="flex items-center gap-6">
+            <span className="font-mono text-[0.65rem] tracking-[0.25em] uppercase text-text-secondary hidden sm:inline">STATUS:</span>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+              <span className="font-mono text-[0.65rem] tracking-[0.25em] uppercase text-primary font-bold">ALL SYSTEMS OPERATIONAL</span>
+            </div>
           </div>
-          <p className="text-emerald-100/40 text-xs">Made with ❤️ for Indian businesses</p>
         </div>
       </div>
-
-      {/* Subtle Bottom Glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-40 bg-emerald-500/5 blur-[100px] pointer-events-none" />
+      
+      {/* Accent Line */}
+      <div className="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary/80 via-primary-light to-primary/80"></div>
     </footer>
   );
 }

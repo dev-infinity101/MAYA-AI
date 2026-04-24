@@ -38,11 +38,11 @@ export function ReportProgress({ currentStage, message }: ReportProgressProps) {
               key={stage.key}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive ? 'bg-primary/10 border border-primary/20' :
-                isDone   ? 'opacity-50' : 'opacity-20'
+                isDone   ? 'opacity-60' : 'opacity-25'
               }`}
             >
               <span className="text-sm">{stage.icon}</span>
-              <span className={`text-[13px] flex-1 ${isActive ? 'text-white' : 'text-white/60'}`}>
+              <span className={`text-[13px] flex-1 ${isActive ? 'text-text-primary font-medium' : 'text-text-secondary'}`}>
                 {stage.label}
               </span>
               {isDone   && <span className="text-primary text-xs">✓</span>}
@@ -154,10 +154,10 @@ export function BusinessReport({ markdown, businessContext }: BusinessReportProp
         </div>
         <div className="report-actions">
           <button onClick={handlePDF} className="btn-report-action" title="Save as PDF">
-            <Download size={18} style={{ color: '#f8fafc' }} /> PDF
+            <Download size={18} style={{ color: 'black' }} /> PDF
           </button>
           <button onClick={handleCopy} className="btn-report-action" title="Copy markdown">
-            {copied ? <><Check size={18} className="text-primary" /> Copied</> : <><Copy size={18} style={{ color: '#f8fafc' }} /> Copy</>}
+            {copied ? <><Check size={18} className="text-primary" /> Copied</> : <><Copy size={18} style={{ color: 'black' }} /> Copy</>}
           </button>
         </div>
       </div>

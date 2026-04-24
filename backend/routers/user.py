@@ -235,6 +235,39 @@ async def get_pending_followups(
     return {"followups": followups}
 
 
+# ── GET /api/user/applications ───────────────────────────────────────────────
+
+@router.get("/applications")
+async def get_applications(
+    db: AsyncSession = Depends(get_db),
+    clerk_user_id: str = Depends(get_current_user_id),
+):
+    """Returns all schemes for which a draft was generated (My Applications)."""
+    result = await db.execute(
+        select(UserSchemeInteraction, Scheme)
+        .join(Scheme, UserSchemeInteraction.scheme_id == Scheme.id, isouter=True)
+        .where(
+            UserSchemeInteraction.clerk_user_id == clerk_user_id,
+            UserSchemeInteraction.application_status == "draft_generated",
+        )
+        .order_by(UserSchemeInteraction.updated_at.desc())
+    )
+    rows = result.all()
+    applications = []
+    for interaction, scheme in rows:
+        applications.append({
+            "id": str(interaction.id),
+            "scheme_id": interaction.scheme_id,
+            "scheme_name": scheme.name if scheme else "Unknown Scheme",
+            "scheme_category": scheme.category if scheme else "",
+            "scheme_description": scheme.description if scheme else "",
+            "scheme_link": scheme.link if scheme else "",
+            "application_status": interaction.application_status,
+            "updated_at": interaction.updated_at.isoformat() if interaction.updated_at else None,
+        })
+    return {"applications": applications}
+
+
 # ── POST /api/user/outcome ────────────────────────────────────────────────────
 
 @router.post("/outcome")

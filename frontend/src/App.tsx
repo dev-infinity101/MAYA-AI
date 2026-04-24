@@ -3,7 +3,6 @@ import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import { LandingPage } from './pages/LandingPage';
 import { ChatInterface } from './pages/ChatInterface';
 import { FeaturesPage } from './pages/Features';
-import { PricingPage } from './pages/Pricing';
 import { AboutPage } from './pages/About';
 import SignInPage from './pages/SignIn';
 import SignUpPage from './pages/SignUp';
@@ -25,7 +24,6 @@ function App() {
                 {/* Public routes */}
                 <Route path="/"          element={<LandingPage />} />
                 <Route path="/features"  element={<FeaturesPage />} />
-                <Route path="/pricing"   element={<PricingPage />} />
                 <Route path="/about"     element={<AboutPage />} />
                 <Route path="/dashboard" element={<Dashboard />} />
 

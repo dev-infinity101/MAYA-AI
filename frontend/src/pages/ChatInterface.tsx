@@ -3,13 +3,16 @@ import { ChevronDown, PanelLeftOpen, Square, ArrowUp, Megaphone, LineChart, Land
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Message } from '../types';
 import { Message as MessageComponent } from '../components/Message';
-import { Sidebar } from '../components/Sidebar';
+import { Sidebar, AppView } from '../components/Sidebar';
 import { chatService, chatStream, reportStream } from '../services/api';
 import { ThinkingWithText, ThinkingMode } from '../components/ThinkingIndicator';
 import { OnboardingModal } from '../components/OnboardingModal';
 import { ReportProgress, BusinessReport } from '../components/BusinessReport';
 import Dashboard from './Dashboard';
 import SettingsPage from './SettingsPage';
+import ReportsPage from './ReportsPage';
+import SchemesPage from './SchemesPage';
+import ApplicationsPage from './ApplicationsPage';
 import styles from './ChatInterface.module.css';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000';
@@ -191,10 +194,10 @@ const ChatInputBox = ({
         accept=".txt,.doc,.docx,.xls,.xlsx,.csv,.pdf,.eml,image/jpeg,image/png,image/gif,image/webp" 
       />
 
-      {/* Glow Animation using primary green */}
-      <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-primary/10 rounded-[28px] blur-md transition duration-500 ${isCentered ? 'opacity-15 group-focus-within:opacity-40' : 'opacity-0 group-focus-within:opacity-50'}`} />
+      {/* Saffron neon glow — always faintly visible, intensifies on focus */}
+      <div className={`absolute -inset-0.5 bg-gradient-to-r from-primary/25 to-primary-light/15 rounded-2xl blur-lg transition duration-500 ${isCentered ? 'opacity-15 group-focus-within:opacity-40' : 'opacity-10 group-focus-within:opacity-35'}`} />
 
-      <div className="relative bg-[#2A2A2A] rounded-[24px] border border-[#2F2F2F] focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 shadow-lg flex flex-col transition-all">
+      <div className="relative bg-white rounded-xl border border-[rgba(196,97,10,0.18)] focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 shadow-[0_2px_20px_rgba(196,97,10,0.12)] hover:shadow-[0_4px_28px_rgba(196,97,10,0.16)] focus-within:shadow-[0_4px_32px_rgba(196,97,10,0.22)] flex flex-col transition-all duration-200">
         {/* Top Row: Input */}
         <div className="flex items-start px-3 pt-3">
           <textarea
@@ -202,8 +205,8 @@ const ChatInputBox = ({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isCentered ? "Ask anything" : "Message MAYA..."}
-            className="flex-1 bg-transparent border-none outline-none text-white placeholder-[#A0A0A0] px-2 py-2 resize-none max-h-[200px] custom-scrollbar text-[15px] leading-relaxed block overflow-hidden"
+            placeholder={isCentered ? "Ask anything about your business…" : "Message MAYA..."}
+            className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder-text-muted px-2 py-2 resize-none max-h-[200px] custom-scrollbar text-[15px] leading-relaxed block overflow-hidden"
             rows={1}
             style={{ height: '40px' }}
           />
@@ -215,7 +218,7 @@ const ChatInputBox = ({
           <div className="flex items-center gap-2 pl-1 relative">
             <button
               onClick={handleAttachmentClick}
-              className="p-2 text-[#A0A0A0] hover:text-white transition-colors rounded-full hover:bg-white/5 active:scale-95 flex-shrink-0"
+              className="p-2 text-text-muted hover:text-text-primary transition-colors rounded-full hover:bg-surface-warm active:scale-95 flex-shrink-0"
               title="Upload attachment (Docs, Images, Text)"
             >
               <Paperclip size={20} strokeWidth={2} className="-rotate-30" />
@@ -225,8 +228,8 @@ const ChatInputBox = ({
               onClick={toggleAgentMenu}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-[13px] font-medium ${
                 selectedAgent
-                  ? 'border-transparent bg-[#1E1E1E] text-white'
-                  : 'border-transparent hover:bg-white/5 text-[#A0A0A0] hover:text-white'
+                  ? 'border-primary/20 bg-surface-warm text-text-primary'
+                  : 'border-transparent hover:bg-surface-warm text-text-muted hover:text-text-primary'
               }`}
             >
               {selectedAgent ? (
@@ -251,31 +254,31 @@ const ChatInputBox = ({
                   className="fixed inset-0 z-40" 
                   onClick={() => setShowAgentMenu(false)}
                 />
-                <div className={`absolute left-0 sm:left-10 w-56 bg-[#1A1A1A] border border-white/[0.08] shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-2xl p-1.5 py-2 z-50 flex flex-col gap-1 min-w-max animate-in fade-in zoom-in-95 duration-200 ${
+                <div className={`absolute left-0 sm:left-10 w-56 bg-white border border-[rgba(196,97,10,0.10)] shadow-[0_8px_32px_rgba(150,80,0,0.12)] rounded-2xl p-1.5 py-2 z-50 flex flex-col gap-1 min-w-max animate-in fade-in zoom-in-95 duration-200 ${
                   menuPosition === 'top' 
                     ? 'bottom-full mb-3 origin-bottom-left' 
                     : 'top-full mt-3 origin-top-left'
                 }`}>
-                  <p className="px-3 py-1 text-[11px] text-text-secondary uppercase tracking-wider font-medium">Route directly to agent</p>
-                  <button onClick={() => selectAgent('marketing')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'marketing' ? 'text-primary bg-primary/5' : 'text-text-secondary hover:text-white'}`}>
-                    <Megaphone size={16} className={`transition-colors ${selectedAgent === 'marketing' ? 'text-primary' : 'text-primary/70 group-hover:text-primary'}`} />
+                  <p className="px-3 py-1 text-[11px] text-text-muted uppercase tracking-wider font-medium">Route to agent</p>
+                  <button onClick={() => selectAgent('marketing')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-surface-warm rounded-xl transition-colors text-[13px] group ${selectedAgent === 'marketing' ? 'text-primary bg-primary/5 font-medium' : 'text-text-secondary hover:text-text-primary'}`}>
+                    <Megaphone size={16} className={`transition-colors ${selectedAgent === 'marketing' ? 'text-primary' : 'text-primary/60 group-hover:text-primary'}`} />
                     Marketing Agent
                     {selectedAgent === 'marketing' && <span className="ml-auto text-[10px] text-primary">&#10003;</span>}
                   </button>
-                  <button onClick={() => selectAgent('market')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'market' ? 'text-blue-400 bg-blue-400/5' : 'text-text-secondary hover:text-white'}`}>
-                    <LineChart size={16} className={`transition-colors ${selectedAgent === 'market' ? 'text-blue-400' : 'text-blue-400/70 group-hover:text-blue-400'}`} />
+                  <button onClick={() => selectAgent('market')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-surface-warm rounded-xl transition-colors text-[13px] group ${selectedAgent === 'market' ? 'text-blue-600 bg-blue-50 font-medium' : 'text-text-secondary hover:text-text-primary'}`}>
+                    <LineChart size={16} className={`transition-colors ${selectedAgent === 'market' ? 'text-blue-600' : 'text-blue-500/60 group-hover:text-blue-600'}`} />
                     Market Research Agent
-                    {selectedAgent === 'market' && <span className="ml-auto text-[10px] text-blue-400">&#10003;</span>}
+                    {selectedAgent === 'market' && <span className="ml-auto text-[10px] text-blue-600">&#10003;</span>}
                   </button>
-                  <button onClick={() => selectAgent('finance')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'finance' ? 'text-amber-400 bg-amber-400/5' : 'text-text-secondary hover:text-white'}`}>
-                    <Landmark size={16} className={`transition-colors ${selectedAgent === 'finance' ? 'text-amber-400' : 'text-amber-400/70 group-hover:text-amber-400'}`} />
+                  <button onClick={() => selectAgent('finance')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-surface-warm rounded-xl transition-colors text-[13px] group ${selectedAgent === 'finance' ? 'text-amber-700 bg-amber-50 font-medium' : 'text-text-secondary hover:text-text-primary'}`}>
+                    <Landmark size={16} className={`transition-colors ${selectedAgent === 'finance' ? 'text-amber-700' : 'text-amber-600/60 group-hover:text-amber-700'}`} />
                     Finance Agent
-                    {selectedAgent === 'finance' && <span className="ml-auto text-[10px] text-amber-400">&#10003;</span>}
+                    {selectedAgent === 'finance' && <span className="ml-auto text-[10px] text-amber-700">&#10003;</span>}
                   </button>
-                  <button onClick={() => selectAgent('brand')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-white/5 rounded-xl transition-colors text-[13px] group ${selectedAgent === 'brand' ? 'text-purple-400 bg-purple-400/5' : 'text-text-secondary hover:text-white'}`}>
-                    <Briefcase size={16} className={`transition-colors ${selectedAgent === 'brand' ? 'text-purple-400' : 'text-purple-400/70 group-hover:text-purple-400'}`} />
+                  <button onClick={() => selectAgent('brand')} className={`flex items-center gap-3 px-3 py-2 w-full text-left hover:bg-surface-warm rounded-xl transition-colors text-[13px] group ${selectedAgent === 'brand' ? 'text-purple-700 bg-purple-50 font-medium' : 'text-text-secondary hover:text-text-primary'}`}>
+                    <Briefcase size={16} className={`transition-colors ${selectedAgent === 'brand' ? 'text-purple-700' : 'text-purple-600/60 group-hover:text-purple-700'}`} />
                     Branding Agent
-                    {selectedAgent === 'brand' && <span className="ml-auto text-[10px] text-purple-400">&#10003;</span>}
+                    {selectedAgent === 'brand' && <span className="ml-auto text-[10px] text-purple-700">&#10003;</span>}
                   </button>
                 </div>
               </>
@@ -285,7 +288,7 @@ const ChatInputBox = ({
           {/* Right side actions */}
           <div className="flex items-center gap-2">
             {/* Model Selector Dropdown Trigger */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-transparent hover:bg-white/5 hover:text-white cursor-pointer transition-colors text-[#A0A0A0] text-[13px] font-medium">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-transparent hover:bg-surface-warm hover:text-text-primary cursor-pointer transition-colors text-text-muted text-[13px] font-medium">
               MAYA v2 Flash
               <ChevronDown size={14} />
             </div>
@@ -294,9 +297,9 @@ const ChatInputBox = ({
             {isLoading ? (
               <button
                 onClick={handleStop}
-                className="p-2 rounded-full bg-white text-black hover:scale-95 transition-all flex items-center justify-center transform active:scale-90"
+                className="p-2 rounded-full bg-primary text-white hover:bg-primary-light hover:scale-95 transition-all flex items-center justify-center transform active:scale-90"
               >
-                <Square size={16} fill="black" />
+                <Square size={16} fill="white" />
               </button>
             ) : (
               <button
@@ -304,8 +307,8 @@ const ChatInputBox = ({
                 disabled={!input.trim()}
                 className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center transform active:scale-90 ${
                   input.trim()
-                    ? 'bg-white text-black hover:bg-white/90'
-                    : 'bg-white/5 text-white/30 cursor-not-allowed'
+                    ? 'bg-primary text-white hover:bg-primary-light shadow-[0_2px_8px_rgba(196,97,10,0.30)]'
+                    : 'bg-gray-100 text-text-muted/40 cursor-not-allowed'
                 }`}
               >
                 <ArrowUp size={18} strokeWidth={3} />
@@ -326,7 +329,7 @@ export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [currentView, setCurrentView] = useState<'chat' | 'dashboard' | 'settings'>('chat');
+  const [currentView, setCurrentView] = useState<AppView>('chat');
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   // thinkingMode drives the ThinkingWithText indicator.
@@ -760,7 +763,7 @@ export function ChatInterface() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-screen bg-[#161616] overflow-hidden font-sans text-white">
+    <div className="flex h-screen bg-background overflow-hidden font-sans text-text-primary">
       {/* Onboarding Modal overlays everything */}
       {showOnboarding && <OnboardingModal onComplete={() => {
         setShowOnboarding(false);
@@ -780,26 +783,27 @@ export function ChatInterface() {
         userProfile={userProfile}
         clerkUser={clerkUser}
         onNavigate={setCurrentView}
+        currentView={currentView}
       />
 
       {/* Main Chat Area */}
-      <div className={`flex-1 flex flex-col relative w-full h-full bg-[#161616] ${styles.sidebarBorder}`}>
+      <div className={`flex-1 flex flex-col relative w-full h-full bg-background ${styles.sidebarBorder}`}>
         {/* Header */}
-        <div className="h-14 flex items-center justify-between px-4 bg-[#161616]/80 backdrop-blur-md z-10 border-none">
+        <div className="h-14 flex items-center justify-between px-4 bg-background/90 backdrop-blur-md z-10 border-b border-[rgba(196,97,10,0.06)]">
           <div className="flex items-center gap-3">
             {!isSidebarOpen && (
               <button
                 onClick={() => setSidebarOpen(true)}
                 aria-label="Open sidebar"
                 title="Open sidebar"
-                className="p-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 group"
+                className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-warm rounded-lg transition-all duration-200 group"
               >
                 <PanelLeftOpen size={20} className="group-hover:scale-110 transition-transform" />
               </button>
             )} 
             {currentView === 'chat' && (
               <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-text-secondary">
-                <span className={`text-lg font-small text-grey truncate max-w-[200px] md:max-w-[400px] ${styles.heading}`}>
+                <span className={`text-sm truncate max-w-[200px] md:max-w-[400px] ${styles.heading}`}>
                   {conversationId ? sessions.find(s => s.id === conversationId)?.title || "Chat" : "Maya MSME"}
                 </span>
               </div>
@@ -813,15 +817,21 @@ export function ChatInterface() {
             <Dashboard />
           ) : currentView === 'settings' ? (
             <SettingsPage />
+          ) : currentView === 'reports' ? (
+            <ReportsPage onOpenChat={(convId) => { loadSessionHistory(convId); setCurrentView('chat'); }} />
+          ) : currentView === 'schemes' ? (
+            <SchemesPage />
+          ) : currentView === 'applications' ? (
+            <ApplicationsPage />
           ) : isHistoryLoading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-primary/15 border-t-primary rounded-full animate-spin" />
             </div>
           ) : messages.length === 0 ? (
             /* Welcome Screen (New Chat) */
             <div className="flex flex-col items-center justify-center h-full px-4">
-              <h1 className={`text-center animate-in slide-in-from-bottom-4 duration-700 tracking-tight font text-white mb-8 ${styles.welcomeTitle}`}>
-                How can I help you grow?
+              <h1 className={`text-center animate-in slide-in-from-bottom-4 duration-700 mb-10 ${styles.welcomeTitle}`}>
+                How can I help you <span className="underline decoration-primary decoration-2 underline-offset-4">grow</span>?
               </h1>
 
               {/* Centered Search Input */}
@@ -877,7 +887,7 @@ export function ChatInterface() {
 
         {/* Floating Input Bar (Ongoing Chat) */}
         {currentView === 'chat' && messages.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/95 to-transparent pt-32 pb-8 px-4 z-10 pointer-events-none">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/96 to-transparent pt-28 pb-8 px-4 z-10 pointer-events-none">
             <div className="max-w-[800px] mx-auto flex justify-center pointer-events-auto">
               <ChatInputBox
                 input={input}

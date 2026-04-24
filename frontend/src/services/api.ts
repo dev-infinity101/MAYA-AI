@@ -235,6 +235,69 @@ export const reportStream = async (
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Collection views — Reports, Schemes, Applications
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ReportItem {
+    id: string;
+    conversation_id: string;
+    title: string;
+    created_at: string;
+    report: string;
+    business_context: Record<string, any>;
+}
+
+export interface SchemeResultItem {
+    id: string;
+    conversation_id: string;
+    title: string;
+    created_at: string;
+    summary: string;
+    schemes: Scheme[];
+}
+
+export interface ApplicationItem {
+    id: string;
+    scheme_id: number;
+    scheme_name: string;
+    scheme_category: string;
+    scheme_description: string;
+    scheme_link: string;
+    application_status: string;
+    updated_at: string;
+}
+
+export const getReports = async (token?: string | null): Promise<{ reports: ReportItem[] }> => {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    try {
+        const res = await fetch(`${API_BASE}/api/history/reports`, { headers });
+        if (!res.ok) return { reports: [] };
+        return res.json();
+    } catch { return { reports: [] }; }
+};
+
+export const getSchemeResults = async (token?: string | null): Promise<{ scheme_results: SchemeResultItem[] }> => {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    try {
+        const res = await fetch(`${API_BASE}/api/history/scheme-results`, { headers });
+        if (!res.ok) return { scheme_results: [] };
+        return res.json();
+    } catch { return { scheme_results: [] }; }
+};
+
+export const getApplications = async (token?: string | null): Promise<{ applications: ApplicationItem[] }> => {
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    try {
+        const res = await fetch(`${API_BASE}/api/user/applications`, { headers });
+        if (!res.ok) return { applications: [] };
+        return res.json();
+    } catch { return { applications: [] }; }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // chatStream — text agents via SSE (Step 3.3)
 // Now accepts an optional Clerk JWT token to pass as Authorization header.
 // ─────────────────────────────────────────────────────────────────────────────

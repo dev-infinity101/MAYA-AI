@@ -1,7 +1,7 @@
 .scrollArea {
     --chat-padding: 24px;
     --scroll-padding: 16px;
-    
+
     padding: var(--chat-padding);
     padding-right: var(--scroll-padding);
 }
@@ -9,26 +9,29 @@
 .messageList {
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Consistent 12px vertical spacing */
-    padding-left: 8px; 
+    gap: 12px;
+    padding-left: 8px;
     padding-right: 8px;
 }
 
 .heading {
-    font-size: 14px; /* Standardized for header/small text */
-    letter-spacing: 0.5px;
+    font-size: 14px;
+    letter-spacing: 0.3px;
     line-height: 1.4;
+    color: #6B5540;
 }
 
 .welcomeTitle {
-    font-size: 24px; /* Medium size for the hero heading */
-    letter-spacing: -0.02em;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    letter-spacing: -0.03em;
     line-height: 1.2;
-    font-weight: 500;
+    font-weight: 700;
+    color: #1C1007;
 }
 
 .sidebarBorder {
-    border-left: 1px solid rgba(255, 255, 255, 0.05); /* Subtle 1px border */
+    border-left: 1px solid rgba(196, 97, 10, 0.08);
 }
 
 @media (max-width: 768px) {
@@ -36,9 +39,13 @@
         --chat-padding: 16px;
         --scroll-padding: 12px;
     }
-    
+
     .messageList {
         padding-left: 0;
         padding-right: 0;
+    }
+
+    .welcomeTitle {
+        font-size: 22px;
     }
 }

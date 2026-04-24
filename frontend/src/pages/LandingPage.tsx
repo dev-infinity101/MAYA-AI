@@ -3,10 +3,10 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/Button';
 import FancyOutlineLiftButton from '../components/FancyOutlineLiftButton';
-import { FuturisticBeam } from '../components/FuturisticBeam';
-import { ArrowRight, Shield, MessageSquare, CheckCircle2 , Megaphone} from 'lucide-react';
+import { ArrowRight, Shield, MessageSquare, CheckCircle2, Megaphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import chatInterface from '../Assets/chat-interface.png';
+import { PageLoader } from '../components/PageLoader';
+import { LotusAnimation } from '../components/LotusAnimation';
 
 export function LandingPage() {
   const [index, setIndex] = useState(0);
@@ -27,135 +27,83 @@ export function LandingPage() {
     return () => clearInterval(timer);
   }, [isPaused, totalItems]);
 
-  useEffect(() => {
-    const el = heroVisualRef.current;
-    if (!el) return;
-
-    let rafId: number | null = null;
-
-    const update = () => {
-      rafId = null;
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight || 1;
-      const start = vh * 0.92;
-      const end = vh * 0.68;
-      const raw = (start - rect.top) / (start - end);
-      const t = Math.min(1, Math.max(0, raw));
-
-      const translateY = (1 - t) * 120;
-      const blur = (1 - t) * 14;
-      const opacity = 0.55 + t * 0.45;
-      const scale = 0.98 + t * 0.02;
-
-      el.style.transform = `translate3d(0, ${translateY}px, 0) scale(${scale})`;
-      el.style.filter = `blur(${blur}px)`;
-      el.style.opacity = `${opacity}`;
-    };
-
-    const requestUpdate = () => {
-      if (rafId !== null) return;
-      rafId = window.requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
-
-    return () => {
-      if (rafId !== null) window.cancelAnimationFrame(rafId);
-      window.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
-    };
-  }, []);
+  // Parallax removed — image area displays clearly without blur
 
   return (
-    <div className="min-h-screen bg-black overflow-hidden">
-        {/* Enhanced Animated Background Gradients */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-emerald-500/15 rounded-full blur-[150px] animate-pulse" style={{ animationDuration: '5s' }} />
-          <div className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-cyan-500/10 rounded-full blur-[180px] animate-pulse" style={{ animationDuration: '7s', animationDelay: '1.5s' }} />
-          <div className="absolute top-1/3 right-1/3 w-[600px] h-[600px] bg-teal-500/8 rounded-full blur-[160px] animate-pulse" style={{ animationDuration: '6s', animationDelay: '3s' }} />
-        </div>
-
+    <div className="min-h-screen bg-background overflow-hidden">
+        <PageLoader />
         <Header />
       
         {/* 1. HERO SECTION */}
-        <section className="relative min-h-screen flex items-center justify-center pt-32">
-          {/* Background Effects */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/20 blur-[120px] rounded-full opacity-30 pointer-events-none animate-pulse" style={{ animationDuration: '4s' }} />
-          <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none animate-pulse" style={{ animationDuration: '6s' }} />
-          
-          <div className="container mx-auto px-6 relative z-10 text-center">
-            
-            <h1 className="hero-title text-white mb-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-              Smarter Business
-              Decisions with 
-              <span 
-                ref={containerRef}
-                className="scroll-container cursor-pointer"
-                onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => setIsPaused(false)}
-              >
-                <span 
-                  className="scroll-text"
-                  style={{ transform: `translateY(-${index * 1.5}em)` }}
-                >
-                  {rotatingTexts.map((text, i) => (
-                    <span 
-                      key={i} 
-                      className="scroll-item text-[#00FFB2]"
+        <section className="relative min-h-screen flex items-center pt-28 pb-20">
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+
+              {/* Left — text content */}
+              <div className="flex-1 text-center lg:text-left">
+                <h1 className="hero-title text-text-primary mb-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                  Smarter Business
+                  Decisions with
+                  <span
+                    ref={containerRef}
+                    className="scroll-container cursor-pointer"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                  >
+                    <span
+                      className="scroll-text"
+                      style={{ transform: `translateY(-${index * 1.5}em)` }}
                     >
-                      {text}
+                      {rotatingTexts.map((text, i) => (
+                        <span key={i} className="scroll-item text-primary">{text}</span>
+                      ))}
                     </span>
-                  ))}
-                </span>
-              </span>
-            </h1>
-            
-            <p className="text-xl text-emerald-100/70 max-w-2xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-              Discover government programs, get personalized business advice, and navigate growth with our specialized AI agents.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-              <Link to="/chat">
-                  <button className="btn-modern-glow w-full sm:w-auto ">
-                    <span className="relative z-10">Start Free Trial <ArrowRight className="inline-block ml-2 w-6 h-5" /></span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </button>
-              </Link>
-              <Button variant="ghost" size="lg" className="w-full sm:w-auto btn-glow">
-                View Demo
-              </Button>
+                  </span>
+                </h1>
+
+                <p className="text-xl text-text-secondary max-w-xl mx-auto lg:mx-0 mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+                  Discover government programs, get personalized business advice, and navigate growth with our specialized AI agents.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                  <Link to="/chat">
+                    <button className="btn-modern-glow w-full sm:w-auto">
+                      <span className="relative z-10">Start Free Trial <ArrowRight className="inline-block ml-2 w-6 h-5" /></span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-light opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </button>
+                  </Link>
+                  <Button variant="ghost" size="lg" className="w-full sm:w-auto text-text-secondary hover:text-text-primary border border-[rgba(196,97,10,0.15)] hover:border-primary/30 px-8 py-3 rounded-xl transition-all">
+                    View Demo
+                  </Button>
+                </div>
+              </div>
+
+              {/* Right — lotus flower animation */}
+              <div className="flex-1 w-full max-w-sm lg:max-w-none flex items-center justify-center animate-in fade-in zoom-in duration-1000 delay-400">
+                <div className="w-full" style={{ maxWidth: '420px', aspectRatio: '1 / 1' }}>
+                  <LotusAnimation />
+                </div>
+              </div>
             </div>
 
-            {/* Hero Visual with Parallax Effect */}
+            {/* Hero Visual — image area below (no blur) */}
             <div
               ref={heroVisualRef}
-              className="mt-14 relative animate-in fade-in zoom-in duration-1000 delay-500 group"
-              style={{
-                transform: 'translate3d(0, 120px, 0) scale(0.98)',
-                filter: 'blur(14px)',
-                opacity: 0.55,
-                willChange: 'transform, filter, opacity',
-              }}
+              className="mt-20 relative animate-in fade-in zoom-in duration-1000 delay-600"
+              style={{ willChange: 'transform, opacity' }}
             >
-              <div className="glass-panel p-2 rounded-2xl max-w-5xl mx-auto shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden backdrop-blur-md bg-black/40">
-                 <div className="aspect-video bg-white/10 rounded-xl border border-white/20 flex items-center justify-center text-white/50 text-2xl w-full h-auto">
-                   <img src={chatInterface} alt="Chat Interface" className="w-full h-auto object-cover rounded-xl" />
-                 </div>
-                 {/* Enhanced Overlay Gradients */}
-                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent h-full w-full rounded-2xl pointer-events-none" />
-                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-cyan-500/5 h-full w-full rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="rounded-3xl max-w-5xl mx-auto overflow-hidden border border-[rgba(196,97,10,0.10)] bg-surface-warm min-h-[200px] flex items-center justify-center">
+                <span className="text-text-muted text-sm font-medium tracking-widest uppercase opacity-50">[ Chat interface preview coming soon ]</span>
               </div>
             </div>
           </div>
-          <div className="pointer-events-none absolute -bottom-24 left-0 right-0 h-64 bg-gradient-to-b from-transparent via-black/60 to-black" />
+          <div className="pointer-events-none absolute -bottom-24 left-0 right-0 h-64 bg-gradient-to-b from-transparent via-background/60 to-background" />
         </section>
 
         {/* Glowing Section Divider */}
         <div className="relative h-24 w-full overflow-visible flex items-center justify-center">
-          <div className="absolute w-full max-w-[1400px] h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-          <div className="absolute w-full max-w-[1000px] h-[40px] bg-emerald-500/10 blur-[50px] rounded-full" />
+          <div className="absolute w-full max-w-[1400px] h-[1px] bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+          <div className="absolute w-full max-w-[1000px] h-[40px] bg-[rgba(196,97,10,0.05)] blur-[50px] rounded-full" />
         </div>
 
         {/* 2. VALUE PROP SECTION */}
@@ -163,7 +111,7 @@ export function LandingPage() {
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <ValueCard 
-                icon={<Shield className="w-8 h-8 text-emerald-400" />}
+                icon={<Shield className="w-8 h-8 text-primary" />}
                 title="Scheme Navigator"
                 desc="Find relevant government programs in seconds with instant eligibility checks."
               />
@@ -171,8 +119,8 @@ export function LandingPage() {
                 icon={
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 32 32" 
-                    className="w-8 h-8 text-cyan-400"
+                    viewBox="0 0 32 32"
+                    className="w-8 h-8 text-secondary"
                     fill="currentColor"
                   >
                     <title>technology-robot-ai-signal-2</title> 
@@ -213,7 +161,7 @@ export function LandingPage() {
                 desc="4 specialized agents for branding, marketing, finance, and research."
               />
               <ValueCard 
-                icon={<MessageSquare className="w-8 h-8 text-emerald-400" />}
+                icon={<MessageSquare className="w-8 h-8 text-primary" />}
                 title="Modern Chat"
                 desc="Clean, WhatsApp-like interface with history and quick actions."
               />
@@ -222,63 +170,56 @@ export function LandingPage() {
         </section>
 
         <div className="relative h-24 w-full overflow-visible flex items-center justify-center">
-          <div className="absolute w-full max-w-[1400px] h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-          <div className="absolute w-full max-w-[1000px] h-[40px] bg-emerald-500/10 blur-[50px] rounded-full" />
+          <div className="absolute w-full max-w-[1400px] h-[1px] bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+          <div className="absolute w-full max-w-[1000px] h-[40px] bg-[rgba(196,97,10,0.05)] blur-[50px] rounded-full" />
         </div>
                   
         {/* 3. FEATURE BLOCKS */}
-        <section id="features" className="py-32 bg-black relative">
-          <FuturisticBeam />
+        <section id="features" className="py-32 bg-background relative">
           <div className="container mx-auto px-6">
             {/* Feature 1 */}
             <div className="flex flex-col md:flex-row items-center gap-24 mb-48">
               <div className="flex-1">
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-emerald-500/20 blur-[80px] rounded-full group-hover:bg-emerald-500/30 transition-all duration-500" />
-                  <div className="glass-panel p-8 rounded-3xl relative z-10 border border-emerald-500/20 backdrop-blur-md bg-black/40 group-hover:border-emerald-500/40 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-emerald-500/20">
+                  <div className="absolute inset-0 bg-primary/6 blur-[80px] rounded-full group-hover:bg-primary/10 transition-all duration-500" />
+                  <div className="p-8 rounded-3xl relative z-10 border border-[rgba(196,97,10,0.14)] bg-white group-hover:border-primary/30 transition-all duration-500 group-hover:shadow-[0_8px_40px_rgba(150,80,0,0.12)]">
                       <div className="space-y-4">
-                          <div className="flex items-center gap-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 group-hover:bg-emerald-500/10 transition-all duration-300">
-                              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">1</div>
+                          <div className="flex items-center gap-4 p-4 rounded-xl bg-surface-warm border border-[rgba(196,97,10,0.12)] group-hover:bg-[#FDE8C0] transition-all duration-300">
+                              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary font-bold">1</div>
                               <div>
-                                  <h4 className="font-bold text-white">PMEGP Scheme</h4>
-                                  <p className="text-xs text-emerald-100/60">Subsidy up to 35%</p>
+                                  <h4 className="font-bold text-text-primary">PMEGP Scheme</h4>
+                                  <p className="text-xs text-text-muted">Subsidy up to 35%</p>
                               </div>
-                              <div className="ml-auto text-emerald-400 text-sm font-semibold">95% Match</div>
+                              <div className="ml-auto text-primary text-sm font-semibold">95% Match</div>
                           </div>
-                          <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 opacity-60 hover:opacity-100 transition-opacity duration-300">
-                              <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold">2</div>
+                          <div className="flex items-center gap-4 p-4 rounded-xl bg-[#F5F0EA] border border-[rgba(196,97,10,0.08)] opacity-70 hover:opacity-100 transition-opacity duration-300">
+                              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold">2</div>
                               <div>
-                                  <h4 className="font-bold text-white">Mudra Loan</h4>
-                                  <p className="text-xs text-emerald-100/60">Up to 10 Lakhs</p>
+                                  <h4 className="font-bold text-text-primary">Mudra Loan</h4>
+                                  <p className="text-xs text-text-muted">Up to 10 Lakhs</p>
                               </div>
-                              <div className="ml-auto text-cyan-400 text-sm font-semibold">82% Match</div>
+                              <div className="ml-auto text-secondary text-sm font-semibold">82% Match</div>
                           </div>
                       </div>
                   </div>
                 </div>
               </div>
               <div className="flex-1 space-y-8">
-                <h2 className="text-4xl md:text-5xl font-bold leading-tight bg-gradient-to-r from-white via-emerald-200 to-cyan-300 bg-clip-text text-transparent">
+                <h2 className="text-4xl md:text-5xl font-bold leading-tight text-text-primary font-display">
                   Find the right schemes <br />
-                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">in seconds.</span>
+                  <span className="text-primary">in seconds.</span>
                 </h2>
-                <p className="text-emerald-100/60 text-lg leading-relaxed">
+                <p className="text-text-secondary text-lg leading-relaxed">
                   Stop searching through endless government websites. Our AI analyzes your business profile and matches you with the top 3-5 schemes you're actually eligible for.
                 </p>
                 <ul className="space-y-4">
                   {['Instant Eligibility Check', 'Direct Application Links', 'Document Checklist'].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-white group/item">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 group-hover/item:scale-110 transition-transform duration-300" /> 
-                      <span className="group-hover/item:text-emerald-200 transition-colors duration-300">{item}</span>
+                    <li key={item} className="flex items-center gap-3 text-text-primary group/item">
+                      <CheckCircle2 className="w-5 h-5 text-secondary group-hover/item:scale-110 transition-transform duration-300" />
+                      <span className="group-hover/item:text-primary transition-colors duration-300">{item}</span>
                     </li>
                   ))}
                 </ul>
-                <br />
-                <Link to="/chat">
-                  <FancyOutlineLiftButton>
-                    Try Scheme Finder
-                  </FancyOutlineLiftButton>
-                </Link>
               </div>
             </div>
 
@@ -286,7 +227,7 @@ export function LandingPage() {
             <div className="flex flex-col md:flex-row-reverse items-center gap-24">
               <div className="flex-1">
                  <div className="relative">
-                  <div className="absolute inset-0 bg-cyan-500/20 blur-[80px] rounded-full" />
+                  <div className="absolute inset-0 bg-secondary/8 blur-[80px] rounded-full" />
                    <div className="grid grid-cols-2 gap-4 relative z-10">
                       <AgentCard 
                         icon={
@@ -331,9 +272,9 @@ export function LandingPage() {
                             </g>
                           </svg>
                         } 
-                        title="Market Research Agent" 
-                        color="text-cyan-400" 
-                        borderColor="border-cyan-500/30" 
+                        title="Market Research Agent"
+                        color="text-secondary"
+                        borderColor="border-secondary/20"
                       />
                       <AgentCard 
                         icon={
@@ -376,9 +317,9 @@ export function LandingPage() {
                             </g>
                           </svg>
                         } 
-                        title="Brand Agent" 
-                        color="text-emerald-400" 
-                        borderColor="border-emerald-500/30" 
+                        title="Brand Agent"
+                        color="text-primary"
+                        borderColor="border-primary/20"
                       />
                       <AgentCard 
                         icon={
@@ -406,36 +347,30 @@ export function LandingPage() {
                             </g>
                           </svg>
                         } 
-                        title="Finance Agent" 
-                        color="text-green-400" 
-                        borderColor="border-green-500/30" 
+                        title="Finance Agent"
+                        color="text-amber-700"
+                        borderColor="border-amber-500/20"
                       />
-                      <AgentCard icon={<Megaphone />} title="Marketing Agent" color="text-teal-400" borderColor="border-teal-500/30" />
+                      <AgentCard icon={<Megaphone />} title="Marketing Agent" color="text-purple-700" borderColor="border-purple-400/20" />
                    </div>
                  </div>
               </div>
               <div className="flex-1 space-y-8">
-                <h2 className="text-4xl md:text-5xl font-bold leading-tight bg-gradient-to-r from-white via-emerald-200 to-cyan-300 bg-clip-text text-transparent">
+                <h2 className="text-4xl md:text-5xl font-bold leading-tight text-text-primary font-display">
                   Your Personal Board <br />
-                  <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">of Advisors.</span>
+                  <span className="text-primary">of Advisors.</span>
                 </h2>
-                <p className="text-emerald-100/60 text-lg leading-relaxed">
+                <p className="text-text-secondary text-lg leading-relaxed">
                   Get expert advice on branding, marketing, finance, and market research. Our multi-agent system routes your query to the right specialist.
                 </p>
                 <ul className="space-y-4">
                   {['Competitor Analysis', 'Brand Name Generation', 'Low-budget Marketing Ideas'].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-white group/item">
-                      <CheckCircle2 className="w-5 h-5 text-cyan-400 group-hover/item:scale-110 transition-transform duration-300" /> 
-                      <span className="group-hover/item:text-emerald-200 transition-colors duration-300">{item}</span>
+                    <li key={item} className="flex items-center gap-3 text-text-primary group/item">
+                      <CheckCircle2 className="w-5 h-5 text-secondary group-hover/item:scale-110 transition-transform duration-300" />
+                      <span className="group-hover/item:text-primary transition-colors duration-300">{item}</span>
                     </li>
                   ))}
                 </ul>
-                <br />
-                <Link to="/agents">
-                  <FancyOutlineLiftButton>
-                    Meet the Agents
-                  </FancyOutlineLiftButton>
-                </Link>
               </div>
             </div>
           </div>
@@ -443,12 +378,12 @@ export function LandingPage() {
 
         {/* Glowing Section Divider */}
         <div className="relative h-24 w-full overflow-visible flex items-center justify-center">
-          <div className="absolute w-full max-w-[1400px] h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-          <div className="absolute w-full max-w-[1000px] h-[40px] bg-emerald-500/10 blur-[50px] rounded-full" />
+          <div className="absolute w-full max-w-[1400px] h-[1px] bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+          <div className="absolute w-full max-w-[1000px] h-[40px] bg-[rgba(196,97,10,0.05)] blur-[50px] rounded-full" />
         </div>
 
         {/* 4. METRICS */}
-        <section className="py-24 bg-black">
+        <section className="py-24 bg-surface-warm">
           <div className="container mx-auto px-6">
               <div className="flex flex-col md:flex-row items-center justify-center gap-16 md:gap-32">
                   <Metric number="10,000+" label="Queries Answered" />
@@ -460,23 +395,22 @@ export function LandingPage() {
 
         {/* Glowing Section Divider */}
         <div className="relative h-24 w-full overflow-visible flex items-center justify-center">
-          <div className="absolute w-full max-w-[1400px] h-[2px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-          <div className="absolute w-full max-w-[1000px] h-[40px] bg-emerald-500/10 blur-[50px] rounded-full" />
+          <div className="absolute w-full max-w-[1400px] h-[1px] bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+          <div className="absolute w-full max-w-[1000px] h-[40px] bg-[rgba(196,97,10,0.05)] blur-[50px] rounded-full" />
         </div>
 
         {/* 5. CTA */}
         <section className="py-32 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(196,97,10,0.04)] to-transparent" />
           <div className="container mx-auto px-6 relative z-10 text-center">
-              <h2 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-white via-emerald-200 to-cyan-300 bg-clip-text text-transparent">
+              <h2 className="text-5xl md:text-7xl font-bold mb-8 text-text-primary font-display">
                   Make smarter <br/> business decisions.
               </h2>
-              <p className="text-xl text-emerald-100/60 mb-12">No credit card required. Start growing today.</p>
+              <p className="text-xl text-text-secondary mb-12">No credit card required. Start growing today.</p>
               <Link to="/chat">
-                  <button className="btn-modern-glow sm:w-auto ">
-                    <span className="relative z-10">Start Free</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </button>
+                  <FancyOutlineLiftButton>
+                    Start Free
+                  </FancyOutlineLiftButton>
               </Link>
           </div>
         </section>
@@ -492,26 +426,25 @@ export function LandingPage() {
 
 function ValueCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
   return (
-    <div className="group relative p-8 rounded-2xl backdrop-blur-md bg-black/40 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-500 hover:-translate-y-2 overflow-hidden hover:shadow-2xl hover:shadow-emerald-500/10">
-      {/* Hover Glow Effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10 pointer-events-none" />
-      
+    <div className="group relative p-8 rounded-2xl bg-white border border-[rgba(196,97,10,0.12)] hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 overflow-hidden shadow-[0_2px_16px_rgba(150,80,0,0.06)] hover:shadow-[0_8px_32px_rgba(150,80,0,0.12)]">
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/4 via-transparent to-primary-light/4 pointer-events-none" />
+
       <div className="relative z-10">
-        <div className="mb-6 p-4 rounded-xl bg-black/50 border border-emerald-500/20 w-fit group-hover:scale-110 transition-all duration-300 group-hover:border-emerald-500/40 group-hover:bg-emerald-500/10 group-hover:shadow-lg group-hover:shadow-emerald-500/50">
+        <div className="mb-6 p-4 rounded-xl bg-surface-warm border border-[rgba(196,97,10,0.12)] w-fit group-hover:scale-110 transition-all duration-300 group-hover:bg-primary/8 group-hover:shadow-md group-hover:shadow-primary/10">
           {icon}
         </div>
-        <h3 className="text-xl font-bold mb-3 text-white group-hover:text-emerald-200 transition-colors duration-300">{title}</h3>
-        <p className="text-emerald-100/60 leading-relaxed group-hover:text-emerald-100/80 transition-colors duration-300">{desc}</p>
+        <h3 className="text-xl font-bold mb-3 text-text-primary group-hover:text-primary transition-colors duration-300">{title}</h3>
+        <p className="text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300">{desc}</p>
       </div>
     </div>
   );
 }
 function AgentCard({ icon, title, color, borderColor }: { icon: React.ReactNode, title: string, color: string, borderColor: string }) {
     return (
-        <div className={`group p-6 rounded-2xl flex flex-col items-center text-center gap-4 backdrop-blur-md bg-black/40 border ${borderColor} hover:border-emerald-500/40 hover:-translate-y-2 transition-all duration-500 hover:shadow-lg hover:shadow-emerald-500/20`}>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-emerald-500/5 via-transparent to-cyan-500/5 pointer-events-none rounded-2xl" />
-            <div className={`relative z-10 p-3 rounded-full bg-black/50 border ${borderColor} ${color} group-hover:scale-110 transition-transform duration-300`}>{icon}</div>
-            <span className="relative z-10 font-medium text-white group-hover:text-emerald-200 transition-colors duration-300">{title}</span>
+        <div className={`group relative p-6 rounded-2xl flex flex-col items-center text-center gap-4 bg-white border ${borderColor} hover:border-primary/30 hover:-translate-y-2 transition-all duration-500 shadow-[0_2px_12px_rgba(150,80,0,0.06)] hover:shadow-[0_6px_24px_rgba(150,80,0,0.10)]`}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/3 via-transparent to-primary-light/3 pointer-events-none rounded-2xl" />
+            <div className={`relative z-10 p-3 rounded-full bg-surface-warm border ${borderColor} ${color} group-hover:scale-110 transition-transform duration-300`}>{icon}</div>
+            <span className="relative z-10 font-medium text-text-primary group-hover:text-primary transition-colors duration-300">{title}</span>
         </div>
     )
 }
@@ -519,8 +452,8 @@ function AgentCard({ icon, title, color, borderColor }: { icon: React.ReactNode,
 function Metric({ number, label }: { number: string, label: string }) {
     return (
         <div className="flex flex-col items-center text-center group">
-            <div className="metric-number mb-1 bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">{number}</div>
-            <div className="text-[10px] md:text-xs font-medium text-emerald-100/40 uppercase tracking-[0.2em] group-hover:text-emerald-100/60 transition-colors duration-300">{label}</div>
+            <div className="metric-number mb-1 group-hover:scale-110 transition-transform duration-300">{number}</div>
+            <div className="text-[10px] md:text-xs font-medium text-text-muted uppercase tracking-[0.2em] group-hover:text-text-secondary transition-colors duration-300">{label}</div>
         </div>
     )
 }

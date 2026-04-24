@@ -36,16 +36,16 @@ export function FuturisticBeam({ className = '' }: { className?: string }) {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] h-full">
         
         {/* Central Solid Core - The "Power Source" */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-full bg-[#14ff8a] opacity-60 blur-[1px] shadow-[0_0_20px_#14ff8a]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-full bg-[#C4610A] opacity-60 blur-[1px] shadow-[0_0_20px_#C4610A]" />
         
         {/* Main Glow Column */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[20%] h-full bg-gradient-to-b from-[#14ff8a]/0 via-[#14ff8a]/20 to-[#14ff8a]/0 blur-[30px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[20%] h-full bg-gradient-to-b from-[#C4610A]/0 via-[#C4610A]/20 to-[#C4610A]/0 blur-[30px]" />
 
         {/* Data Stream Streaks */}
         {streaks.map((streak, i) => (
           <div
             key={i}
-            className="absolute top-0 bg-gradient-to-b from-transparent via-[#14ff8a] to-transparent"
+            className="absolute top-0 bg-gradient-to-b from-transparent via-[#C4610A] to-transparent"
             style={{
               left: streak.left,
               width: streak.width,
@@ -66,8 +66,8 @@ export function FuturisticBeam({ className = '' }: { className?: string }) {
             className="w-[1000px] h-[600px] origin-bottom transform rotate-x-[80deg] translate-y-[200px]"
             style={{
                 backgroundImage: `
-                    linear-gradient(to right, rgba(20, 255, 138, 0.4) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(20, 255, 138, 0.4) 1px, transparent 1px)
+                    linear-gradient(to right, rgba(196, 97, 10, 0.25) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(196, 97, 10, 0.25) 1px, transparent 1px)
                 `,
                 backgroundSize: '40px 40px',
                 maskImage: 'radial-gradient(circle at center bottom, black 0%, transparent 70%)',

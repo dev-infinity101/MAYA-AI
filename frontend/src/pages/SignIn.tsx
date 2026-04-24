@@ -2,29 +2,29 @@ import { SignIn } from '@clerk/clerk-react';
 
 export default function SignInPage() {
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
             <SignIn
                 routing="path"
                 path="/sign-in"
                 fallbackRedirectUrl="/chat"
                 appearance={{
                     variables: {
-                        colorPrimary: '#10b981',
-                        colorBackground: '#0a0a0a',
-                        colorText: '#e2e8f0',
-                        colorInputBackground: '#1a1a1a',
-                        colorInputText: '#e2e8f0',
+                        colorPrimary: '#C4610A',
+                        colorBackground: '#FFFCF5',
+                        colorText: '#1C1007',
+                        colorInputBackground: '#FFFFFF',
+                        colorInputText: '#1C1007',
                         borderRadius: '12px',
                     },
                     elements: {
-                        card: 'shadow-2xl border border-white/10',
-                        headerTitle: 'text-white',
-                        headerSubtitle: 'text-gray-400',
-                        socialButtonsBlockButton: 'border border-white/10 hover:bg-white/5',
-                        dividerLine: 'bg-white/10',
-                        dividerText: 'text-gray-500',
-                        formFieldInput: 'border-white/10 focus:border-emerald-500',
-                        footerActionLink: 'text-emerald-400 hover:text-emerald-300',
+                        card: 'shadow-[0_4px_32px_rgba(150,80,0,0.12)] border border-[rgba(196,97,10,0.12)]',
+                        headerTitle: 'text-text-primary font-display',
+                        headerSubtitle: 'text-text-secondary',
+                        socialButtonsBlockButton: 'border border-[rgba(196,97,10,0.15)] hover:bg-primary/5',
+                        dividerLine: 'bg-[rgba(196,97,10,0.12)]',
+                        dividerText: 'text-text-muted',
+                        formFieldInput: 'border-[rgba(196,97,10,0.15)] focus:border-primary/50',
+                        footerActionLink: 'text-primary hover:text-primary-light',
                     }
                 }}
             />

@@ -17,7 +17,8 @@ export function PremiumSelect({ value, onChange, options, placeholder = "Select 
     const containerRef = useRef<HTMLDivElement>(null);
 
     const validOptions = options || [];
-    const filteredOptions = searchable || validOptions.length > 8 
+    const shouldShowSearch = searchable || validOptions.length > 8;
+    const filteredOptions = shouldShowSearch
         ? validOptions.filter(opt => opt.toLowerCase().includes(searchQuery.toLowerCase()))
         : validOptions;
 
@@ -31,8 +32,6 @@ export function PremiumSelect({ value, onChange, options, placeholder = "Select 
         return () => document.removeEventListener('mousedown', handleOutsideClick);
     }, []);
 
-    const shouldShowSearch = searchable || validOptions.length > 8;
-
     return (
         <div className="relative w-full text-left" ref={containerRef}>
             <button
@@ -40,34 +39,34 @@ export function PremiumSelect({ value, onChange, options, placeholder = "Select 
                 onClick={() => { setIsOpen(!isOpen); setSearchQuery(''); }}
                 className={clsx(
                     "flex w-full items-center justify-between gap-2 px-4 py-3 rounded-xl border text-sm transition-all focus:outline-none",
-                    isOpen 
-                        ? "bg-white/10 border-emerald-500/50 text-white shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
-                        : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20",
+                    isOpen
+                        ? "bg-white border-primary/40 text-text-primary shadow-[0_0_0_3px_rgba(196,97,10,0.10)]"
+                        : "bg-[#FEF8EE] border-[rgba(196,97,10,0.15)] text-text-secondary hover:bg-white hover:border-primary/25",
                     className
                 )}
             >
-                <span className="truncate">{value || <span className="text-gray-500">{placeholder}</span>}</span>
-                <ChevronDown size={16} className={clsx("text-gray-500 transition-transform duration-300", isOpen && "rotate-180 text-emerald-400")} />
+                <span className="truncate">{value || <span className="text-text-muted">{placeholder}</span>}</span>
+                <ChevronDown size={15} className={clsx("text-text-muted transition-transform duration-200 flex-shrink-0", isOpen && "rotate-180 text-primary")} />
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 w-full mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute z-50 w-full mt-2 bg-white border border-[rgba(196,97,10,0.12)] rounded-xl shadow-[0_8px_32px_rgba(150,80,0,0.12)] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                     {shouldShowSearch && (
-                        <div className="flex items-center px-4 py-2.5 border-b border-white/10 bg-white/5">
-                            <Search size={14} className="text-emerald-500/70 mr-2 flex-shrink-0" />
+                        <div className="flex items-center px-3.5 py-2.5 border-b border-[rgba(196,97,10,0.08)] bg-surface-warm">
+                            <Search size={13} className="text-primary/60 mr-2 flex-shrink-0" />
                             <input
                                 autoFocus
                                 type="text"
-                                className="w-full bg-transparent text-sm text-white placeholder-gray-500 outline-none"
-                                placeholder="Search options..."
+                                className="w-full bg-transparent text-sm text-text-primary placeholder-text-muted outline-none"
+                                placeholder="Search options…"
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                             />
                         </div>
                     )}
-                    <ul className="max-h-60 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                    <ul className="max-h-60 overflow-y-auto py-1 custom-scrollbar">
                         {filteredOptions.length === 0 ? (
-                            <li className="px-4 py-3 text-sm text-gray-500 text-center">No results found</li>
+                            <li className="px-4 py-3 text-sm text-text-muted text-center">No results found</li>
                         ) : (
                             filteredOptions.map((opt) => (
                                 <li
@@ -75,13 +74,13 @@ export function PremiumSelect({ value, onChange, options, placeholder = "Select 
                                     onClick={() => { onChange(opt); setIsOpen(false); }}
                                     className={clsx(
                                         "flex px-4 py-2.5 text-sm cursor-pointer items-center justify-between transition-colors",
-                                        value === opt 
-                                            ? "bg-emerald-500/15 text-emerald-400 font-medium" 
-                                            : "text-gray-300 hover:bg-white/10 hover:text-white"
+                                        value === opt
+                                            ? "bg-primary/8 text-primary font-medium"
+                                            : "text-text-secondary hover:bg-surface-warm hover:text-text-primary"
                                     )}
                                 >
                                     <span className="truncate pr-4">{opt}</span>
-                                    {value === opt && <Check size={14} className="text-emerald-400 flex-shrink-0" />}
+                                    {value === opt && <Check size={13} className="text-primary flex-shrink-0" />}
                                 </li>
                             ))
                         )}
