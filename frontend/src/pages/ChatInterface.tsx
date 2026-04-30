@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDown, PanelLeftOpen, Square, ArrowUp, Megaphone, LineChart, Landmark, Briefcase, Paperclip, Box, Ghost } from 'lucide-react';
+import { ChevronDown, PanelLeftOpen, Square, ArrowUp, Megaphone, LineChart, Landmark, Briefcase, Paperclip, Box, Ghost, Mic, MicOff } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
+import { useLanguage } from '../hooks/useLanguage';
 import { Message } from '../types';
 import { Message as MessageComponent } from '../components/Message';
 import { Sidebar, AppView } from '../components/Sidebar';
@@ -135,11 +136,14 @@ const ChatInputBox = ({
   selectedAgent,
   onSelectAgent,
 }: ChatInputProps) => {
+  const { t } = useLanguage();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const agentButtonRef = useRef<HTMLButtonElement>(null);
+  const recognitionRef = useRef<any>(null);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState<'top' | 'bottom'>('bottom');
+  const [isRecording, setIsRecording] = useState(false);
 
   // Auto-resize logic whenever input changes
   useEffect(() => {
@@ -172,7 +176,6 @@ const ChatInputBox = ({
     if (!showAgentMenu && agentButtonRef.current) {
       const rect = agentButtonRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
-      // Calculate remaining space, need ~260px for the dropdown
       if (spaceBelow < 260) {
         setMenuPosition('top');
       } else {
@@ -182,6 +185,36 @@ const ChatInputBox = ({
     setShowAgentMenu(!showAgentMenu);
   };
 
+  const toggleMic = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognition.onresult = (e: any) => {
+      const transcript = Array.from(e.results as any[])
+        .map((r: any) => r[0].transcript)
+        .join('');
+      setInput(transcript);
+    };
+    recognition.onend = () => setIsRecording(false);
+    recognition.onerror = () => setIsRecording(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  };
+
+  const hasSpeechSupport = !!(
+    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  );
 
   return (
     <div className={`w-full max-w-3xl relative group animate-in fade-in duration-500 flex flex-col ${isCentered ? 'slide-in-from-bottom-6' : ''}`}>
@@ -205,7 +238,7 @@ const ChatInputBox = ({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isCentered ? "Ask anything about your business…" : "Message MAYA..."}
+            placeholder={isCentered ? t('chat_placeholder') : t('chat_placeholder_short')}
             className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder-text-muted px-2 py-2 resize-none max-h-[200px] custom-scrollbar text-[15px] leading-relaxed block overflow-hidden"
             rows={1}
             style={{ height: '40px' }}
@@ -223,7 +256,23 @@ const ChatInputBox = ({
             >
               <Paperclip size={20} strokeWidth={2} className="-rotate-30" />
             </button>
-            <button 
+            {hasSpeechSupport && (
+              <button
+                onClick={toggleMic}
+                title={isRecording ? 'Stop recording' : 'हिंदी में बोलें (Speak in Hindi)'}
+                className={`p-2 rounded-full transition-all active:scale-95 flex-shrink-0 relative ${
+                  isRecording
+                    ? 'text-red-500 bg-red-50 hover:bg-red-100'
+                    : 'text-text-muted hover:text-text-primary hover:bg-surface-warm'
+                }`}
+              >
+                {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+                {isRecording && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                )}
+              </button>
+            )}
+            <button
               ref={agentButtonRef}
               onClick={toggleAgentMenu}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-[13px] font-medium ${

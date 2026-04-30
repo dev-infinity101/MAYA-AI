@@ -46,3 +46,6 @@ class AgentState(TypedDict):
     # Query embedding computed during routing — reused by scheme_agent_node
     # to avoid paying a second embedding API call on the scheme search path
     query_embedding: Optional[list]
+
+    # Language detected from the user's message: 'en' | 'hi' | 'hinglish'
+    detected_lang: Optional[str]

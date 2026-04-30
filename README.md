@@ -41,29 +41,130 @@ The core purpose of MAYA is to:
 
 ## System Architecture and Major Components
 
-The MAYA AI Project follows a client-server architecture with a clear separation of concerns between the frontend and backend.
+The MAYA AI Project follows a client-server architecture with a clear separation of concerns between the frontend and backend, enhanced with multi-agent orchestration, vector search, and multilingual support.
 
-### Backend
-The backend is a FastAPI application that serves as the primary API for the frontend.
-*   **Entry Point:** `backend/main.py` initializes the FastAPI application, handles application lifecycle events (startup/shutdown), and configures CORS.
-*   **API Endpoints:** Provides RESTful APIs for various functionalities, including AI interactions, data storage, and authentication.
-*   **AI Integration:** Integrates with Google Gemini for AI capabilities, using Langchain and Langgraph for orchestrating complex AI agents and workflows.
-*   **Database Layer:** Interacts with a PostgreSQL database using SQLAlchemy. `pgvector` is utilized for efficient vector similarity searches, crucial for AI-driven features. Alembic manages database migrations.
-*   **Authentication:** Handles user authentication and authorization using JWTs, with password hashing via bcrypt.
-*   **External Services:** Integrates with Tavily for web search capabilities, allowing AI agents to access real-time information.
+### Backend Architecture
 
-### Frontend
-The frontend is a React application built with Vite, providing the user interface.
-*   **Entry Point:** `frontend/src/main.tsx` renders the root `App` component.
-*   **Routing:** `frontend/src/App.tsx` defines the client-side routes using `react-router-dom`, directing users to different pages.
-*   **Pages:** Dedicated pages for various features, including a `LandingPage`, `ChatInterface` (for AI interaction), `FeaturesPage`, `AgentsPage`, `PricingPage`, and `AboutPage`.
-*   **Components:** Reusable UI components are organized in `frontend/src/components`, ensuring consistency and maintainability.
-*   **State Management:** Zustand is used for efficient and scalable state management across the application.
-*   **Styling:** Utilizes Tailwind CSS for a utility-first approach to styling, ensuring a consistent and responsive design.
-*   **API Communication:** Uses Axios to make asynchronous HTTP requests to the backend API.
+The backend is a FastAPI application with LangGraph-based multi-agent orchestration:
 
-### Overall Flow
-The frontend communicates with the backend via HTTP requests. The backend processes these requests, interacts with the PostgreSQL database, leverages Google Gemini and other AI tools, and returns responses to the frontend.
+*   **Entry Point:** `backend/main.py` initializes the FastAPI application, configures CORS, and manages application lifecycle (startup migrations, language service initialization).
+
+*   **Multi-Agent Orchestration** (`backend/agents/`):
+    - `graph.py` — LangGraph state machine defining agent nodes (scheme, market, brand, finance, general agents)
+    - `router.py` — Semantic routing with 3-layer pipeline: hardcoded intercepts → keyword matching → fallback to general agent
+    - `state.py` — `AgentState` TypedDict shared across all agent nodes, includes message history, conversation context, and detected language
+    - `draft_templates.py` — Gemini-powered prompt templates for scheme-specific structured reports (PMEGP, Mudra, Stand-Up India, ODOP, Vishwakarma)
+
+*   **API Endpoints** (`backend/routers/`):
+    - `/api/chat/agent` — Routes scheme queries to LangGraph, returns structured JSON with scheme cards
+    - `/api/chat/stream` — Streams SSE responses for advisory/text queries
+    - `/api/draft/generate` — Legacy template-fill based application letters
+    - `/api/draft/generate-rich` — NEW: Gemini-powered scheme-specific project reports
+    - `/api/whatsapp/webhook` — Twilio WhatsApp bot integration with message validation
+    - `/api/user/*` — User profile management, onboarding, settings
+
+*   **AI Services** (`backend/services/`):
+    - `gemini_service.py` — Google Gemini API client for text generation and embeddings
+    - `scheme_service.py` — pgvector cosine similarity search for scheme discovery
+    - `tavily_service.py` — Real-time web search for market research agent
+    - `message_service.py` — Conversation persistence with PostgreSQL
+    - `user_service.py` — User profile and session management
+    - `health_score_service.py` — Dynamic business health profiling
+    - `eligibility_service.py` — Rule-based scheme eligibility checking
+
+*   **Database Layer**:
+    - **PostgreSQL + asyncpg** for async, non-blocking database access
+    - **pgvector** extension for 768-dimensional embeddings and cosine similarity search
+    - **SQLAlchemy ORM** with async support for type-safe queries
+    - **Alembic** for version-controlled database migrations
+    - **Connection Pooling** optimized for Cloud SQL with automatic retry logic
+
+*   **Authentication**:
+    - Clerk integration for end-to-end user authentication and webhook-based sync
+    - User data scoped to Clerk user IDs for multi-tenancy
+    - Optional JWT-based fallback for API-only clients
+
+*   **External Integrations**:
+    - Google Gemini for language generation and embeddings
+    - Tavily API for real-time market research
+    - Twilio WhatsApp for bot messaging
+    - (Optional) Seedream for generative media
+
+### Frontend Architecture
+
+The frontend is a React application built with Vite, TypeScript, and Tailwind CSS:
+
+*   **Entry Point:** `frontend/src/main.tsx` → `App.tsx` (React Router v6 with protected routes)
+
+*   **Pages** (`frontend/src/pages/`):
+    - `ChatInterface.tsx` — Core dual-mode chat: scheme queries → JSON agent endpoint, advisory queries → SSE stream
+    - `LandingPage.tsx` — Hero section with animations and call-to-action
+    - `Features.tsx` — Showcase of MAYA capabilities (new Reports, Schemes, Applications pages)
+    - `Settings.tsx` — User profile and preference management
+    - Plus: Pricing, About, Onboarding
+
+*   **Components** (`frontend/src/components/`):
+    - `DraftGeneratorModal.tsx` — Rich modal for scheme selection and draft generation (461 lines, supports markdown editing)
+    - `SchemeCard.tsx` — Interactive display of scheme details with eligibility check
+    - `HealthScoreCard.tsx` — Real-time business health visualization
+    - Animation components: `AbstractAnimation.tsx`, `DocumentsAnimation.tsx`, `LotusAnimation.tsx`, `SchemeScanAnimation.tsx`
+    - `LanguageToggle.tsx` — NEW: Language switcher for Hindi/Hinglish/English
+    - `AgentMonitor.tsx`, `AgentOverviewCard.tsx` — Agent status and performance widgets
+    - `Sidebar.tsx` — Navigation with chat history and language support
+
+*   **State Management** (Zustand):
+    - Chat history (messages, conversations)
+    - User profile (name, business type, sector)
+    - UI state (loading, errors, language preference)
+    - Agent status and routing information
+
+*   **API Communication** (`frontend/src/services/api.ts`):
+    - `chatService.chatAgent()` — Scheme queries (JSON response)
+    - `chatService.chatStream()` — Advisory queries (SSE stream)
+    - `draftService.generateDraft()` — Template-based or rich draft generation
+    - `userService.getProfile()`, `updateProfile()` — Profile CRUD
+    - `eligibilityService.checkEligibility()` — Scheme eligibility checking
+
+*   **Styling**:
+    - **Tailwind CSS** for utility-first responsive design
+    - **Sakhi Light Theme** with saffron glow effects and improved accessibility
+    - **Smooth Animations** with CSS keyframes for loading states and transitions
+    - **Mobile-First Responsive Design** across all pages and modals
+
+*   **Internationalization** (`frontend/src/i18n/`):
+    - Translation files for Hindi and Hinglish
+    - Context provider for language switching
+    - Locale-specific formatting (numbers, dates, currencies)
+
+### Multilingual Support (NEW)
+
+*   **Language Detection**: Backend detects language from user query via context hints
+*   **Agent Prompts**: Each agent can respond in English, Hindi, or Hinglish with language-specific formatting
+*   **Frontend Toggle**: Language switcher in Sidebar for manual language selection
+*   **Consistency**: All agent responses, error messages, and UI text adapt to selected language
+
+### Data Flow
+
+1. **User Query** → Frontend detects language, sends to `/api/chat/agent` or `/api/chat/stream`
+2. **Backend Router** → Classifies query intent (scheme search, market research, etc.), detects language
+3. **Agent Selection** → Routes to appropriate LangGraph node (scheme, market, brand, finance, general)
+4. **Agent Processing**:
+   - Scheme Agent: Vector search + Gemini ranking
+   - Market Agent: Web search (Tavily) + synthesis
+   - Brand Agent: Creative generation
+   - Finance Agent: Eligibility checking + calculations
+5. **Response Generation** → Adapts language based on detected language setting
+6. **Frontend Rendering** → Displays JSON scheme cards or streams SSE text, preserves language context
+7. **Persistence** → Conversation saved with language metadata for future reference
+
+### Overall Architecture Benefits
+
+- **Scalability**: Async database access, connection pooling, and Cloud SQL support horizontal scaling
+- **Modularity**: LangGraph agents are independently testable and updatable
+- **Performance**: Vector search (pgvector) vs. full-text search, optimized routing latency
+- **User Privacy**: Data scoped to Clerk user IDs, no cross-user data leakage
+- **Extensibility**: New agents, services, or languages can be added without modifying core routing
+- **Reliability**: Automatic retries, connection pooling, comprehensive error handling
 
 ## Installation and Setup Requirements
 
@@ -223,6 +324,161 @@ The FastAPI backend automatically generates interactive API documentation using 
 
 These interfaces provide detailed information about available endpoints, request/response schemas, and allow you to test API calls directly from your browser.
 
+## Deployment Guide
+
+### Prerequisites
+- Google Cloud Platform (GCP) account with active billing
+- Docker installed locally
+- GitHub repository with CI/CD configured
+- Cloud SQL instance with PostgreSQL 13+
+- All required API keys (Gemini, Tavily, Clerk, Twilio optional)
+
+### Backend Deployment (Google Cloud Run)
+
+1. **Build Docker Image**:
+   ```bash
+   cd backend
+   docker build -t gcr.io/[PROJECT_ID]/maya-api:latest .
+   ```
+
+2. **Push to Google Container Registry**:
+   ```bash
+   docker push gcr.io/[PROJECT_ID]/maya-api:latest
+   ```
+
+3. **Deploy to Cloud Run**:
+   ```bash
+   gcloud run deploy maya-api \
+     --image gcr.io/[PROJECT_ID]/maya-api:latest \
+     --platform managed \
+     --region us-central1 \
+     --set-env-vars DATABASE_URL=postgresql://... \
+     --set-env-vars GEMINI_API_KEY=... \
+     --set-env-vars TAVILY_API_KEY=... \
+     --set-env-vars CLERK_SECRET_KEY=... \
+     --memory 2Gi \
+     --timeout 60
+   ```
+
+4. **Database Migration**:
+   ```bash
+   # Run migrations from Cloud Shell or local machine
+   alembic upgrade head -x sqlalchemy.url=postgresql://user:pass@host/maya_prod
+   ```
+
+### Frontend Deployment (Vercel)
+
+1. **Connect GitHub Repository**:
+   - Go to vercel.com → New Project → Import Git Repository
+   - Select `frontend` directory as root
+
+2. **Set Environment Variables**:
+   ```
+   VITE_API_URL=https://maya-api-xxxxx.a.run.app
+   VITE_CLERK_PUBLISHABLE_KEY=<your_clerk_key>
+   ```
+
+3. **Deploy**:
+   ```bash
+   vercel --prod
+   ```
+   Or push to `main` branch for automatic deployment.
+
+### Database Setup (Cloud SQL)
+
+1. **Create Cloud SQL Instance**:
+   ```bash
+   gcloud sql instances create maya-db \
+     --database-version=POSTGRES_15 \
+     --tier=db-f1-micro \
+     --region=us-central1
+   ```
+
+2. **Create Database**:
+   ```bash
+   gcloud sql databases create maya --instance=maya-db
+   ```
+
+3. **Enable pgvector Extension**:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS vector;
+   ```
+
+4. **Update Connection String**:
+   ```
+   postgresql+asyncpg://[user]:[password]@/maya?unix_socket_factory=/cloudsql/[PROJECT_ID]:[REGION]:[INSTANCE_NAME]
+   ```
+
+### WhatsApp Bot Setup (Twilio)
+
+1. **Create Twilio Account**:
+   - Sign up at twilio.com
+   - Get WhatsApp sandbox number
+
+2. **Configure Webhook**:
+   ```bash
+   # In Twilio Console → WhatsApp Sandbox Settings
+   Webhook URL: https://[your-api]/api/whatsapp/webhook
+   ```
+
+3. **Environment Variables**:
+   ```
+   TWILIO_ACCOUNT_SID=ACxxxxxx
+   TWILIO_AUTH_TOKEN=xxxxxxx
+   TWILIO_PHONE_NUMBER=+1234567890
+   ```
+
+### Environment Variables Checklist
+
+**Backend (.env or Cloud Run Secrets)**:
+- `DATABASE_URL` — PostgreSQL connection string (async)
+- `GEMINI_API_KEY` — Google Gemini API key
+- `TAVILY_API_KEY` — Tavily API key for web search
+- `CLERK_SECRET_KEY` — Clerk webhook secret
+- `CLERK_PUBLISHABLE_KEY` — Clerk public key
+- `TWILIO_ACCOUNT_SID` — (Optional) for WhatsApp bot
+- `TWILIO_AUTH_TOKEN` — (Optional) for WhatsApp bot
+- `SECRET_KEY` — JWT signing secret (can be auto-generated)
+
+**Frontend (.env)**:
+- `VITE_API_URL` — Backend API URL
+- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk public key
+
+### Health Checks & Monitoring
+
+1. **API Health**:
+   ```bash
+   curl https://[your-api]/health
+   # Expected: {"status": "healthy"}
+   ```
+
+2. **Database Connection**:
+   - Logs should show successful connections at startup
+   - Check Cloud SQL instance metrics in GCP Console
+
+3. **Logging**:
+   - Backend logs available in Cloud Logging (GCP Console)
+   - Frontend errors tracked in Vercel Analytics
+
+### Troubleshooting Deployment
+
+**Database Connection Errors**:
+- Verify Cloud SQL connection string format
+- Check IP whitelisting (if using public IP)
+- Ensure pgvector extension is enabled
+
+**API Timeouts**:
+- Increase Cloud Run timeout (current: 60s)
+- Check database query performance
+- Review agent routing latency in logs
+
+**WhatsApp Messages Not Received**:
+- Verify Twilio webhook URL is accessible
+- Check request signature validation in logs
+- Ensure phone numbers have WhatsApp enabled
+
+---
+
 ## Testing Methodology and How to Run Tests
 
 (Information on testing methodology and how to run tests is not explicitly available in the provided files. This section will be updated once testing frameworks and scripts are identified.)
@@ -248,9 +504,47 @@ npm test
 yarn test
 ```
 
+## Recent Upgrades & Features (April 2026)
+
+### Multilingual Support
+- **Hindi & Hinglish Responses**: The system now detects user language and responds in Hindi, Hinglish, or English.
+- **Language-Aware Routing**: Backend agents adapt prompts based on detected language.
+- **Frontend Language Toggle**: New `LanguageToggle.tsx` component allows users to switch languages on-the-fly.
+
+### Rich Draft Generation
+- **Scheme-Specific Reports**: New `/api/draft/generate-rich` endpoint generates comprehensive project reports using Gemini AI.
+- **Auto-Population**: Applicant details are auto-filled from user profiles with `[TO BE UPDATED]` markers.
+- **Subsidy & Eligibility Info**: Each scheme template includes subsidy rates, document checklists, and implementation timelines.
+- **Supported Schemes**: PMEGP, Mudra, Stand-Up India, ODOP, Vishwakarma.
+
+### Enhanced UI/UX
+- **Sakhi Light Theme**: New design language with saffron glow effects and improved accessibility.
+- **Dashboard Pages**: Added Reports, Schemes, and Applications pages for better organization.
+- **Smooth Animations**: Refined component transitions and loading states for professional appearance.
+- **Responsive Design**: Enhanced mobile support across all new features.
+
+### Performance Improvements
+- **DB Connection Pooling**: Optimized PostgreSQL connection management for faster queries.
+- **Agent Routing Latency**: Reduced response times for agent classification and routing.
+- **Caching Layer**: Implemented caching for frequently accessed schemes and user profiles.
+
+### Deployment Enhancements
+- **Docker Support**: Added `Dockerfile` for containerized Google Cloud deployment.
+- **Optimized Build Layers**: Multi-stage Docker builds reduce image size.
+- **Environment Variable Management**: Centralized configuration for cloud deployments.
+
+### Developer Experience
+- **Better Error Messages**: Improved debugging with language-specific error responses.
+- **Request Validation**: Enhanced Pydantic models for robust API contracts.
+- **Comprehensive Logging**: Detailed logs for multilingual query processing.
+
+---
+
 ## Known Issues and Limitations
 
-(This section will be populated as issues and limitations are identified during development and testing.)
+- **Language Detection**: Currently relies on explicit user language setting; auto-detection from user input is in development.
+- **RTL Support**: Hindi right-to-left text rendering needs refinement in some components.
+- **Rich Draft Export**: PDF export for generated reports is queued for Q2 2026 release.
 
 ## Contribution Guidelines
 

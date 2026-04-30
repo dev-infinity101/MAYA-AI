@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Megaphone, Search, Shield, Zap } from 'lucide-react';
+import { useState } from 'react';
 
 const agents = [
   { id: 'marketing', name: 'Marketing Strategist', desc: 'Campaigns & ROI' },

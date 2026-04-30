@@ -1,6 +1,6 @@
 import mayaLogo from '../Assets/maya -new logo.png';
 
-export function Brand({ showText = true }: { showText?: boolean }) {
+export function Brand({ showText: _showText = true }: { showText?: boolean }) {
   return (
     <div className="flex items-center gap-2">
       <img

@@ -24,6 +24,15 @@ from database import AsyncSessionLocal
 logger = logging.getLogger(__name__)
 
 
+def _lang_suffix(detected_lang: str | None) -> str:
+    """Returns a language-instruction block to append to any agent prompt."""
+    if detected_lang == 'hi':
+        return '\n\nआप एक भारतीय MSME सहायक हैं। हमेशा सरल हिंदी में जवाब दें। कठिन अंग्रेजी शब्दों से बचें।'
+    if detected_lang == 'hinglish':
+        return '\n\nRespond naturally in Hinglish — Hindi for explanations, English for technical terms like PMEGP, IFSC, GST.'
+    return ''
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # HELPER: Centralised text-agent DB save
 # ──────────────────────────────────────────────────────────────────────────────
@@ -86,6 +95,7 @@ async def scheme_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
+    detected_lang = state.get("detected_lang", "en")
     t0 = time.time()
 
     # 1. Intent Detection (Specific Scheme Check)
@@ -135,7 +145,9 @@ async def scheme_agent_node(state: AgentState):
         }
 
     if not schemes:
-        msg = "I'm sorry, I couldn't find any specific schemes for that in my database."
+        msg = ("मुझे खेद है, मुझे इसके लिए कोई विशिष्ट योजना नहीं मिली।"
+               if detected_lang == 'hi'
+               else "I'm sorry, I couldn't find any specific schemes for that in my database.")
         # Save empty-result message to DB
         if conversation_id:
             try:
@@ -179,7 +191,10 @@ async def scheme_agent_node(state: AgentState):
     if is_specific_scheme and len(schemes_data) > 0:
         # BYPASS LLM ENTIRELY for specific scheme intents (Latency Drop ~50%)
         logger.info("⚡ Intent: Specific Scheme — Bypassing Gemini ranking")
-        chat_text = f"Here is the detailed information you requested about the {schemes_data[0]['name']}."
+        if detected_lang == 'hi':
+            chat_text = f"यहाँ {schemes_data[0]['name']} के बारे में विस्तृत जानकारी है जो आपने माँगी थी।"
+        else:
+            chat_text = f"Here is the detailed information you requested about the {schemes_data[0]['name']}."
         final_schemes = schemes_data
         final_schemes[0].update({
             "relevance_score": 98,
@@ -198,7 +213,13 @@ async def scheme_agent_node(state: AgentState):
             for x in schemes_data
         ]
 
-        ranking_prompt = f"""Rate these schemes for: \"{last_message}\"
+        lang_note = (
+            " chat_summary और explanation सरल हिंदी में लिखें। योजना के नाम अंग्रेजी में रखें।"
+            if detected_lang == 'hi' else
+            " Use Hinglish — Hindi for explanations, English for scheme names/technical terms."
+            if detected_lang == 'hinglish' else ""
+        )
+        ranking_prompt = f"""Rate these schemes for: \"{last_message}\"{lang_note}
 {json.dumps(analysis_input)}
 JSON only:
 {{"chat_summary":"2 sentence pitch","schemes_metadata":[{{"id":"","relevance_score":0,"explanation":"","key_benefit":""}}]}}"""
@@ -295,29 +316,52 @@ async def general_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
+    detected_lang = state.get("detected_lang", "en")
 
-    # ── Router already classified identity / greeting via hardcoded intercept ──
-    # Read the intent flag set by router.py instead of re-running string checks.
     intent = state.get("intent")
 
     if intent == "identity":
-        response = ("I'm MAYA — your AI Business Assistant for Indian MSMEs. "
-                   "I help small businesses discover government schemes, plan "
-                   "finances, build their brand, and grow their market. "
-                   "What can I help you with?")
+        if detected_lang == 'hi':
+            response = ("मैं MAYA हूँ — भारतीय MSMEs के लिए आपकी AI बिज़नेस असिस्टेंट। "
+                       "मैं छोटे व्यवसायों को सरकारी योजनाएं खोजने, वित्त योजना बनाने, "
+                       "ब्रांड बनाने और बाज़ार में आगे बढ़ने में मदद करती हूँ। "
+                       "मैं आपकी कैसे मदद कर सकती हूँ?")
+        elif detected_lang == 'hinglish':
+            response = ("Main MAYA hoon — Indian MSMEs ke liye aapki AI Business Assistant. "
+                       "Main aapko government schemes dhundhne, finance plan karne, "
+                       "brand banana aur market mein aage badhne mein help karti hoon. "
+                       "Aap kya jaanna chahte hain?")
+        else:
+            response = ("I'm MAYA — your AI Business Assistant for Indian MSMEs. "
+                       "I help small businesses discover government schemes, plan "
+                       "finances, build their brand, and grow their market. "
+                       "What can I help you with?")
         await _save_agent_response(conversation_id, "general", response)
         return {"messages": [AIMessage(content=response)], "current_agent": "general"}
 
     if intent == "greeting":
-        response = ("Hey! I'm MAYA, your MSME Business Assistant. "
-                   "I can help you find government schemes, research your "
-                   "market, plan finances, or build your brand. "
-                   "What are you working on?")
+        if detected_lang == 'hi':
+            response = ("नमस्ते! मैं MAYA हूँ, आपकी MSME बिज़नेस असिस्टेंट। "
+                       "मैं आपको सरकारी योजनाएं, मार्केट रिसर्च, "
+                       "वित्त योजना, या ब्रांड बनाने में मदद कर सकती हूँ। "
+                       "आप किस पर काम कर रहे हैं?")
+        elif detected_lang == 'hinglish':
+            response = ("Hey! Main MAYA hoon, aapki MSME Business Assistant. "
+                       "Government schemes, market research, finance planning, "
+                       "ya branding mein help kar sakti hoon. "
+                       "Aap kya kar rahe hain?")
+        else:
+            response = ("Hey! I'm MAYA, your MSME Business Assistant. "
+                       "I can help you find government schemes, research your "
+                       "market, plan finances, or build your brand. "
+                       "What are you working on?")
         await _save_agent_response(conversation_id, "general", response)
         return {"messages": [AIMessage(content=response)], "current_agent": "general"}
 
-    # Everything else — Gemini with system_instruction enforces scope
-    response = await gemini_service.generate_response(last_message)
+    # Everything else — Gemini with language hint
+    suffix = _lang_suffix(detected_lang)
+    prompt = f"{last_message}{suffix}" if suffix else last_message
+    response = await gemini_service.generate_response(prompt)
     await _save_agent_response(conversation_id, "general", response)
     return {"messages": [AIMessage(content=response)], "current_agent": "general"}
 
@@ -330,11 +374,9 @@ async def market_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
+    detected_lang = state.get("detected_lang", "en")
 
-    # Fire search immediately — don't await yet (concurrent execution)
     search_task = asyncio.create_task(tavily_service.search(last_message))
-
-    # Await result when we actually need it
     search_results = await search_task
 
     prompt = f"""
@@ -350,7 +392,7 @@ async def market_agent_node(state: AgentState):
     If the query is too vague, ask clarifying questions about their specific industry or location.
 
     CRITICAL: Do NOT start with a greeting or announce yourself. Jump straight into the market insights.
-    """
+    {_lang_suffix(detected_lang)}"""
     response = await gemini_service.generate_response(prompt)
 
     # Extract Tavily source URLs
@@ -370,6 +412,7 @@ async def brand_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
+    detected_lang = state.get("detected_lang", "en")
 
     prompt = f"""
     You are MAYA's Brand Consultant for Indian MSMEs.
@@ -381,7 +424,7 @@ async def brand_agent_node(state: AgentState):
     Provide 3-5 distinct options where appropriate.
 
     CRITICAL: Do NOT start with a greeting or announce yourself. Jump straight into the branding suggestions.
-    """
+    {_lang_suffix(detected_lang)}"""
     response = await gemini_service.generate_response(prompt)
     await _save_agent_response(conversation_id, "brand", response)
 
@@ -396,6 +439,7 @@ async def finance_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
+    detected_lang = state.get("detected_lang", "en")
 
     prompt = f"""
     You are MAYA's Financial Advisor for MSMEs.
@@ -407,7 +451,7 @@ async def finance_agent_node(state: AgentState):
     If they ask about specific government schemes, briefly mention them but suggest asking the 'Scheme Navigator' for details.
 
     CRITICAL: Do NOT start with a greeting or announce yourself. Jump straight into the financial advice.
-    """
+    {_lang_suffix(detected_lang)}"""
     response = await gemini_service.generate_response(prompt)
     await _save_agent_response(conversation_id, "finance", response)
 
@@ -422,6 +466,7 @@ async def marketing_agent_node(state: AgentState):
     messages = state["messages"]
     last_message = messages[-1].content
     conversation_id = state.get("conversation_id")
+    detected_lang = state.get("detected_lang", "en")
 
     prompt = f"""
     You are MAYA's Marketing Strategist for Indian small businesses.
@@ -433,7 +478,7 @@ async def marketing_agent_node(state: AgentState):
     Focus on practical steps they can take immediately.
 
     CRITICAL: Do NOT start with a greeting or announce yourself. Jump straight into the marketing strategies.
-    """
+    {_lang_suffix(detected_lang)}"""
     response = await gemini_service.generate_response(prompt)
     await _save_agent_response(conversation_id, "marketing", response)
 

@@ -187,3 +187,52 @@ This checklist compresses the 16-week PRD timeline into a 2-week intensive MVP s
 - **Comprehensive Modal Actions**: Converted static elements into deep application workflows via `EligibilityModal.tsx` and `DraftGeneratorModal.tsx`.
 - **Generative Image Expansion**: Seedream API architecture introduced via `seedream_service.py` for expanded AI media output capabilities.
 - **Checklist Maintenance**: Authenticated MVP status updates and aligned development logs with recent repository commits.
+
+### [Date: 2026-04-24]
+- **UI Overhaul**: Redesigned all components with Sakhi light theme, saffron glow effects on inputs, and improved accessibility.
+- **New Dashboard Pages**: Added 3 new sidebar pages for Reports (business analytics), Schemes (eligibility tracking), and Applications (draft management).
+- **Enhanced Animations**: Improved AbstractAnimation, AgentMonitor, and all page transitions for better user experience.
+- **Connection Pooling Optimization**: Improved database connection pooling and agent routing latency for faster response times.
+- **Docker Deployment**: Added Dockerfile for Google Cloud deployment with optimized build layers.
+
+### [Date: 2026-04-30] — **Current**
+- **Multilingual Support (Hindi & Hinglish)**:
+  - Added language detection in `graph.py` with `_lang_suffix()` helper function.
+  - Scheme agent now responds in Hindi/Hinglish based on detected language.
+  - Identity responses translated to Hindi and Hinglish variants.
+  - Greeting prompts adapted for multilingual audience.
+  
+- **Rich Draft Generation Engine**:
+  - Created `backend/agents/draft_templates.py` with Gemini-powered scheme-specific prompt templates.
+  - Supports PMEGP, Mudra, Stand-Up India, ODOP, and Vishwakarma schemes.
+  - New `/api/draft/generate-rich` endpoint for structured, markdown-based project reports.
+  - Auto-fills applicant details from user profile with `[TO BE UPDATED]` markers for missing fields.
+  - Provides subsidy rates, document checklists, and implementation schedules per scheme.
+  
+- **Backend Enhancements**:
+  - Enhanced `DraftGeneratorModal.tsx` with rich text editing and preview capabilities (461 lines → comprehensive modal).
+  - Updated `graph.py` with language-aware agent routing and fallback logic.
+  - Improved `router.py` with semantic understanding for multilingual queries.
+  - Extended `main.py` with new lifespan hooks for language service initialization.
+  - Refined `whatsapp.py` with better message formatting for multilingual support.
+  - Expanded `seed_demo_data.py` with multilingual scheme descriptions and sample user profiles.
+  
+- **Frontend UI Refinements**:
+  - Updated all animation components with consistent styling (AbstractAnimation, DocumentsAnimation, LotusAnimation, SchemeScanAnimation).
+  - Improved AgentMonitor and AgentOverviewCard for better visual hierarchy.
+  - Refined Sidebar navigation with language toggle support.
+  - Enhanced ChatInterface with language detection hints.
+  - Updated Features and LandingPage with multilingual content previews.
+  - Refined Brand component for theme consistency.
+  - Enhanced PageLoader with theme-aware styling.
+  - Updated Footer with language information.
+  - Improved index.css with language-specific typography rules.
+  
+- **i18n Infrastructure**:
+  - Created `frontend/src/i18n/` directory with translation files.
+  - Added `LanguageToggle.tsx` component for language switching.
+  - Created `frontend/src/hooks/` for custom hooks supporting language context.
+  
+- **Documentation Assets**:
+  - Generated `MAYA_Stand-Up_India_Application_Brief_Draft.md` as example draft template.
+  - Added sample PDF report (`my report.pdf`) for demonstration purposes.

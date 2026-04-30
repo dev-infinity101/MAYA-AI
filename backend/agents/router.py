@@ -1,3 +1,4 @@
+import re
 from agents.state import AgentState
 import logging
 
@@ -27,6 +28,16 @@ GREETING_TRIGGERS = {
 # Will be replaced by semantic router in Phase C migration.
 # ──────────────────────────────────────────────────────────────────────────────
 
+def detect_language(text: str) -> str:
+    """Classify message language: 'hi', 'hinglish', or 'en'."""
+    devanagari = len(re.findall(r'[ऀ-ॿ]', text))
+    if devanagari == 0:
+        return 'en'
+    alpha = len(re.findall(r'[a-zA-Zऀ-ॿ]', text))
+    ratio = devanagari / alpha if alpha > 0 else 1.0
+    return 'hi' if ratio > 0.6 else 'hinglish'
+
+
 ROUTE_KEYWORDS = {
     "scheme":    ["scheme", "loan", "subsidy", "yojana", "fund", "startup india", "mudra", "eligibility", "msme scheme", "women entrepreneur", "grant"],
     "market":    ["market", "trend", "competitor", "industry", "demand", "supply", "research", "audience", "market size"],
@@ -52,6 +63,7 @@ async def route_request(state: AgentState) -> dict:
     last_message = messages[-1]
     query = last_message.content.strip()
     query_lower = query.lower().rstrip("?!. ")
+    lang = detect_language(query)
 
     # ── Layer 1: identity intercept ───────────────────────────────────────────
     if any(trigger in query_lower for trigger in IDENTITY_TRIGGERS):
@@ -61,6 +73,7 @@ async def route_request(state: AgentState) -> dict:
             "intent": "identity",
             "routing_confidence": 1.0,
             "query_embedding": None,
+            "detected_lang": lang,
         }
 
     # ── Layer 1: greeting intercept ───────────────────────────────────────────
@@ -71,6 +84,7 @@ async def route_request(state: AgentState) -> dict:
             "intent": "greeting",
             "routing_confidence": 1.0,
             "query_embedding": None,
+            "detected_lang": lang,
         }
 
     # ── Layer 2: keyword routing ──────────────────────────────────────────────
@@ -89,10 +103,11 @@ async def route_request(state: AgentState) -> dict:
         found_category = "general"
         confidence = 0.5
 
-    logger.info(f"Router: keyword → {found_category} (score={scores.get(found_category, 0)})")
+    logger.info(f"Router: keyword → {found_category} (score={scores.get(found_category, 0)}, lang={lang})")
     return {
         "current_agent": found_category,
         "intent": None,
         "routing_confidence": confidence,
-        "query_embedding": None,  # populated by semantic router in Phase C
+        "query_embedding": None,
+        "detected_lang": lang,
     }

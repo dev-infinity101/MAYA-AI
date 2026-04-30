@@ -111,6 +111,9 @@ origins = [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://maya-msme-works.vercel.app",
+    "https://maya-msme-work.vercel.app",
+    "https://maya-msme.work",
+    "https://www.maya-msme.work",
 ]
 
 app.add_middleware(

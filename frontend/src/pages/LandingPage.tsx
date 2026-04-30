@@ -7,6 +7,7 @@ import { ArrowRight, Shield, MessageSquare, CheckCircle2, Megaphone } from 'luci
 import { Link } from 'react-router-dom';
 import { PageLoader } from '../components/PageLoader';
 import { LotusAnimation } from '../components/LotusAnimation';
+import chatInterface from '../Assets/chat-interface.png';
 
 export function LandingPage() {
   const [index, setIndex] = useState(0);
@@ -92,8 +93,15 @@ export function LandingPage() {
               className="mt-20 relative animate-in fade-in zoom-in duration-1000 delay-600"
               style={{ willChange: 'transform, opacity' }}
             >
-              <div className="rounded-3xl max-w-5xl mx-auto overflow-hidden border border-[rgba(196,97,10,0.10)] bg-surface-warm min-h-[200px] flex items-center justify-center">
-                <span className="text-text-muted text-sm font-medium tracking-widest uppercase opacity-50">[ Chat interface preview coming soon ]</span>
+              <div className="rounded-3xl max-w-5xl mx-auto overflow-hidden border border-[rgba(196,97,10,0.15)] bg-white shadow-[0_8px_32px_rgba(150,80,0,0.10)] group">
+                <div className="relative">
+                  <img 
+                    src={chatInterface} 
+                    alt="MAYA Chat Interface" 
+                    className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.02]" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
+                </div>
               </div>
             </div>
           </div>

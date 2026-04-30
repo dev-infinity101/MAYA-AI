@@ -44,7 +44,7 @@ def send_whatsapp_reply(to: str, message: str):
             time.sleep(1)  # Sandbox rate limit
 
 
-def format_schemes_for_whatsapp(schemes: list, summary: str) -> str:
+def format_schemes_for_whatsapp(schemes: list, summary: str, lang: str = 'en') -> str:
     """
     Convert scheme cards to WhatsApp-friendly text.
     No HTML, no markdown tables — just clean formatted text.
@@ -64,25 +64,29 @@ def format_schemes_for_whatsapp(schemes: list, summary: str) -> str:
         app_mode = scheme.get("application_mode", "")
 
         lines.append(f"*{i}. {name}*")
-        lines.append(f"✅ Match: {score}%")
+        match_label = "मिलान" if lang == 'hi' else "Match"
+        lines.append(f"✅ {match_label}: {score}%")
 
         if explanation:
             lines.append(f"📌 {explanation}")
 
         if benefits:
-            # Handle if benefits is a list or a string
             first_benefit = benefits[0] if isinstance(benefits, list) and benefits else str(benefits)
             lines.append(f"💰 {first_benefit}")
 
         if app_mode:
-            lines.append(f"📋 Apply: {app_mode}")
+            apply_label = "आवेदन" if lang == 'hi' else "Apply"
+            lines.append(f"📋 {apply_label}: {app_mode}")
 
         if link:
             lines.append(f"🔗 {link}")
 
-        lines.append("")  # blank line between schemes
+        lines.append("")
 
-    lines.append("Reply with a scheme name to generate your application draft.")
+    footer = ("योजना का नाम भेजें और हम आपका आवेदन पत्र तैयार करेंगे।"
+              if lang == 'hi' else
+              "Reply with a scheme name to generate your application draft.")
+    lines.append(footer)
     return "\n".join(lines)
 
 
@@ -133,7 +137,8 @@ async def whatsapp_webhook(request: Request):
         send_whatsapp_reply(
             from_number,
             "🎤 Voice messages coming soon! Please type your question for now.\n\n"
-            "Try: 'What schemes am I eligible for?' or 'I need a business loan'"
+            "Try: 'What schemes am I eligible for?' or 'I need a business loan'\n\n"
+            "या हिंदी में लिखें: 'मुझे लोन चाहिए' / 'कौन सी योजना मिलेगी'"
         )
         return Response(content="", media_type="text/xml")
 
@@ -202,9 +207,12 @@ async def process_whatsapp_message(from_number: str, message_body: str):
                     text_parts.append(block)
             raw_message = "\n".join(text_parts)
 
+        # Detect language from the incoming message for formatter
+        wa_lang = result.get("detected_lang", "en") or "en"
+
         # Format response based on agent type
         if agent_used == "scheme" and schemes:
-            reply = format_schemes_for_whatsapp(schemes, raw_message)
+            reply = format_schemes_for_whatsapp(schemes, raw_message, lang=wa_lang)
         else:
             reply = format_agent_response_for_whatsapp(raw_message)
 

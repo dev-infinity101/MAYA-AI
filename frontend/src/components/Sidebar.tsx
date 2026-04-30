@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
 import { UserButton } from '@clerk/clerk-react';
 import { Brand } from './Brand';
+import { LanguageToggle } from './LanguageToggle';
 
 export type AppView = 'chat' | 'dashboard' | 'settings' | 'schemes' | 'applications' | 'reports';
 
@@ -232,6 +233,9 @@ export function Sidebar({
 
         {/* User footer */}
         <div className="mt-auto px-1 pb-2 pt-3 border-t border-[rgba(196,97,10,0.08)]">
+           <div className="flex justify-end mb-2 px-1">
+             <LanguageToggle />
+           </div>
            <div
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={clsx(

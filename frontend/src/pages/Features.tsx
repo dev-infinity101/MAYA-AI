@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import FancyOutlineLiftButton from '../components/FancyOutlineLiftButton';
@@ -6,12 +6,12 @@ import { AgentMonitor } from '../components/AgentMonitor';
 import { PageLoader } from '../components/PageLoader';
 import { DocumentsAnimation } from '../components/DocumentsAnimation';
 import { SchemeScanAnimation } from '../components/SchemeScanAnimation';
-import { Search, Shield, Zap, MessageSquare, CheckCircle2, Megaphone } from 'lucide-react';
+import { Search, Shield, Zap, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import chatInterface from '../Assets/chat-interface.png';
 
 export function FeaturesPage() {
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
 
   return (
     <div className="min-h-screen bg-background overflow-hidden font-sans relative">

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function AgentOverviewCard({ index, icon, title, desc, color, borderColor, bgGlow, onHover }: {
+export function AgentOverviewCard({ index, icon, title, desc, color, borderColor, bgGlow: _bgGlow, onHover }: {
   index: number,
   icon: React.ReactNode,
   title: string,
